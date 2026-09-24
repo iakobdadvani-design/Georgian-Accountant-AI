@@ -99,6 +99,14 @@ in `api/chat.py`: pension participation, dividend to an individual, small busine
 - **Georgian strings are written by Claude**; flag new ones for native-speaker review.
 - Match surrounding code: small functions, few comments, type hints, no new dependencies unless needed.
 
+## Answer quality (evals)
+
+`backend/evals/cases.json`: ~50 questions in all five languages with the expected intent, facts, rule
+result (status/amount) and reply language. `python -m evals.run [--provider ollama|claude] [--model-replies]`
+scores a pipeline; `tests/test_evals.py` requires the offline pipeline to pass every case not marked
+`"hard"` (casual phrasings only a model is expected to get). Add a case for every bug found in a real
+conversation. Grounding is checked only for model-written replies.
+
 ## Database
 
 - The local Postgres holds the owner's **real account and data**. Never run `docker compose down -v`,

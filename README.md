@@ -116,6 +116,10 @@ Sessions last `SESSION_DAYS` (default 30). Behind HTTPS, set `SESSION_COOKIE_SEC
 2. Add the Law on Funded Pension to the rad_law corpus so the 2% rate has a quotable excerpt.
 3. Before going public: login rate limiting, password reset, email verification.
 
+Answer quality: `backend/evals/` holds a set of realistic questions in all five languages with
+the expected answers. `python -m evals.run` scores the offline pipeline (instant);
+`--provider ollama` scores your local model, `--provider claude --model-replies` Claude (paid).
+
 Schema changes go through Alembic (`backend/migrations/`); see CLAUDE.md.
 
 ### Languages
