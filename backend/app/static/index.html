@@ -243,6 +243,98 @@
   .deadlines-empty { font-size: 12.5px; color: var(--faint); padding: 2px 4px; line-height: 1.45; }
   .profile .profile-actions { display: flex; justify-content: flex-end; }
 
+  /* ---------- sales & expenses ---------- */
+  .books-btn { margin-top: 10px; justify-content: flex-start; gap: 8px; }
+  body.books-open .books-btn { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+  body.books-open #log, body.books-open .composer-wrap, body.books-open #booksAlert { display: none; }
+  .books { flex: 1; min-height: 0; overflow-y: auto; padding: 24px; }
+  .books-inner { max-width: 960px; margin: 0 auto; display: grid; gap: 16px; }
+  .books-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .month-nav { display: flex; align-items: center; gap: 10px; }
+  .month-nav .icon-btn { font-size: 18px; line-height: 1; }
+  .month-label { font-size: 17px; font-weight: 650; min-width: 150px; text-align: center; letter-spacing: -.01em; }
+  .books-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .books-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+  .books-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px;
+    display: grid; gap: 4px; box-shadow: var(--shadow); }
+  .books-card-label { font-size: 12.5px; color: var(--muted); font-weight: 500; }
+  .books-card-value { font-size: clamp(16px, 1.5vw, 20px); font-weight: 650; letter-spacing: -.02em; font-variant-numeric: tabular-nums;
+    white-space: nowrap; }
+  .books-card-hint { font-size: 12px; color: var(--faint); }
+  .books-card.accent { border-color: color-mix(in srgb, var(--accent) 35%, var(--border)); background: var(--accent-soft); }
+  .books-card.accent .books-card-value { color: var(--accent); }
+  .books-card.ok { border-color: color-mix(in srgb, var(--ok) 35%, var(--border)); background: var(--ok-soft); }
+  .books-card.ok .books-card-value { color: var(--ok); }
+  .books-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px;
+    display: grid; gap: 14px; box-shadow: var(--shadow); }
+  .books-panel h3 { margin: 0; font-size: 15px; font-weight: 650; }
+  .books-muted { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+  .books-muted.small { font-size: 12px; color: var(--faint); }
+  .books-limit { display: grid; gap: 7px; }
+  .books-limit-head { display: flex; justify-content: space-between; gap: 10px; font-size: 13.5px; flex-wrap: wrap; }
+  .books-limit-head strong { font-variant-numeric: tabular-nums; }
+  .books-bar { height: 8px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); overflow: hidden; }
+  .books-bar span { display: block; height: 100%; background: var(--ok); border-radius: inherit; transition: width .3s; }
+  .books-limit.approaching .books-bar span { background: var(--warn); }
+  .books-limit.exceeded .books-bar span { background: var(--accent); }
+  .books-limit-hint { margin: 0; font-size: 12.5px; color: var(--faint); }
+  .books-alerts { display: grid; gap: 8px; }
+  .books-alerts.side { margin-top: 10px; }
+  .books-alert { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 11px; font-size: 13px;
+    line-height: 1.45; border: 1px solid; }
+  .books-alert.approaching { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 40%, transparent); }
+  .books-alert.exceeded { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+  .alert-icon { flex: none; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; font-size: 11px;
+    font-weight: 700; color: #fff; margin-top: 1px; }
+  .books-alert.approaching .alert-icon { background: var(--warn); }
+  .books-alert.exceeded .alert-icon { background: var(--accent); }
+  .return-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .return-block { border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; background: var(--surface-2); display: grid; gap: 8px; }
+  .return-block h4 { margin: 0 0 2px; font-size: 13px; }
+  .return-line { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; font-size: 13.5px; }
+  .return-line span { color: var(--muted); }
+  .return-line strong { font-variant-numeric: tabular-nums; }
+  .books-table-wrap { overflow-x: auto; margin: 0 -4px; }
+  .books-table-wrap.preview { max-height: 260px; overflow-y: auto; border: 1px solid var(--border); border-radius: 10px; margin: 0; }
+  .books-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  .books-table th { text-align: left; font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em;
+    color: var(--faint); padding: 6px 8px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface); }
+  .books-table td { padding: 9px 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .books-table tr:last-child td { border-bottom: none; }
+  .books-table .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .books-table .muted { color: var(--muted); }
+  .books-table .nowrap { white-space: nowrap; }
+  .books-table .who { max-width: 340px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .books-table .actions { width: 1%; }
+  .small-icon { width: 28px; height: 28px; }
+  .tag { display: inline-block; font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .tag.income { background: var(--ok-soft); color: var(--ok); }
+  .tag.expense { background: var(--info-soft); color: var(--info); }
+  .books-empty { margin: 0; color: var(--faint); font-size: 13.5px; }
+  .books-form { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .books-form label { display: grid; gap: 5px; font-size: 13px; font-weight: 500; }
+  .books-form .wide { grid-column: 1 / -1; }
+  .books-form .check { display: flex; align-items: center; gap: 8px; font-weight: 400; font-size: 14px; }
+  .import-dialog { width: min(720px, calc(100vw - 32px)); }
+  .import-columns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .file-pick { display: flex !important; align-items: center; gap: 10px; cursor: pointer; }
+  .file-pick .file-input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+  .file-pick:focus-within .btn { border-color: var(--accent); }
+  .file-name { color: var(--muted); font-size: 13px; font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .import-done { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--ok-soft); color: var(--ok); font-weight: 500; }
+  @media (max-width: 860px) {
+    .books { padding: 16px; }
+    .books-form, .import-columns { grid-template-columns: 1fr 1fr; }
+    .books-table .who { max-width: 140px; }
+  }
+  @media (max-width: 520px) {
+    .books-form, .import-columns { grid-template-columns: 1fr; }
+    .month-label { min-width: 0; font-size: 15px; }
+    .books-table th:nth-child(3), .books-table td:nth-child(3), .books-table th:nth-child(5), .books-table td:nth-child(5) { display: none; }
+    .books-table .who { max-width: 120px; }
+    .books-card-value { font-size: 17px; }
+  }
+
   /* ---------- auth screen ---------- */
   .auth { position: fixed; inset: 0; z-index: 50; background: var(--bg); display: grid; place-items: center; padding: 20px;
     overflow-y: auto; }
@@ -354,6 +446,11 @@
       </div>
       <select id="company" class="field" data-i18n-aria="company.label"></select>
       <div class="profile" id="profile" hidden></div>
+      <button class="btn block books-btn" id="booksBtn" type="button" hidden>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2zM4 19a2 2 0 0 1 2-2h12M9 7h6M9 11h6"/></svg>
+        <span data-i18n="books.nav"></span>
+      </button>
+      <div class="books-alerts side" id="booksAlert" hidden></div>
     </div>
 
     <div id="deadlinesSection" hidden>
@@ -401,6 +498,10 @@
       <span class="pill" id="aiPill"><span class="dot"></span><span data-i18n="status.checking"></span></span>
       <div class="lang-menu" id="langMenu"></div>
     </header>
+
+    <section class="books" id="books" hidden data-i18n-aria="books.title">
+      <div class="books-inner" id="booksInner"></div>
+    </section>
 
     <div id="log" aria-live="polite">
       <div class="thread" id="thread"></div>
@@ -579,6 +680,7 @@ async function setLanguage(next, { save = true } = {}) {
   renderProfile();
   renderDeadlines();
   renderHistory();
+  window.Books?.onLanguageChange();
   if ($("thread").querySelector(".empty.start")) renderEmpty();
   else if ($("thread").querySelector(".empty.welcome")) renderWelcome();
   if (!companies.length && user) $("title").textContent = t("noCompany.title");
@@ -1006,6 +1108,7 @@ function touchHistory() {
 
 async function openConversation(id) {
   $("app").classList.remove("drawer-open");
+  window.Books?.hide();
   if (busy) return;
   try {
     const conv = await api(`/conversations/${id}`);
@@ -1041,6 +1144,7 @@ async function deleteConversation(c) {
 }
 
 function newChat() {
+  window.Books?.hide();
   conversationId = null;
   $("asOf").value = new Date().toISOString().slice(0, 10);
   renderEmpty();
@@ -1071,7 +1175,7 @@ async function loadProfile(company) {
 function renderProfile() {
   const company = currentCompany();
   const box = $("profile");
-  if (!company || profileState === "none") { box.hidden = true; return; }
+  if (!company || profileState === "none") { box.hidden = true; $("booksBtn").hidden = !company; return; }
   const yes = (b) => t(b ? "common.yes" : "common.no");
   const rows = [[t("profile.taxId"), company.tax_id], [t("profile.legalForm"), t("legal." + company.legal_form)]];
   const p = currentProfile;
@@ -1086,6 +1190,7 @@ function renderProfile() {
     el("div", { class: "profile-actions" },
       el("button", { class: "btn small", type: "button", text: t("common.edit"), onclick: openProfileDialog })));
   box.hidden = false;
+  $("booksBtn").hidden = false;
 }
 
 /* ---------- deadlines ---------- */
@@ -1179,6 +1284,7 @@ profileForm.addEventListener("submit", async (e) => {
     profileDialog.close();
     await loadProfile(currentCompany());
     loadDeadlines();
+    window.Books?.onCompanyChange();
   } catch (err) {
     if (!(err instanceof AuthError)) $("profileError").textContent = err.message;
   }
@@ -1193,8 +1299,11 @@ async function loadCompanies(selectId) {
   select.replaceChildren(...companies.map((c) => new Option(c.name, c.id)));
   select.disabled = !companies.length;
   if (!companies.length) {
+    window.Books?.hide();
     $("title").textContent = t("noCompany.title");
     $("profile").hidden = true;
+    $("booksBtn").hidden = true;
+    $("booksAlert").hidden = true;
     deadlineItems = [];
     renderDeadlines();
     historyItems = [];
@@ -1208,6 +1317,7 @@ async function loadCompanies(selectId) {
   store.set("companyId", select.value);
   loadProfile(currentCompany());
   loadDeadlines();
+  window.Books?.onCompanyChange();
   autosize();
 }
 
@@ -1215,8 +1325,11 @@ $("company").addEventListener("change", () => {
   store.set("companyId", $("company").value);
   loadProfile(currentCompany());
   loadDeadlines();
+  const inBooks = window.Books?.open;
   newChat();
   loadHistory();
+  if (inBooks) window.Books.show();
+  window.Books?.onCompanyChange();
 });
 $("asOf").addEventListener("change", loadDeadlines);
 
@@ -1371,6 +1484,7 @@ $("tabLogin").addEventListener("click", () => setAuthMode("login"));
 $("tabRegister").addEventListener("click", () => setAuthMode("register"));
 
 function showAuth() {
+  window.Books?.hide();
   user = null;
   conversationId = null;
   $("auth").hidden = false;
@@ -1444,5 +1558,6 @@ async function startApp(me) {
   }
 })();
 </script>
+<script src="/static/books.js"></script>
 </body>
 </html>

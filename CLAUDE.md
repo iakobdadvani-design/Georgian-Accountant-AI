@@ -27,6 +27,8 @@ the date. Model replies are rejected if they contain a number the engine didn't 
 | `api/` | Routes. Everything under `/companies`, `/conversations` is scoped to the signed-in user |
 | `legal/index.py` | Read-only search over rad_law's Matsne SQLite FTS5 index (citations only) |
 | `rsge.py`, `api/rsge.py` | RS.ge taxpayer lookup (name + VAT-payer status for a tax ID) via the official WayBillService SOAP API |
+| `books/`, `api/books.py`, `static/books.js` | Sales & expenses: sums of recorded transactions (`books/__init__.py`), bank statement import (CSV/.xlsx, `books/importer.py`), monthly summary running the VAT registration / VAT payable / small business rules on those sums |
+| `facts.py` | `company_facts`: the `company.*` facts rules see |
 | `i18n/` | Reply catalogs `messages/<lang>.json`, `t()`/`tplural()`, locale number/date formatting |
 | `static/index.html`, `static/i18n.json` | The whole UI (vanilla JS, no build) and its catalog (all visible text) |
 
@@ -110,6 +112,18 @@ in `api/chat.py`: pension participation, dividend to an individual, small busine
 (local, currently qwen2.5:14b: good at extraction, poor Georgian prose, so replies default to
 templates), `off`. Any model failure falls back to keywords/templates with a visible warning.
 Tests override the pipeline and must never call a real model.
+
+## Sales & expenses (books)
+
+Transactions store the total paid/received (`amount`, VAT included) and `vat_amount`. Books code only
+adds amounts up; any tax figure is a rule evaluated with those sums (`api/books.py: summary`). Legal
+limits are read from the rule files (`rule_threshold()` for condition values, `TaxRule.limits` for
+others), never hard-coded; only the 80% "approaching" warning share is an app setting. VAT inside an
+amount always comes from `ge.vat.output_vat` (`books.vat_inside`). Imported rows get a SHA-256
+fingerprint (`external_id`, unique per company) so re-imports add nothing. The chat fills
+`taxable_turnover_12m` / `over_small_business_limit` from the books when the user doesn't state them
+(`with_books` in `api/chat.py`) and says so (`Extraction.from_books`). `static/books.js` is a second
+script that reuses the page's globals; the page calls it only through `window.Books?.…`.
 
 ## RS.ge lookup
 
