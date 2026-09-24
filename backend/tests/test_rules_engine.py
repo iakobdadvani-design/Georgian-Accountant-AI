@@ -113,8 +113,8 @@ def test_unknown_operator_rejected():
 
 def test_shipped_rule_files_are_valid():
     rules = load_rules()
-    assert any(r.is_demo for r in rules)
-    real = [r for r in rules if not r.is_demo]
+    assert not any(r.is_demo for r in rules)
+    real = rules
     # Real rules must carry a legal source; none is verified until a professional signs off.
     assert real and all(r.legal_source.url and r.verification == "unverified" for r in real)
 
@@ -133,12 +133,13 @@ def test_vat_registration_threshold(turnover, registered, expected):
 
 # --- API ---
 
-def test_evaluate_endpoint_uses_demo_rules(client):
-    response = client.post("/rules/evaluate", json={"as_of": "2025-06-01", "facts": {"input.gross_salary": "2500"}})
+def test_evaluate_endpoint_runs_payroll_steps(client):
+    facts = {"input.gross_salary": "2500", "input.pension_participant": True}
+    response = client.post("/rules/evaluate", json={"as_of": "2025-06-01", "facts": facts})
     assert response.status_code == 200
-    payroll = by_id(response.json())["demo.payroll_withholding"]
-    assert payroll["version"] == 2
-    assert Decimal(payroll["amount"]) == Decimal("300.00")
+    payroll = by_id(response.json())["ge.payroll.income_tax"]
+    assert Decimal(payroll["amount"]) == Decimal("490.00")
+    assert payroll["verification"] == "unverified"
 
 
 def test_company_evaluate_pulls_facts_from_db(client):
@@ -155,4 +156,78 @@ def test_company_evaluate_pulls_facts_from_db(client):
     client.put(f"/companies/{company['id']}/tax-profile", json={"vat_registered": True})
     after = by_id(client.post(url, json=body).json())
     assert after["ge.vat.registration_threshold"]["status"] == "not_applicable"
-    assert after["demo.registered_flat_fee"]["status"] == "applies"
+
+
+# --- multi-step calculations ---
+
+def steps_rule(steps, result, **overrides):
+    return rule(conditions={"fact": "input.x", "op": "gt", "value": 0},
+                calculation={"type": "steps", "steps": steps, "result": result}, **overrides)
+
+
+def test_steps_round_each_money_step_half_up():
+    r = steps_rule([
+        {"name": "a", "label": "a", "op": "multiply", "args": ["input.x", "0.02"]},
+        {"name": "b", "label": "b", "op": "subtract", "args": ["input.x", "a"]},
+    ], "b")
+    result = evaluate_rule(r, {"input.x": "1234.56"})
+    assert result.amount == Decimal("1209.87")  # a = 24.6912 -> 24.69
+    assert [line.amount for line in result.breakdown] == [Decimal("24.69"), Decimal("1209.87")]
+    assert any("a = input.x (1234.56) x 0.02 = 24.69" in t for t in result.trace)
+
+
+def test_unrounded_intermediate_step():
+    r = steps_rule([
+        {"name": "base", "label": "base", "op": "divide", "args": ["input.x", "0.85"], "round": False, "show": False},
+        {"name": "tax", "label": "tax", "op": "multiply", "args": ["base", "0.15"]},
+    ], "tax")
+    result = evaluate_rule(r, {"input.x": "1000"})
+    assert result.amount == Decimal("176.47")  # 1176.470588... x 0.15, rounded once at the end
+    assert [line.name for line in result.breakdown] == ["tax"]
+
+
+def test_conditional_step_is_zero_when_condition_false_and_missing_when_unknown():
+    r = steps_rule([
+        {"name": "p", "label": "p", "op": "multiply", "args": ["input.x", "0.02"],
+         "when": {"fact": "input.flag", "op": "eq", "value": True}},
+        {"name": "rest", "label": "rest", "op": "subtract", "args": ["input.x", "p"]},
+    ], "rest")
+    assert evaluate_rule(r, {"input.x": "100", "input.flag": False}).amount == Decimal("100.00")
+    assert evaluate_rule(r, {"input.x": "100", "input.flag": True}).amount == Decimal("98.00")
+    unknown = evaluate_rule(r, {"input.x": "100"})
+    assert unknown.status == "insufficient_data" and unknown.missing_facts == ["input.flag"]
+
+
+@pytest.mark.parametrize("steps, result, error", [
+    ([{"name": "a", "label": "a", "op": "add", "args": ["input.x", "typo"]}], "a", "before it is defined"),
+    ([{"name": "a", "label": "a", "op": "add", "args": ["input.x", "1"]}], "b", "is not a step"),
+    ([{"name": "a", "label": "a", "op": "add", "args": ["input.x", "1"]},
+      {"name": "a", "label": "a", "op": "add", "args": ["input.x", "1"]}], "a", "duplicate"),
+])
+def test_step_rule_validation(steps, result, error):
+    with pytest.raises(ValueError, match=error):
+        steps_rule(steps, result)
+
+
+def test_division_by_zero_is_insufficient_data_not_a_crash():
+    r = steps_rule([{"name": "q", "label": "q", "op": "divide", "args": ["input.x", "input.y"]}], "q")
+    assert evaluate_rule(r, {"input.x": "10", "input.y": "0"}).status == "insufficient_data"
+
+
+# --- payroll worked examples (gold set) ---
+
+@pytest.mark.parametrize("gross, in_scheme, expected", [
+    ("2500", True, {"employee_pension": "50.00", "income_tax": "490.00", "net_salary": "1960.00",
+                    "employer_pension": "50.00", "employer_cost": "2550.00"}),
+    ("1800", True, {"employee_pension": "36.00", "income_tax": "352.80", "net_salary": "1411.20",
+                    "employer_pension": "36.00", "employer_cost": "1836.00"}),
+    ("2500", False, {"employee_pension": "0.00", "income_tax": "500.00", "net_salary": "2000.00",
+                     "employer_pension": "0.00", "employer_cost": "2500.00"}),
+    ("1234.56", True, {"employee_pension": "24.69", "income_tax": "241.97", "net_salary": "967.90",
+                       "employer_pension": "24.69", "employer_cost": "1259.25"}),
+])
+def test_payroll_gold_examples(gross, in_scheme, expected):
+    facts = {"input.gross_salary": gross, "input.pension_participant": in_scheme}
+    [result] = [r for r in evaluate(load_rules(), facts, date(2026, 9, 24)) if r.rule_id == "ge.payroll.income_tax"]
+    assert {line.name: str(line.amount) for line in result.breakdown} == expected
+    assert result.amount == Decimal(expected["income_tax"])

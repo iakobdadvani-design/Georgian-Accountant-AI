@@ -117,12 +117,12 @@ def use_pipeline(fake):
 def test_chat_with_claude_reply(client, company):
     use_pipeline(FakeClaude(
         {"intent": "calculate_payroll_tax", "amount": "2500", "language": "ka"},
-        {"reply": "დემო წესით დაკავება 300.00 ლარია."},
+        {"reply": "საშემოსავლო გადასახადი 490.00 ლარია."},
     ))
     body = client.post(f"/companies/{company['id']}/chat", json={"message": "ხელფასი 2500", "as_of": "2025-06-01"}).json()
     assert body["reply_source"] == "claude"
-    assert body["reply"] == "დემო წესით დაკავება 300.00 ლარია."
-    assert Decimal(body["results"][0]["amount"]) == Decimal("300.00")  # number came from the engine
+    assert body["reply"] == "საშემოსავლო გადასახადი 490.00 ლარია."
+    assert Decimal(body["results"][0]["amount"]) == Decimal("490.00")  # number came from the engine
     assert body["warnings"] == []
 
 
@@ -133,12 +133,12 @@ def test_chat_falls_back_to_template_when_reply_invents_numbers(client, company)
     ))
     body = client.post(f"/companies/{company['id']}/chat", json={"message": "salary 2500", "as_of": "2025-06-01"}).json()
     assert body["reply_source"] == "template"
-    assert "300.00 GEL" in body["reply"]
+    assert "1 960.00 GEL" in body["reply"]
     assert any("999.99" in w for w in body["warnings"])
 
 
 def test_chat_falls_back_to_keywords_when_extraction_fails(client, company):
-    use_pipeline(FakeClaude(anthropic.APIConnectionError(request=None), {"reply": "Withholding is 300.00 GEL."}))
+    use_pipeline(FakeClaude(anthropic.APIConnectionError(request=None), {"reply": "Income tax is 490.00 GEL."}))
     body = client.post(f"/companies/{company['id']}/chat", json={"message": "salary 2500", "as_of": "2025-06-01"}).json()
     assert body["extraction"]["source"] == "keyword"
     assert body["reply_source"] == "claude"

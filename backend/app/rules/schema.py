@@ -1,8 +1,9 @@
+import re
 from datetime import date
 from decimal import Decimal
 from typing import Literal, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 FactValue = bool | int | float | str
 
@@ -46,7 +47,49 @@ class Fixed(BaseModel):
     amount: Decimal
 
 
-Calculation = Union[Percentage, Fixed]
+CONSTANT = re.compile(r"^-?\d+(\.\d+)?$")
+
+
+class Step(BaseModel):
+    """One named arithmetic step. Args are constants ("0.02"), fact names ("input.x") or earlier step names."""
+
+    name: str = Field(pattern=r"^[a-z_][a-z0-9_]*$")
+    label: LocalizedText
+    op: Literal["multiply", "divide", "subtract", "add"]
+    args: list[str] = Field(min_length=2)
+    when: "Condition | None" = None  # if false, the step is 0 (e.g. not in the pension scheme)
+    round: bool = True  # money steps round half-up to 0.01; intermediate bases may stay exact
+    show: bool = True  # include in the result's breakdown
+
+
+class Steps(BaseModel):
+    type: Literal["steps"]
+    steps: list[Step] = Field(min_length=1)
+    result: str  # the step whose value is the result's `amount`
+
+    @model_validator(mode="after")
+    def check_references(self) -> "Steps":
+        seen: set[str] = set()
+        for step in self.steps:
+            if step.name in seen:
+                raise ValueError(f"duplicate step name {step.name!r}")
+            for arg in step.args:
+                # Facts are always dotted ("input.gross_salary"), so a bare unknown name is a typo.
+                if not CONSTANT.match(arg) and "." not in arg and arg not in seen:
+                    raise ValueError(f"step {step.name!r} uses {arg!r} before it is defined")
+            seen.add(step.name)
+        if self.result not in seen:
+            raise ValueError(f"result {self.result!r} is not a step")
+        return self
+
+
+Calculation = Union[Percentage, Fixed, Steps]
+
+
+class BreakdownLine(BaseModel):
+    name: str
+    label: LocalizedText
+    amount: Decimal
 
 
 class LegalSource(BaseModel):
@@ -106,6 +149,8 @@ class RuleResult(BaseModel):
     tax_type: str
     status: Literal["applies", "not_applicable", "insufficient_data"]
     amount: Decimal | None = None
+    amount_label: LocalizedText | None = None  # what `amount` is, for step calculations
+    breakdown: list[BreakdownLine] = []
     message: LocalizedText | None = None
     reasons: list[LocalizedText] = Field(default=[], description="Why the rule does not apply (failed conditions)")
     missing_facts: list[str] = []
@@ -115,3 +160,6 @@ class RuleResult(BaseModel):
     verification: Verification
     last_verified_date: date | None = None
     citations: list[Passage] = []
+
+
+Step.model_rebuild()

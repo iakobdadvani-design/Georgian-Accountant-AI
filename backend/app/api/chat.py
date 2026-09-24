@@ -13,7 +13,7 @@ from app.api.legal import attach_citations, get_legal_index
 from app.api.rules import company_facts
 from app.auth import get_current_user
 from app.chat.claude import ClaudeBackend, get_client
-from app.chat.context import apply_context, inherit_language, pending_state
+from app.chat.context import apply_context, inherit_language, pending_state, topic_state
 from app.chat.extractor import INTENT_AMOUNT_FACT, Extraction, Extractor, KeywordExtractor
 from app.chat.llm import AIUnavailable, LLMExtractor, LLMResponder
 from app.chat.ollama import OllamaBackend
@@ -32,6 +32,20 @@ log = logging.getLogger(__name__)
 router = APIRouter(tags=["chat"])
 
 TITLE_CHARS = 60
+
+# Facts filled in when the user doesn't say, and always disclosed in the reply. Most employees are
+# auto-enrolled in the funded pension scheme (Law on Funded Pension, Art. 3).
+DEFAULT_FACTS: dict[str, dict[str, bool]] = {
+    "calculate_payroll_tax": {"pension_participant": True},
+}
+
+
+def with_defaults(extraction: Extraction) -> Extraction:
+    defaults = {k: v for k, v in DEFAULT_FACTS.get(extraction.intent, {}).items() if k not in extraction.entities}
+    if not defaults:
+        return extraction
+    return extraction.model_copy(update={"entities": {**extraction.entities, **defaults},
+                                         "assumed": [*extraction.assumed, *defaults]})
 
 
 class Responder(Protocol):
@@ -138,7 +152,8 @@ def chat(
     previous = last_assistant_payload(conversation)
     pending = previous.get("pending")
     extraction = inherit_language(extraction, payload.message, (previous.get("extraction") or {}).get("language"))
-    extraction, used_context = apply_context(extraction, payload.message, pending)
+    extraction, used_context = apply_context(extraction, payload.message, pending, previous.get("topic"))
+    extraction = with_defaults(extraction)
 
     results: list[RuleResult] = []
     if extraction.intent != "unknown":
@@ -165,6 +180,7 @@ def chat(
     record["as_of"] = payload.as_of.isoformat()
     # A turn the engine couldn't act on ("hi", "thanks") keeps an unanswered question open.
     record["pending"] = pending_state(extraction, bool(questions)) or (pending if extraction.intent == "unknown" else None)
+    record["topic"] = topic_state(extraction) or (previous.get("topic") if extraction.intent == "unknown" else None)
     db.add_all([
         Message(conversation_id=conversation.id, role=MessageRole.user, content=payload.message),
         Message(conversation_id=conversation.id, role=MessageRole.assistant, content=reply, payload=record),

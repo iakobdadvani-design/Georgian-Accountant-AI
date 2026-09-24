@@ -24,15 +24,37 @@ def pending_state(extraction: Extraction, needs_more: bool) -> dict | None:
     return {"intent": extraction.intent, "entities": extraction.entities}
 
 
-def apply_context(extraction: Extraction, message: str, pending: dict | None) -> tuple[Extraction, bool]:
-    """Returns the extraction to use and whether earlier turns contributed to it."""
-    if not pending:
+def topic_state(extraction: Extraction) -> dict | None:
+    """What the last answered question was about, so a correction ("they're not in the pension scheme")
+    can recompute it. Only facts the user actually stated are kept, never defaults."""
+    if extraction.intent == "unknown":
+        return None
+    stated = {k: v for k, v in extraction.entities.items() if k not in extraction.assumed}
+    return {"intent": extraction.intent, "entities": stated}
+
+
+def apply_context(
+    extraction: Extraction, message: str, pending: dict | None, topic: dict | None = None
+) -> tuple[Extraction, bool]:
+    """Returns the extraction to use and whether earlier turns contributed to it.
+
+    `pending` is an unanswered question; `topic` is the last answered one. A bare amount only ever
+    completes a pending question; a same-topic message without an amount reuses the topic's facts.
+    """
+    base = pending or topic
+    if not base:
         return extraction, False
-    intent, prior = pending["intent"], pending.get("entities", {})
+    intent, prior = base["intent"], base.get("entities", {})
 
     if extraction.intent == intent:
+        own_amount = INTENT_AMOUNT_FACT[intent] in extraction.entities
+        if pending is None and own_amount:
+            return extraction, False  # a new figure on the same topic is a new question
         merged = {**prior, **extraction.entities}
         return extraction.model_copy(update={"entities": merged}), merged != extraction.entities
+
+    if pending is None:
+        return extraction, False
 
     if extraction.intent == "unknown":
         amount = parse_amount(message)

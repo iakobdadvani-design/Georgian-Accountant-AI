@@ -133,6 +133,11 @@
   .badge.unverified { background: var(--warn-soft); color: var(--warn); }
   .badge.verified { background: var(--ok-soft); color: var(--ok); }
   .amount { font-size: 30px; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .amount-label { font-size: 12.5px; color: var(--muted); margin-bottom: -6px; }
+  .breakdown { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+  .breakdown td { padding: 6px 0; border-top: 1px solid var(--border); }
+  .breakdown td:last-child { text-align: right; font-weight: 500; white-space: nowrap; padding-left: 12px; }
+  .breakdown tr:last-child td { font-weight: 600; }
   .amount small { font-size: 15px; font-weight: 500; color: var(--muted); margin-left: 4px; }
   .card p { margin: 0; color: var(--ink); }
   .source { font-size: 12.5px; color: var(--muted); }
@@ -548,7 +553,15 @@ function resultCard(r, lang) {
         title: ui[r.verification + "Tip"] })));
 
   if (r.amount !== null && r.amount !== undefined) {
+    if (r.amount_label) card.append(el("div", { class: "amount-label", text: loc(r.amount_label, lang) }));
     card.append(el("div", { class: "amount" }, formatAmount(r.amount), el("small", { text: ui.currency })));
+  }
+  // Steps that didn't apply (e.g. pension for someone outside the scheme) are 0; leave them out.
+  const lines = (r.breakdown || []).filter((line) => Number(line.amount) !== 0);
+  if (lines.length) {
+    card.append(el("table", { class: "breakdown" }, el("tbody", {}, lines.map((line) =>
+      el("tr", {}, el("td", { text: loc(line.label, lang) }),
+        el("td", { text: `${formatAmount(line.amount)} ${ui.currency}` }))))));
   }
   card.append(el("div", { class: "source", text: `${ui.source}: ${loc(r.legal_source.citation, lang)}` }));
 

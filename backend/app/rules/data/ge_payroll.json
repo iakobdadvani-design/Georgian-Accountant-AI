@@ -1,0 +1,79 @@
+[
+  {
+    "rule_id": "ge.payroll.income_tax",
+    "version": 1,
+    "title": {
+      "en": "Salary: income tax and pension",
+      "ka": "ხელფასი: საშემოსავლო გადასახადი და საპენსიო შენატანი"
+    },
+    "tax_type": "payroll",
+    "effective_from": "2019-01-01",
+    "conditions": {
+      "fact": "input.gross_salary",
+      "op": "gt",
+      "value": 0,
+      "if_false": {
+        "en": "A salary of zero has no income tax or pension contributions.",
+        "ka": "ნულოვან ხელფასს საშემოსავლო გადასახადი და საპენსიო შენატანი არ ეკისრება."
+      }
+    },
+    "calculation": {
+      "type": "steps",
+      "result": "income_tax",
+      "steps": [
+        {
+          "name": "employee_pension",
+          "label": {"en": "Employee pension (2%)", "ka": "დასაქმებულის საპენსიო შენატანი (2%)"},
+          "op": "multiply",
+          "args": ["input.gross_salary", "0.02"],
+          "when": {"fact": "input.pension_participant", "op": "eq", "value": true}
+        },
+        {
+          "name": "taxable_income",
+          "label": {"en": "Taxable income", "ka": "დასაბეგრი შემოსავალი"},
+          "op": "subtract",
+          "args": ["input.gross_salary", "employee_pension"],
+          "show": false
+        },
+        {
+          "name": "income_tax",
+          "label": {"en": "Income tax (20%)", "ka": "საშემოსავლო გადასახადი (20%)"},
+          "op": "multiply",
+          "args": ["taxable_income", "0.20"]
+        },
+        {
+          "name": "net_salary",
+          "label": {"en": "Take-home pay", "ka": "ხელზე ასაღები თანხა"},
+          "op": "subtract",
+          "args": ["input.gross_salary", "employee_pension", "income_tax"]
+        },
+        {
+          "name": "employer_pension",
+          "label": {"en": "Employer pension (2%, on top of salary)", "ka": "დამსაქმებლის საპენსიო შენატანი (2%, ხელფასის გარდა)"},
+          "op": "multiply",
+          "args": ["input.gross_salary", "0.02"],
+          "when": {"fact": "input.pension_participant", "op": "eq", "value": true}
+        },
+        {
+          "name": "employer_cost",
+          "label": {"en": "Total cost to employer", "ka": "დამსაქმებლის ჯამური ხარჯი"},
+          "op": "add",
+          "args": ["input.gross_salary", "employer_pension"]
+        }
+      ]
+    },
+    "legal_source": {
+      "citation": {
+        "en": "Tax Code of Georgia, Art. 81(1) and 82(1)(b³); Law on Funded Pension, Art. 3(6)",
+        "ka": "საქართველოს საგადასახადო კოდექსი, მუხლი 81(1) და 82(1)(ბ³); კანონი დაგროვებითი პენსიის შესახებ, მუხლი 3(6)"
+      },
+      "url": "https://matsne.gov.ge/en/document/view/1043717",
+      "note": "Income tax 20% (Tax Code Art. 81(1)) and the income-tax exemption of funded-pension contributions (Art. 82(1)(b3)) are from the rad_law Tax Code snapshot. The 2% employee and 2% employer contributions are Law of Georgia on Funded Pension Art. 3(6)(a)-(b), read on matsne.gov.ge/en/document/view/4280127 on 2026-09-24; that law is not yet in the rad_law corpus. effective_from 2019-01-01 is when the funded pension scheme started, not a verified date for this exact rule. Not covered: the state contribution (paid by the state, not the employer), special rates and exemptions elsewhere in Art. 81-82, non-resident employees. Needs review by a qualified accountant before last_verified_date is set.",
+      "search_query": "natural person taxable income taxed rate 20%",
+      "document_id": "1043717",
+      "language": "en"
+    },
+    "last_verified_date": null,
+    "is_demo": false
+  }
+]

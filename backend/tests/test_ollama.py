@@ -34,7 +34,7 @@ def test_ollama_extraction_request_and_parse():
     assert seen["url"] == "http://ollama:11434/api/chat"
     body = seen["body"]
     assert body["model"] == "qwen2.5:14b" and body["stream"] is False
-    assert body["format"]["required"] == ["intent", "amount", "language"]  # schema-constrained output
+    assert body["format"]["required"] == ["intent", "amount", "pension_participant", "language"]  # constrained
     assert body["options"]["temperature"] == 0
 
 
@@ -97,5 +97,5 @@ def test_chat_falls_back_when_ollama_is_down(client):
     }).json()
     body = client.post(f"/companies/{company['id']}/chat", json={"message": "salary 2500", "as_of": "2025-06-01"}).json()
     assert body["extraction"]["source"] == "keyword"
-    assert body["results"][0]["amount"] == "300.00"
+    assert body["results"][0]["amount"] == "490.00"
     assert any("not reachable" in w for w in body["warnings"])

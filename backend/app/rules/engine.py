@@ -5,8 +5,10 @@ from datetime import date
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 
 from app.rules.schema import (
+    CONSTANT,
     AllOf,
     AnyOf,
+    BreakdownLine,
     Compare,
     Condition,
     FactValue,
@@ -14,6 +16,7 @@ from app.rules.schema import (
     LocalizedText,
     Percentage,
     RuleResult,
+    Steps,
     TaxRule,
 )
 
@@ -96,7 +99,68 @@ def referenced_facts(rule: TaxRule) -> set[str]:
     walk(rule.conditions)
     if isinstance(rule.calculation, Percentage):
         found.add(rule.calculation.base)
+    elif isinstance(rule.calculation, Steps):
+        for step in rule.calculation.steps:
+            found.update(arg for arg in step.args if "." in arg and not CONSTANT.match(arg))
+            if step.when is not None:
+                walk(step.when)
     return found
+
+
+STEP_SYMBOLS = {"multiply": " x ", "divide": " / ", "subtract": " - ", "add": " + "}
+
+
+def run_steps(calculation: Steps, facts: Facts, trace: list[str]) -> tuple[dict[str, Decimal], list[str]]:
+    """Evaluate steps in order. Returns step values, or the facts that were missing or not numeric."""
+    values: dict[str, Decimal] = {}
+    for step in calculation.steps:
+        if step.when is not None:
+            missing: list[str] = []
+            applies = check(step.when, facts, missing, trace, [])
+            if applies is None:
+                return values, missing
+            if not applies:
+                values[step.name] = Decimal("0.00")
+                trace.append(f"{step.name} = 0 (condition not met)")
+                continue
+
+        operands: list[Decimal] = []
+        shown: list[str] = []
+        for arg in step.args:
+            if CONSTANT.match(arg):
+                value = Decimal(arg)
+                shown.append(arg)
+            elif arg in values:
+                value = values[arg]
+                shown.append(f"{arg} ({value})")
+            else:
+                value = as_decimal(facts[arg]) if arg in facts else None
+                if value is None:
+                    return values, [arg]
+                shown.append(f"{arg} ({value})")
+            operands.append(value)
+
+        first, rest = operands[0], operands[1:]
+        if step.op == "multiply":
+            result = first
+            for x in rest:
+                result *= x
+        elif step.op == "divide":
+            if any(x == 0 for x in rest):
+                trace.append(f"{step.name}: division by zero")
+                return values, [a for a in step.args[1:] if not CONSTANT.match(a)]
+            result = first
+            for x in rest:
+                result /= x
+        elif step.op == "subtract":
+            result = first - sum(rest)
+        else:
+            result = first + sum(rest)
+        if step.round:
+            result = result.quantize(CENT, rounding=ROUND_HALF_UP)
+        values[step.name] = result
+        trace.append(f"{step.name} = {STEP_SYMBOLS[step.op].join(shown)} = {result}")
+    return values, []
 
 
 def evaluate_rule(rule: TaxRule, facts: Facts) -> RuleResult:
@@ -134,6 +198,18 @@ def evaluate_rule(rule: TaxRule, facts: Facts) -> RuleResult:
     elif isinstance(rule.calculation, Fixed):
         amount = rule.calculation.amount.quantize(CENT, rounding=ROUND_HALF_UP)
         trace.append(f"fixed amount {amount}")
+    elif isinstance(rule.calculation, Steps):
+        values, missing_inputs = run_steps(rule.calculation, facts, trace)
+        if missing_inputs:
+            return result.model_copy(
+                update={"status": "insufficient_data", "missing_facts": missing_inputs, "trace": trace})
+        amount = values[rule.calculation.result]
+        breakdown = [BreakdownLine(name=s.name, label=s.label, amount=values[s.name])
+                     for s in rule.calculation.steps if s.show]
+        label = next(s.label for s in rule.calculation.steps if s.name == rule.calculation.result)
+        return result.model_copy(update={"status": "applies", "amount": amount, "amount_label": label,
+                                         "breakdown": breakdown,
+                                         "message": rule.message, "trace": trace})
 
     return result.model_copy(update={"status": "applies", "amount": amount, "message": rule.message, "trace": trace})
 

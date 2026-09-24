@@ -53,6 +53,7 @@ Intents:
 - unknown: anything else.
 
 amount: the single money amount the user states for that intent, copied as written using only digits, spaces, commas and one decimal point (e.g. "2,500" or "150000"). Do not convert currencies, annualise, add, or otherwise compute. null if no amount is stated.
+pension_participant: false only if the user says the employee is not in (or opted out of) the funded pension scheme; true if they say the employee is in it; otherwise null.
 language: "ka" if the user wrote in Georgian, otherwise "en"."""
 
 EXTRACTION_SCHEMA = {
@@ -60,9 +61,10 @@ EXTRACTION_SCHEMA = {
     "properties": {
         "intent": {"type": "string", "enum": ["calculate_payroll_tax", "check_vat_registration", "unknown"]},
         "amount": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+        "pension_participant": {"anyOf": [{"type": "boolean"}, {"type": "null"}]},
         "language": {"type": "string", "enum": ["en", "ka"]},
     },
-    "required": ["intent", "amount", "language"],
+    "required": ["intent", "amount", "pension_participant", "language"],
     "additionalProperties": False,
 }
 
@@ -70,6 +72,7 @@ EXTRACTION_SCHEMA = {
 class _ExtractionOutput(BaseModel):
     intent: Intent
     amount: str | None
+    pension_participant: bool | None = None
     language: Language
 
 
@@ -84,7 +87,9 @@ class LLMExtractor:
         except ValidationError as e:
             raise AIUnavailable("extraction did not match schema") from e
 
-        entities = {}
+        entities: dict[str, str | bool] = {}
+        if out.intent == "calculate_payroll_tax" and out.pension_participant is not None:
+            entities["pension_participant"] = out.pension_participant
         if out.intent != "unknown" and out.amount is not None:
             amount = normalize_amount(out.amount)
             if amount is None:
@@ -104,6 +109,7 @@ How to answer:
 - Start with the direct answer to their question: "Yes, ...", "No, ...", or the amount.
 - Then say why in one or two plain sentences, using the rule's message or reasons. Mention the legal basis once, naturally (e.g. "under Article 165 of the Tax Code"); never list rule IDs, statuses or field names.
 - If something is missing, ask for it in a natural way.
+- If assumed_by_default lists a fact, say briefly what you assumed and invite a correction.
 - Warm and concise, like a person, not a report.
 
 Hard rules:
@@ -152,6 +158,7 @@ class LLMResponder:
         payload = json.dumps({
             "intent": extraction.intent,
             "entities": extraction.entities,
+            "assumed_by_default": extraction.assumed,
             "results": [r.model_dump(mode="json", exclude={"citations"}) for r in results],
         }, ensure_ascii=False)
         user = f"USER MESSAGE:\n{message}\n\nENGINE RESULTS:\n{payload}"

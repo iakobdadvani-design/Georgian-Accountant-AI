@@ -107,8 +107,8 @@ def test_conversation_is_saved_with_results(client, company):
     detail = client.get(f"/conversations/{cid}").json()
     assert [m["role"] for m in detail["messages"]] == ["user", "assistant", "user", "assistant"]
     saved = detail["messages"][1]["payload"]
-    assert saved["results"][0]["rule_id"] == "demo.payroll_withholding"
-    assert saved["results"][0]["amount"] == "300.00"
+    assert saved["results"][0]["rule_id"] == "ge.payroll.income_tax"
+    assert saved["results"][0]["amount"] == "490.00"
     assert saved["as_of"] == "2025-06-01"
 
 
@@ -119,7 +119,7 @@ def test_follow_up_answer_completes_pending_question(client, company):
     follow_up = chat(client, company, "2500", first["conversation_id"])
     assert follow_up["used_context"] is True
     assert follow_up["extraction"]["intent"] == "calculate_payroll_tax"
-    assert follow_up["results"][0]["amount"] == "300.00"
+    assert follow_up["results"][0]["amount"] == "490.00"
     assert follow_up["questions"] == []
 
     # once answered there is nothing pending: a bare number no longer means salary

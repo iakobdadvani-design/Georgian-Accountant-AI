@@ -47,19 +47,23 @@ def chat(client, company, message, as_of="2025-06-01"):
 
 def test_payroll_message_runs_only_payroll_rules(client, company):
     body = chat(client, company, "I hired someone for GEL 2,500")
-    assert body["extraction"]["entities"] == {"gross_salary": "2500"}
+    assert body["extraction"]["entities"] == {"gross_salary": "2500", "pension_participant": True}
+    assert body["extraction"]["assumed"] == ["pension_participant"]
     [result] = body["results"]
-    assert result["rule_id"] == "demo.payroll_withholding"
-    assert Decimal(result["amount"]) == Decimal("300.00")
-    assert "300.00 GEL" in body["reply"]
-    assert body["reply"].startswith("For a gross salary of 2 500 GEL, the payroll withholding comes to 300.00 GEL.")
-    assert "demo rate" in body["reply"]
+    assert result["rule_id"] == "ge.payroll.income_tax"
+    assert Decimal(result["amount"]) == Decimal("490.00")
+    assert {line["name"]: line["amount"] for line in result["breakdown"]} == {
+        "employee_pension": "50.00", "income_tax": "490.00", "net_salary": "1960.00",
+        "employer_pension": "50.00", "employer_cost": "2550.00"}
+    assert body["reply"].startswith("For a gross salary of 2 500 GEL, the employee takes home 1 960.00 GEL.")
+    assert "costs you 2 550.00 GEL in total" in body["reply"]
+    assert "I've assumed the employee is in the funded pension scheme" in body["reply"]
 
 
-def test_date_picks_rule_version(client, company):
-    [result] = chat(client, company, "salary 2500", as_of="2024-06-01")["results"]
-    assert result["version"] == 1
-    assert Decimal(result["amount"]) == Decimal("250.00")
+def test_no_rule_before_effective_date(client, company):
+    body = chat(client, company, "salary 2500", as_of="2018-06-01")
+    assert body["results"] == []
+    assert body["reply"] == "I don't have a rule in effect for that on the selected date."
 
 
 def test_missing_amount_asks_for_it(client, company):
@@ -118,7 +122,7 @@ def test_greeting_keeps_pending_question(client, company):
     body["message"] = "2500"
     follow_up = client.post(f"/companies/{company['id']}/chat", json=body).json()
     assert follow_up["used_context"] is True
-    assert follow_up["results"][0]["amount"] == "300.00"
+    assert follow_up["results"][0]["amount"] == "490.00"
 
 
 def test_chat_page_served(client):
@@ -171,7 +175,8 @@ def test_below_threshold_says_no_and_why(client, company):
 
 def test_georgian_payroll_answer(client, company):
     body = chat(client, company, "ხელფასი 1800 ლარი")
-    assert body["reply"].startswith("1 800 ლარიანი ხელფასიდან დასაკავებელი თანხა შეადგენს 216.00 ლარს.")
+    assert body["reply"].startswith("1 800 ლარიანი ხელფასიდან თანამშრომელს ხელზე დარჩება 1 411.20 ლარი.")
+    assert "ვივარაუდე, რომ თანამშრომელი დაგროვებით საპენსიო სქემაშია ჩართული" in body["reply"]
 
 
 def test_bare_number_follow_up_keeps_georgian(client, company):
@@ -180,3 +185,28 @@ def test_bare_number_follow_up_keeps_georgian(client, company):
         "message": "150 000", "as_of": "2025-06-01", "conversation_id": first["conversation_id"]}).json()
     assert follow_up["extraction"]["language"] == "ka"
     assert follow_up["reply"].startswith("დიახ, დღგ-ის გადამხდელად რეგისტრაცია გჭირდებათ.")
+
+
+def test_not_in_pension_scheme_stated_up_front(client, company):
+    body = chat(client, company, "salary 2500, not in the pension scheme")
+    assert body["extraction"]["assumed"] == []
+    assert body["reply"].startswith("For a gross salary of 2 500 GEL, the employee takes home 2 000.00 GEL")
+    assert "I've assumed" not in body["reply"]
+
+
+def test_pension_correction_recomputes_previous_salary(client, company):
+    first = chat(client, company, "ხელფასი 2500")
+    body = {"message": "საპენსიოში არ არის", "as_of": "2025-06-01", "conversation_id": first["conversation_id"]}
+    corrected = client.post(f"/companies/{company['id']}/chat", json=body).json()
+    assert corrected["used_context"] is True
+    assert corrected["extraction"]["entities"] == {"gross_salary": "2500", "pension_participant": False}
+    assert corrected["reply"].startswith("2 500 ლარიანი ხელფასიდან თანამშრომელს ხელზე დარჩება 2 000.00 ლარი")
+
+
+def test_new_salary_on_same_topic_is_a_new_question(client, company):
+    first = chat(client, company, "salary 2500, not in the pension scheme")
+    body = {"message": "and for salary 3000?", "as_of": "2025-06-01", "conversation_id": first["conversation_id"]}
+    second = client.post(f"/companies/{company['id']}/chat", json=body).json()
+    # a new figure doesn't silently inherit the earlier "no pension" answer; the default is restated
+    assert second["extraction"]["entities"]["gross_salary"] == "3000"
+    assert second["extraction"]["assumed"] == ["pension_participant"]

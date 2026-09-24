@@ -59,9 +59,22 @@ VERIFICATION_NOTES: dict[str, L] = {
 
 PHRASES: dict[str, L] = {
     # payroll
-    "payroll_amount": {
-        "en": "For a gross salary of {salary} GEL, the payroll withholding comes to {amount} GEL.",
-        "ka": "{salary} ლარიანი ხელფასიდან დასაკავებელი თანხა შეადგენს {amount} ლარს.",
+    "payroll_with_pension": {
+        "en": "For a gross salary of {gross} GEL, the employee takes home {net} GEL. You withhold {pension} GEL "
+              "for their pension (2%) and {tax} GEL income tax (20% of what's left). On top of the salary you also "
+              "pay a {employer_pension} GEL employer pension contribution, so this salary costs you {cost} GEL in "
+              "total.",
+        "ka": "{gross} ლარიანი ხელფასიდან თანამშრომელს ხელზე დარჩება {net} ლარი. თქვენ აკავებთ {pension} ლარს "
+              "საპენსიო შენატანად (2%) და {tax} ლარს საშემოსავლო გადასახადად (დარჩენილი თანხის 20%). ამას გარდა, "
+              "თავად იხდით {employer_pension} ლარს დამსაქმებლის საპენსიო შენატანად, ასე რომ, ეს ხელფასი ჯამში "
+              "{cost} ლარი დაგიჯდებათ.",
+    },
+    "payroll_no_pension": {
+        "en": "For a gross salary of {gross} GEL, the employee takes home {net} GEL after {tax} GEL income tax (20%). "
+              "No pension contributions apply, since they're not in the funded pension scheme.",
+        "ka": "{gross} ლარიანი ხელფასიდან თანამშრომელს ხელზე დარჩება {net} ლარი, {tax} ლარის საშემოსავლო "
+              "გადასახადის (20%) გამოკლების შემდეგ. საპენსიო შენატანი არ ერიცხება, რადგან დაგროვებით საპენსიო "
+              "სქემაში არ მონაწილეობს.",
     },
     "payroll_ask": {
         "en": "Sure, I can work that out. What is the gross monthly salary?",
@@ -93,6 +106,14 @@ PHRASES: dict[str, L] = {
     "no_rules": {
         "en": "I don't have a rule in effect for that on the selected date.",
         "ka": "არჩეული თარიღისთვის ამ საკითხზე მოქმედი წესი არ მაქვს.",
+    },
+}
+
+ASSUMPTIONS: dict[str, L] = {
+    "pension_participant": {
+        "en": "I've assumed the employee is in the funded pension scheme, as most employees are. Tell me if they're not.",
+        "ka": "ვივარაუდე, რომ თანამშრომელი დაგროვებით საპენსიო სქემაშია ჩართული, როგორც დასაქმებულთა უმეტესობა. "
+              "თუ ასე არ არის, მითხარით.",
     },
 }
 
@@ -170,9 +191,14 @@ def _payroll(results: list[RuleResult], extraction: Extraction, lang: Language) 
     result = next((r for r in results if "payroll" in r.rule_id), None)
     if result is None:
         return None
-    if result.status == "applies" and result.amount is not None:
-        salary = group_digits(extraction.entities.get("gross_salary", ""))
-        return [PHRASES["payroll_amount"][lang].format(salary=salary, amount=result.amount)]
+    if result.status == "applies" and result.breakdown:
+        values = {line.name: group_digits(str(line.amount)) for line in result.breakdown}
+        gross = group_digits(str(extraction.entities.get("gross_salary", "")))
+        in_scheme = extraction.entities.get("pension_participant") is not False
+        key = "payroll_with_pension" if in_scheme else "payroll_no_pension"
+        return [PHRASES[key][lang].format(gross=gross, net=values["net_salary"], tax=values["income_tax"],
+                                          pension=values["employee_pension"],
+                                          employer_pension=values["employer_pension"], cost=values["employer_cost"])]
     if result.status == "insufficient_data" and result.missing_facts == ["input.gross_salary"]:
         return [PHRASES["payroll_ask"][lang]]
     return None
@@ -223,6 +249,8 @@ def compose_reply(extraction: Extraction, results: list[RuleResult], message: st
     questions = [q for q in missing_questions(results, lang) if q not in asked]
     if questions:
         lines += [PHRASES["need"][lang]] + [f"- {q}" for q in questions]
+
+    lines += [ASSUMPTIONS[a][lang] for a in extraction.assumed if a in ASSUMPTIONS]
 
     # Only mention verification when the answer actually rests on that rule.
     relevant = [r for r in results if r.status != "insufficient_data"]

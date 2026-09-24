@@ -18,7 +18,9 @@ INTENT_AMOUNT_FACT: dict[str, str] = {
 
 class Extraction(BaseModel):
     intent: Intent
-    entities: dict[str, str] = {}
+    entities: dict[str, str | bool] = {}
+    # Entities filled with a default rather than stated by the user; the reply says so.
+    assumed: list[str] = []
     language: Language = "en"
     source: Literal["keyword", "claude", "ollama"] = "keyword"
     matched_keywords: list[str] = []
@@ -29,10 +31,24 @@ class Extractor(Protocol):
 
 
 KEYWORDS: dict[str, list[str]] = {
-    "calculate_payroll_tax": ["salary", "payroll", "wage", "hired", "hire", "employee", "ხელფას", "დავიქირავე",
-                              "თანამშრომ"],
+    "calculate_payroll_tax": ["salary", "payroll", "wage", "hired", "hire", "employee", "pension", "ხელფას",
+                              "დავიქირავე", "თანამშრომ", "საპენსიო", "პენსი"],
     "check_vat_registration": ["vat", "revenue", "turnover", "sales", "დღგ", "შემოსავ", "ბრუნვ"],
 }
+
+# "not in the pension scheme", "opted out of pension", "საპენსიოში არ არის", "არ არის საპენსიო სქემაში"
+NO_PENSION = re.compile(
+    r"\b(not|isn't|isnt|no longer|opted out|opt(ed)? out|without|no)\b[^.?!]{0,30}\bpension"
+    r"|\bpension\b[^.?!]{0,20}\b(opted out|exempt)"
+    r"|\bარ\b[^.?!]{0,25}(საპენსიო|პენსი)|(საპენსიო|პენსი)[^.?!]{0,25}\bარ\b",
+    re.I,
+)
+
+
+def pension_flag(message: str) -> bool | None:
+    """False when the user says the employee isn't in the funded pension scheme; otherwise unknown."""
+    return False if NO_PENSION.search(message) else None
+
 
 GEORGIAN = re.compile(r"[Ⴀ-ჿ]")
 
@@ -71,9 +87,11 @@ class KeywordExtractor:
         for intent, words in KEYWORDS.items():
             hits = [w for w in words if re.search(r"\b" + re.escape(w), text)]  # word-prefix: "vat" not "private"
             if hits:
-                entities = {}
+                entities: dict[str, str | bool] = {}
                 amount = parse_amount(message)
                 if amount is not None:
                     entities[INTENT_AMOUNT_FACT[intent]] = amount
+                if intent == "calculate_payroll_tax" and pension_flag(message) is False:
+                    entities["pension_participant"] = False
                 return Extraction(intent=intent, entities=entities, language=language, matched_keywords=hits)
         return Extraction(intent="unknown", language=language)
