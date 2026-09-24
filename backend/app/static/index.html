@@ -262,6 +262,16 @@
   .form-grid .hint-text { font-size: 12px; color: var(--faint); font-weight: 400; }
   .form-error { color: var(--accent); font-size: 13px; min-height: 18px; margin: 0; }
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .rs-lookup { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; margin-top: -2px; }
+  .rs-btn { display: inline-flex; align-items: center; gap: 6px; font-weight: 500; }
+  .rs-btn svg { width: 13px; height: 13px; flex: none; }
+  .rs-btn:disabled { opacity: .6; cursor: progress; }
+  .rs-btn.busy svg { animation: rs-pulse .9s ease-in-out infinite alternate; }
+  @keyframes rs-pulse { to { opacity: .25; } }
+  .rs-note { font-size: 12.5px; color: var(--muted); line-height: 1.4; }
+  .rs-note:empty { display: none; }
+  .rs-note.ok { color: var(--ok); }
+  .rs-note.err { color: var(--accent); }
 
   /* ---------- dialog ---------- */
   dialog { border: 1px solid var(--border); border-radius: 18px; padding: 24px; width: min(460px, calc(100vw - 32px));
@@ -456,6 +466,10 @@
         </select>
       </label>
     </div>
+    <div class="rs-lookup">
+      <button class="btn small rs-btn" type="button" id="rsLookupBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span data-i18n="rs.lookup"></span></button>
+      <span class="rs-note" id="rsNote" role="status"></span>
+    </div>
     <label><span data-i18n="companyDialog.regDate"></span>
       <input class="field" name="registration_date" type="date" required>
     </label>
@@ -477,6 +491,10 @@
   <form class="form-grid" id="profileForm" novalidate>
     <h3 data-i18n="profileDialog.title"></h3>
     <p data-i18n="profileDialog.desc"></p>
+    <div class="rs-lookup">
+      <button class="btn small rs-btn" type="button" id="profileRsBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span data-i18n="rs.check"></span></button>
+      <span class="rs-note" id="profileRsNote" role="status"></span>
+    </div>
     <label class="check"><input type="checkbox" name="vat_registered"> <span data-i18n="profile.vatRegistered"></span></label>
     <label id="profileVatDate" hidden><span data-i18n="profile.vatDate"></span>
       <input class="field" name="vat_registration_date" type="date">
@@ -1137,6 +1155,7 @@ function openProfileDialog() {
   f.tax_regime.value = p.tax_regime;
   $("profileVatDate").hidden = !p.vat_registered;
   $("profileError").textContent = "";
+  $("profileRsNote").textContent = "";
   $("app").classList.remove("drawer-open");
   profileDialog.showModal();
 }
@@ -1236,6 +1255,7 @@ const companyForm = $("companyForm");
 function openCompanyDialog() {
   companyForm.reset();
   $("companyError").textContent = "";
+  $("rsNote").textContent = "";
   $("vatDateField").hidden = true;
   $("app").classList.remove("drawer-open");
   companyDialog.showModal();
@@ -1272,6 +1292,63 @@ companyForm.addEventListener("submit", async (e) => {
   } catch (err) {
     if (!(err instanceof AuthError)) error.textContent = err.message;
   }
+});
+
+/* ---------- RS.ge lookup ---------- */
+function legalFormFrom(tin, name) {
+  if (tin.length === 11 || /^ი\s?[./]\s?მ/.test(name)) return "IE";
+  if (/^სს\s/.test(name)) return "JSC";
+  if (/^შპს\s/.test(name)) return "LLC";
+  return null;
+}
+
+async function rsLookup(button, note, code) {
+  const tin = code.replace(/\s/g, "");
+  note.className = "rs-note";
+  if (!/^(\d{9}|\d{11})$/.test(tin)) {
+    note.textContent = t("rs.needCode");
+    note.classList.add("err");
+    return null;
+  }
+  button.disabled = true;
+  button.classList.add("busy");
+  note.textContent = t("rs.checking");
+  try {
+    return await api(`/rs/taxpayers/${tin}`);
+  } catch (err) {
+    note.textContent = err instanceof AuthError ? "" : err.message;
+    note.classList.add("err");
+    return null;
+  } finally {
+    button.disabled = false;
+    button.classList.remove("busy");
+  }
+}
+const rsVat = (r) => t(r.vat_payer ? "rs.vatYes" : "rs.vatNo");
+const rsChecked = (r) => fullDate(new Date(r.checked_at));
+
+$("rsLookupBtn").addEventListener("click", async () => {
+  const f = companyForm.elements, note = $("rsNote");
+  const r = await rsLookup($("rsLookupBtn"), note, f.tax_id.value);
+  if (!r) return;
+  f.tax_id.value = r.tin;
+  f.name.value = r.name;
+  const form = legalFormFrom(r.tin, r.name);
+  if (form) f.legal_form.value = form;
+  f.vat_registered.checked = r.vat_payer;
+  $("vatDateField").hidden = !r.vat_payer;
+  note.textContent = t("rs.filled", { vat: rsVat(r), date: rsChecked(r) });
+  note.classList.add("ok");
+});
+
+$("profileRsBtn").addEventListener("click", async () => {
+  const note = $("profileRsNote");
+  const r = await rsLookup($("profileRsBtn"), note, currentCompany().tax_id);
+  if (!r) return;
+  profileForm.elements.vat_registered.checked = r.vat_payer;
+  $("profileVatDate").hidden = !r.vat_payer;
+  note.textContent = t("rs.profileResult", { name: r.name, vat: rsVat(r), date: rsChecked(r) });
+  note.classList.add("ok");
 });
 
 /* ---------- sign in / register ---------- */

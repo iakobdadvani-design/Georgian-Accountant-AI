@@ -27,6 +27,8 @@ services:
       OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:14b}
       OLLAMA_REPLIES: ${OLLAMA_REPLIES:-false}
       LAW_INDEX_PATH: /law_index/laws.sqlite3
+      RS_SERVICE_USER: ${RS_SERVICE_USER:-}
+      RS_SERVICE_PASSWORD: ${RS_SERVICE_PASSWORD:-}
     ports:
       - "8000:8000"
     volumes:

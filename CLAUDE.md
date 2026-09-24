@@ -26,6 +26,7 @@ the date. Model replies are rejected if they contain a number the engine didn't 
 | `chat/context.py` | Multi-turn: pending question carried across turns, language inheritance |
 | `api/` | Routes. Everything under `/companies`, `/conversations` is scoped to the signed-in user |
 | `legal/index.py` | Read-only search over rad_law's Matsne SQLite FTS5 index (citations only) |
+| `rsge.py`, `api/rsge.py` | RS.ge taxpayer lookup (name + VAT-payer status for a tax ID) via the official WayBillService SOAP API |
 | `i18n/` | Reply catalogs `messages/<lang>.json`, `t()`/`tplural()`, locale number/date formatting |
 | `static/index.html`, `static/i18n.json` | The whole UI (vanilla JS, no build) and its catalog (all visible text) |
 
@@ -106,6 +107,15 @@ in `api/chat.py`: pension participation, dividend to an individual.
 (local, currently qwen2.5:14b: good at extraction, poor Georgian prose, so replies default to
 templates), `off`. Any model failure falls back to keywords/templates with a visible warning.
 Tests override the pipeline and must never call a real model.
+
+## RS.ge lookup
+
+`GET /rs/taxpayers/{tin}` (9 or 11 digits) asks services.rs.ge for the registered name and VAT status;
+the add-company and tax-profile dialogs use it to fill the form. It needs an RS "service user"
+(`RS_SERVICE_USER` / `RS_SERVICE_PASSWORD` in `.env`), created by the taxpayer in eservices.rs.ge;
+without one the endpoint answers 503 "not set up". Never ask for or store a user's RS portal login,
+and don't scrape rs.ge pages. RS data only pre-fills facts the user then saves; it never feeds a
+calculation directly. Tests override `get_rs_client` and must never call RS.
 
 ## Gotchas (Windows dev box)
 

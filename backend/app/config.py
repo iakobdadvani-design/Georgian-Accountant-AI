@@ -25,5 +25,10 @@ class Settings(BaseSettings):
     # rad_law's SQLite FTS5 index of Matsne legal texts. Empty -> no legal citations.
     law_index_path: str = ""
 
+    # RS.ge taxpayer lookup: a "service user" created in your eservices.rs.ge account. Empty -> lookup off.
+    rs_service_user: str = ""
+    rs_service_password: str = ""
+    rs_url: str = "https://services.rs.ge/WayBillService/WayBillService.asmx"
+
 
 settings = Settings()

@@ -73,6 +73,13 @@ On an 8-message English/Georgian probe, qwen2.5:14b classified 8/8 and qwen2.5:7
 poor Georgian replies, hence templates by default. Whatever the provider, a failed or slow model
 call falls back to keywords/templates with a visible warning.
 
+RS.ge lookup (the "Look up on RS.ge" button when adding a company, "Check on RS.ge" in the tax
+profile) fills in the registered name and VAT status from the Revenue Service. It uses RS's official
+web service and needs a service user: in eservices.rs.ge, create one under the waybill service
+users, then set `RS_SERVICE_USER` and `RS_SERVICE_PASSWORD` in `.env` and run `docker compose up -d`.
+Without it the button says the lookup isn't set up. Only public taxpayer facts are read; personal
+tax data (income, declarations, debts) is behind the RS login and isn't accessed.
+
 Legal citations need rad_law's index. Compose mounts `LAW_INDEX_DIR`
 (default `../rag law/RAD law/data/index`) read-only; without it, results just have no
 citations.

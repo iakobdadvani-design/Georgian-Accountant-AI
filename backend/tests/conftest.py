@@ -7,6 +7,7 @@ from sqlalchemy.pool import StaticPool
 from app import models  # noqa: F401 - registers all tables with Base
 from app.api.chat import ChatPipeline, get_pipeline
 from app.api.legal import get_legal_index
+from app.api.rsge import get_rs_client
 from app.chat.extractor import KeywordExtractor
 from app.chat.responder import TemplateResponder
 from app.database import Base, get_db
@@ -38,6 +39,7 @@ def make_client():
     # Never call the real API or read a real legal index from tests, whatever the environment says.
     app.dependency_overrides[get_pipeline] = lambda: ChatPipeline(KeywordExtractor(), TemplateResponder(), "keyword", "template")
     app.dependency_overrides[get_legal_index] = lambda: None
+    app.dependency_overrides[get_rs_client] = lambda: None
 
     def make(email: str | None = None) -> TestClient:
         client = TestClient(app)
