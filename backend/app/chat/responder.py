@@ -213,7 +213,11 @@ def compose_reply(extraction: Extraction, results: list[RuleResult], message: st
     if questions:
         lines += [t("phrase.need", lang)] + [f"- {q}" for q in questions]
 
-    lines += [t(f"assumption.{a}", lang) for a in extraction.assumed if a in KNOWN_ASSUMPTIONS]
+    for a in extraction.assumed:
+        if a in extraction.from_books:
+            lines.append(t(f"assumption.books.{a}", lang, amount=format_amount(extraction.from_books[a], lang)))
+        elif a in KNOWN_ASSUMPTIONS:
+            lines.append(t(f"assumption.{a}", lang))
 
     # Only mention verification when the answer actually rests on that rule.
     relevant = [r for r in results if r.status != "insufficient_data"]

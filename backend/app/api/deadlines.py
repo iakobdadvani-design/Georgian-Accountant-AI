@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.api.companies import get_company
-from app.api.rules import company_facts
+from app.facts import company_facts
 from app.database import get_db
 from app.models import Company, TaxEvent
 from app.models.enums import TaxEventStatus

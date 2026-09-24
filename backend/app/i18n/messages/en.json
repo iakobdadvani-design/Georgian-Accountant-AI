@@ -47,6 +47,8 @@
   "assumption.pension_participant": "I've assumed the employee is in the funded pension scheme, as most employees are. Tell me if they're not.",
   "assumption.dividend_recipient": "I've assumed the dividend goes to an individual owner. Dividends paid to another company aren't taxed at source, so tell me if that's the case.",
   "assumption.over_small_business_limit": "I've assumed your gross income this year is still within GEL 500,000. If it's higher, tell me: the rate is then 3%.",
+  "assumption.books.taxable_turnover_12m": "I used the sales recorded in your books: {amount} GEL (without VAT) over the last 12 months. If some sales aren't recorded, tell me the real total.",
+  "assumption.books.over_small_business_limit": "Your books show {amount} GEL of income this year so far, and I compared that with the GEL 500,000 limit.",
   "offtopic.greeting": "Hi! I'm your tax assistant. I can help with salaries, VAT and dividends. For example, ask:",
   "offtopic.thanks": "You're welcome! Anything else I can check for you?",
   "offtopic.unknown": "I can't answer that one yet. Right now I can help with salaries, VAT and dividends. Try, for example:",

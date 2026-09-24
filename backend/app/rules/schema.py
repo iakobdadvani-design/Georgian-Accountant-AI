@@ -131,6 +131,9 @@ class TaxRule(BaseModel):
     legal_source: LegalSource
     last_verified_date: date | None = None
     is_demo: bool = False
+    # Named amounts other code compares recorded figures against (e.g. the small business income limit),
+    # so they live in the rule file next to their legal source.
+    limits: dict[str, Decimal] = {}
 
     def is_effective_on(self, day: date) -> bool:
         return self.effective_from <= day and (self.effective_to is None or day <= self.effective_to)

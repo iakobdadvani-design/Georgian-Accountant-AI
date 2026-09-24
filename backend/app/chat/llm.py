@@ -142,7 +142,7 @@ How to answer:
 - Start with the direct answer to their question: "Yes, ...", "No, ...", or the amount.
 - Then say why in one or two plain sentences, using the rule's message or reasons. Mention the legal basis once, naturally (e.g. "under Article 165 of the Tax Code"); never list rule IDs, statuses or field names.
 - If something is missing, ask for it in a natural way.
-- If assumed_by_default lists a fact, say briefly what you assumed and invite a correction.
+- If assumed_by_default lists a fact, say briefly what you assumed and invite a correction. If it is in taken_from_recorded_sales, say it comes from the sales recorded in the app, with that amount.
 - Warm and concise, like a person, not a report.
 
 Hard rules:
@@ -192,6 +192,7 @@ class LLMResponder:
             "intent": extraction.intent,
             "entities": extraction.entities,
             "assumed_by_default": extraction.assumed,
+            "taken_from_recorded_sales": extraction.from_books,
             "results": [r.model_dump(mode="json", exclude={"citations"}) for r in results],
         }, ensure_ascii=False)
         user = f"USER MESSAGE:\n{message}\n\nENGINE RESULTS:\n{payload}"

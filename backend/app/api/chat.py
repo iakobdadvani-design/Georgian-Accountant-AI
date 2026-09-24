@@ -6,12 +6,14 @@ from typing import Literal, Protocol
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.api.companies import get_company
 from app.api.deadlines import DeadlineItem, deadline_items
 from app.api.legal import attach_citations, get_legal_index
-from app.api.rules import company_facts
+from app.books import last_12_months, month_end, taxable_turnover, totals
+from app.facts import company_facts
 from app.auth import get_current_user
 from app.chat.claude import ClaudeBackend, get_client
 from app.chat.context import apply_context, inherit_language, pending_state, topic_state
@@ -23,7 +25,7 @@ from app.config import settings
 from app.i18n import Language, t
 from app.database import get_db
 from app.legal.index import LegalIndex
-from app.models import Company, Conversation, Message, User
+from app.models import Company, Conversation, Message, Transaction, User
 from app.models.enums import MessageRole
 from app.rules.engine import evaluate, referenced_facts
 from app.rules.loader import get_rules
@@ -44,6 +46,30 @@ DEFAULT_FACTS: dict[str, dict[str, bool | str]] = {
     # Most small businesses stay well under the GEL 500 000 limit that switches the rate to 3% (Art. 90(2)).
     "calculate_small_business_tax": {"over_small_business_limit": False},
 }
+
+
+def with_books(extraction: Extraction, company: Company, db: Session, as_of: date) -> Extraction:
+    """Fill a fact the user didn't state from the company's recorded sales, if it has any. Disclosed in the reply."""
+    entities = extraction.entities
+    wanted = {"check_vat_registration": "taxable_turnover_12m",
+              "calculate_small_business_tax": "over_small_business_limit"}.get(extraction.intent)
+    if wanted is None or wanted in entities:
+        return extraction
+    records = db.scalars(select(Transaction).where(Transaction.company_id == company.id)).all()
+    if extraction.intent == "check_vat_registration":
+        start, end = last_12_months(as_of)
+        if not totals(records, start, end).income:
+            return extraction
+        shown = value = str(taxable_turnover(records, start, end))
+    else:
+        year = totals(records, date(as_of.year, 1, 1), month_end(as_of))
+        limit = next(r for r in get_rules() if r.rule_id == "ge.small_business.tax").limits.get("year_gross_income")
+        if not year.income or limit is None:
+            return extraction
+        shown, value = str(year.income), year.income > limit
+    return extraction.model_copy(update={"entities": {**entities, wanted: value},
+                                         "assumed": [*extraction.assumed, wanted],
+                                         "from_books": {**extraction.from_books, wanted: shown}})
 
 
 def with_defaults(extraction: Extraction) -> Extraction:
@@ -162,7 +188,7 @@ def chat(
     pending = previous.get("pending")
     extraction = inherit_language(extraction, payload.message, (previous.get("extraction") or {}).get("language"))
     extraction, used_context = apply_context(extraction, payload.message, pending, previous.get("topic"))
-    extraction = with_defaults(extraction)
+    extraction = with_defaults(with_books(extraction, company, db, payload.as_of))
 
     results: list[RuleResult] = []
     deadlines: list[DeadlineItem] = []

@@ -2,13 +2,13 @@ from datetime import date
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
-from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.api.companies import get_company
 from app.database import get_db
-from app.models import Company, Employee
-from app.rules.engine import Facts, evaluate
+from app.facts import company_facts
+from app.models import Company
+from app.rules.engine import evaluate
 from app.rules.loader import get_rules
 from app.rules.schema import FactValue, RuleResult, TaxRule
 
@@ -23,19 +23,6 @@ class EvaluateRequest(BaseModel):
 class CompanyEvaluateRequest(BaseModel):
     as_of: date = Field(default_factory=date.today)
     inputs: dict[str, FactValue] = Field(default={}, description="Exposed to rules as input.<name>")
-
-
-def company_facts(company: Company, db: Session) -> Facts:
-    facts: Facts = {
-        "company.legal_form": company.legal_form,
-        "company.employee_count": db.scalar(select(func.count()).where(Employee.company_id == company.id)),
-    }
-    if company.tax_profile is not None:
-        facts["company.vat_registered"] = company.tax_profile.vat_registered
-        facts["company.tax_regime"] = company.tax_profile.tax_regime.value
-        facts["company.has_employees"] = company.tax_profile.has_employees or facts["company.employee_count"] > 0
-        facts["company.owns_property"] = company.tax_profile.owns_property
-    return facts
 
 
 @router.get("/rules", response_model=list[TaxRule])

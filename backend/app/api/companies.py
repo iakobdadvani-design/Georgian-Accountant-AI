@@ -1,11 +1,14 @@
 import uuid
+from datetime import date
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.auth import get_current_user
+from app.books import vat_inside
 from app.database import get_db
+from app.facts import company_facts
 from app.models import Company, CompanyTaxProfile, Employee, TaxEvent, Transaction, User
 from app.schemas.domain import (
     CompanyCreate,
@@ -97,14 +100,33 @@ def create_transaction(
         employee = db.get(Employee, payload.employee_id)
         if employee is None or employee.company_id != company.id:
             raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "employee_id does not belong to this company")
-    return save(db, Transaction(company_id=company.id, **payload.model_dump()))
+    fields = payload.model_dump(exclude={"vat_included"})
+    if payload.vat_included and payload.vat_amount is None:
+        fields["vat_amount"] = vat_inside(payload.amount, company_facts(company, db), payload.occurred_on)
+    return save(db, Transaction(company_id=company.id, **fields))
 
 
 @router.get("/{company_id}/transactions", response_model=list[TransactionRead])
-def list_transactions(company: Company = Depends(get_company), db: Session = Depends(get_db)):
-    return db.scalars(
-        select(Transaction).where(Transaction.company_id == company.id).order_by(Transaction.occurred_on)
-    ).all()
+def list_transactions(
+    start: date | None = Query(default=None), end: date | None = Query(default=None),
+    company: Company = Depends(get_company), db: Session = Depends(get_db),
+):
+    query = select(Transaction).where(Transaction.company_id == company.id)
+    if start:
+        query = query.where(Transaction.occurred_on >= start)
+    if end:
+        query = query.where(Transaction.occurred_on <= end)
+    return db.scalars(query.order_by(Transaction.occurred_on, Transaction.created_at)).all()
+
+
+@router.delete("/{company_id}/transactions/{transaction_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_transaction(transaction_id: uuid.UUID, company: Company = Depends(get_company), db: Session = Depends(get_db)):
+    transaction = db.get(Transaction, transaction_id)
+    if transaction is None or transaction.company_id != company.id:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Transaction not found")
+    db.delete(transaction)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.post("/{company_id}/tax-events", response_model=TaxEventRead, status_code=status.HTTP_201_CREATED)

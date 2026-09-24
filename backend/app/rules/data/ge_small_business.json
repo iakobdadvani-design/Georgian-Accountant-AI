@@ -47,16 +47,30 @@
           "name": "tax_at_1",
           "label": "Tax at 1%",
           "op": "multiply",
-          "args": ["input.small_business_income", "0.01"],
-          "when": {"fact": "input.over_small_business_limit", "op": "eq", "value": false},
+          "args": [
+            "input.small_business_income",
+            "0.01"
+          ],
+          "when": {
+            "fact": "input.over_small_business_limit",
+            "op": "eq",
+            "value": false
+          },
           "show": false
         },
         {
           "name": "tax_at_3",
           "label": "Tax at 3% (gross income this year above GEL 500 000)",
           "op": "multiply",
-          "args": ["input.small_business_income", "0.03"],
-          "when": {"fact": "input.over_small_business_limit", "op": "eq", "value": true},
+          "args": [
+            "input.small_business_income",
+            "0.03"
+          ],
+          "when": {
+            "fact": "input.over_small_business_limit",
+            "op": "eq",
+            "value": true
+          },
           "show": false
         },
         {
@@ -69,7 +83,10 @@
             "fr": "Impôt de la petite entreprise"
           },
           "op": "add",
-          "args": ["tax_at_1", "tax_at_3"]
+          "args": [
+            "tax_at_1",
+            "tax_at_3"
+          ]
         },
         {
           "name": "after_tax",
@@ -81,7 +98,10 @@
             "fr": "Revenu après impôt"
           },
           "op": "subtract",
-          "args": ["input.small_business_income", "tax"]
+          "args": [
+            "input.small_business_income",
+            "tax"
+          ]
         }
       ]
     },
@@ -100,6 +120,9 @@
       "language": "en"
     },
     "last_verified_date": null,
-    "is_demo": false
+    "is_demo": false,
+    "limits": {
+      "year_gross_income": 500000
+    }
   }
 ]

@@ -7,6 +7,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app import migrate, models  # noqa: F401 - models registers all tables with Base
 from app.api.auth import router as auth_router
+from app.api.books import router as books_router
 from app.api.chat import router as chat_router
 from app.api.companies import router as companies_router
 from app.api.conversations import router as conversations_router
@@ -41,6 +42,7 @@ app.include_router(conversations_router)
 app.include_router(deadlines_router)
 app.include_router(legal_router)
 app.include_router(rs_router)
+app.include_router(books_router)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 

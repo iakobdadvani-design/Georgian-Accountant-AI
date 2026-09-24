@@ -53,17 +53,29 @@ class EmployeeRead(ORMModel, EmployeeCreate):
 class TransactionCreate(BaseModel):
     occurred_on: date
     direction: TransactionDirection
-    amount: Decimal = Field(gt=0, max_digits=14, decimal_places=2)
+    amount: Decimal = Field(gt=0, max_digits=14, decimal_places=2, description="Total paid or received, VAT included")
+    vat_amount: Decimal | None = Field(default=None, ge=0, max_digits=14, decimal_places=2)
+    vat_included: bool = Field(default=False, description="Work out vat_amount as the 18% VAT inside amount (rule ge.vat.output_vat)")
     currency: str = Field(default="GEL", min_length=3, max_length=3)
-    category: str = Field(max_length=64)
+    category: str = Field(default="other", max_length=64)
     counterparty: str | None = Field(default=None, max_length=255)
     description: str | None = Field(default=None, max_length=1000)
     employee_id: uuid.UUID | None = None
 
 
-class TransactionRead(ORMModel, TransactionCreate):
+class TransactionRead(ORMModel):
     id: uuid.UUID
     company_id: uuid.UUID
+    occurred_on: date
+    direction: TransactionDirection
+    amount: Decimal
+    vat_amount: Decimal | None
+    currency: str
+    category: str
+    counterparty: str | None
+    description: str | None
+    employee_id: uuid.UUID | None
+    external_id: str | None
 
 
 class TaxEventCreate(BaseModel):

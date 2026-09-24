@@ -47,6 +47,8 @@
   "assumption.pension_participant": "Ich bin davon ausgegangen, dass der Mitarbeiter am kapitalgedeckten Rentensystem teilnimmt, wie die meisten Beschäftigten. Sagen Sie mir Bescheid, falls nicht.",
   "assumption.dividend_recipient": "Ich bin davon ausgegangen, dass die Dividende an einen Eigentümer als Privatperson geht. Dividenden an ein anderes Unternehmen werden an der Quelle nicht besteuert – sagen Sie Bescheid, falls das zutrifft.",
   "assumption.over_small_business_limit": "Ich bin davon ausgegangen, dass Ihr Bruttoeinkommen in diesem Jahr 500.000 GEL noch nicht übersteigt. Falls doch, sagen Sie es mir: Dann gilt 3 %.",
+  "assumption.books.taxable_turnover_12m": "Ich habe die in Ihrer Buchhaltung erfassten Verkäufe verwendet: {amount} GEL (ohne Mehrwertsteuer) in den letzten 12 Monaten. Falls Verkäufe fehlen, nennen Sie mir die tatsächliche Summe.",
+  "assumption.books.over_small_business_limit": "Laut Ihrer Buchhaltung beträgt das Einkommen in diesem Jahr bisher {amount} GEL; das habe ich mit der Grenze von 500.000 GEL verglichen.",
   "offtopic.greeting": "Hallo! Ich bin Ihr Steuerassistent. Ich helfe bei Gehältern, Mehrwertsteuer und Dividenden. Fragen Sie zum Beispiel:",
   "offtopic.thanks": "Gern geschehen! Kann ich sonst noch etwas für Sie prüfen?",
   "offtopic.unknown": "Diese Frage kann ich noch nicht beantworten. Im Moment helfe ich bei Gehältern, Mehrwertsteuer und Dividenden. Versuchen Sie zum Beispiel:",

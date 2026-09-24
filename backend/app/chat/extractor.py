@@ -35,6 +35,8 @@ class Extraction(BaseModel):
     entities: dict[str, str | bool] = {}
     # Entities filled with a default rather than stated by the user; the reply says so.
     assumed: list[str] = []
+    # Of those, the ones taken from the company's recorded sales and expenses, with the recorded amount.
+    from_books: dict[str, str] = {}
     language: Language = "en"
     source: Literal["keyword", "claude", "ollama"] = "keyword"
     matched_keywords: list[str] = []

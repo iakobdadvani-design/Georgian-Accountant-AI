@@ -47,6 +47,8 @@
   "assumption.pension_participant": "J’ai supposé que le salarié participe au régime de retraite par capitalisation, comme la plupart des salariés. Dites-le-moi si ce n’est pas le cas.",
   "assumption.dividend_recipient": "J’ai supposé que le dividende est versé à un propriétaire personne physique. Les dividendes versés à une autre société ne sont pas imposés à la source : dites-le-moi si c’est le cas.",
   "assumption.over_small_business_limit": "J’ai supposé que votre revenu brut de l’année ne dépasse pas encore 500 000 GEL. Si c’est le cas, dites-le-moi : le taux est alors de 3 %.",
+  "assumption.books.taxable_turnover_12m": "J’ai utilisé les ventes enregistrées dans votre comptabilité : {amount} GEL (hors TVA) sur les 12 derniers mois. Si certaines ventes manquent, indiquez-moi le total réel.",
+  "assumption.books.over_small_business_limit": "D’après votre comptabilité, le revenu de l’année s’élève pour l’instant à {amount} GEL ; je l’ai comparé au plafond de 500 000 GEL.",
   "offtopic.greeting": "Bonjour ! Je suis votre assistant fiscal. Je peux vous aider pour les salaires, la TVA et les dividendes. Par exemple, demandez :",
   "offtopic.thanks": "Avec plaisir ! Puis-je vérifier autre chose pour vous ?",
   "offtopic.unknown": "Je ne peux pas encore répondre à cette question. Pour l’instant, je vous aide pour les salaires, la TVA et les dividendes. Essayez par exemple :",
