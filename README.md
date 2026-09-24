@@ -1,7 +1,7 @@
 # Georgian AI Accountant
 
-AI-native accounting/tax assistant for Georgian businesses. Chat is the interface; a
-deterministic rules engine is the system of record for every number. The AI layer only
+AI-native accounting/tax assistant for Georgian businesses, in **Georgian, English, Russian, German and
+French**. Chat is the interface; a deterministic rules engine is the system of record for every number. The AI layer only
 turns messages into structured input and explains results the engine already computed.
 
 ```
@@ -103,3 +103,10 @@ Sessions last `SESSION_DAYS` (default 30). Behind HTTPS, set `SESSION_COOKIE_SEC
 4. Before going public: login rate limiting, password reset, email verification.
 
 Schema changes go through Alembic (`backend/migrations/`); see CLAUDE.md.
+
+### Languages
+
+The interface, replies, rules and deadlines are available in ქართული, English, Русский, Deutsch and
+Français. Pick one with the globe button (sign-in screen or sidebar); the choice is saved to the account.
+Numbers and dates follow each language's conventions. All translations were machine-written and should
+be reviewed by native speakers, particularly the tax terms.

@@ -1,7 +1,8 @@
 # Georgian AI Accountant
 
 Chat-first tax assistant for Georgian small businesses. FastAPI + PostgreSQL backend, a single-file
-chat page, and a deterministic rules engine. Users write in Georgian or English.
+chat page, and a deterministic rules engine. Fully available in Georgian, English, Russian, German and
+French (interface, replies, rules, deadlines).
 
 ## The one rule that shapes everything
 
@@ -25,7 +26,8 @@ the date. Model replies are rejected if they contain a number the engine didn't 
 | `chat/context.py` | Multi-turn: pending question carried across turns, language inheritance |
 | `api/` | Routes. Everything under `/companies`, `/conversations` is scoped to the signed-in user |
 | `legal/index.py` | Read-only search over rad_law's Matsne SQLite FTS5 index (citations only) |
-| `static/index.html` | The whole UI (vanilla JS, no build). Georgian/English labels in the `UI` object |
+| `i18n/` | Reply catalogs `messages/<lang>.json`, `t()`/`tplural()`, locale number/date formatting |
+| `static/index.html`, `static/i18n.json` | The whole UI (vanilla JS, no build) and its catalog (all visible text) |
 
 ## Commands
 
@@ -52,6 +54,24 @@ Chat intents (`chat/extractor.py`): `calculate_payroll_tax`, `check_vat_registra
 (except deadlines), keyword group(s) in priority order, answer phrasing in `responder.py`, and a field
 in the LLM extraction schema. Defaults the chat assumes (and says it assumed) live in `DEFAULT_FACTS`
 in `api/chat.py`: pension participation, dividend to an individual.
+
+## Languages (ka, en, ru, de, fr)
+
+- **No user-visible string in code.** Replies: `app/i18n/messages/<lang>.json` via `t(key, lang)`.
+  UI: `static/i18n.json`, via `data-i18n*` attributes in markup and `t()` in the page script. Rule and
+  deadline texts are `{"ka","en","ru","de","fr"}` maps inside the rule files. Tests fail if any
+  language lacks a key or a placeholder (`test_i18n.py`, `test_ui_catalog.py`).
+- **Numbers and dates are formatted per language, never hand-written**: `format_amount` /
+  `format_date` / `format_month` on the server; `formatAmount` / `shortDate` / `monthYear` in the page
+  (catalog-driven; don't switch back to `Intl` date/number formatting, it lacks Georgian in some builds).
+  en `1,960.00`, de `1.960,00`, ka/ru `1 960,00` (no-break space), fr `1 960,00` (narrow no-break).
+- **Plurals**: plural maps in catalogs (`{"one","few","many"}` for Russian, `{"one","other"}` en/de/fr,
+  `{"other"}` ka) via `tplural()` / `tp()`.
+- **Reply language**: Georgian or Cyrillic script decides; otherwise clear Latin-language hints; otherwise
+  the user's chosen interface language (`ChatRequest.language`, else `users.language`).
+- **Keywords** for each intent exist in all five languages (`chat/extractor.py`); a trailing `$` marks
+  a whole-word keyword. Amount parsing is locale-independent (`2.500` = `2,500` = `2 500`).
+- Translations are Claude's: flag new ones for native-speaker review, especially tax terminology.
 
 ## Conventions
 
