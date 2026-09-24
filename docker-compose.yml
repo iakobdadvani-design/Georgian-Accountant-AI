@@ -29,6 +29,7 @@ services:
       LAW_INDEX_PATH: /law_index/laws.sqlite3
       RS_SERVICE_USER: ${RS_SERVICE_USER:-}
       REVIEWER_EMAILS: ${REVIEWER_EMAILS:-}
+      PUBLIC_URL: ${PUBLIC_URL:-http://localhost:8000}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:-}
@@ -46,6 +47,31 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
+  # Nightly database backup to ./backups (custom format, for pg_restore), keeping BACKUP_KEEP_DAYS days.
+  backup:
+    image: postgres:16-alpine
+    environment:
+      PGHOST: db
+      PGUSER: ${POSTGRES_USER}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB}
+      KEEP_DAYS: ${BACKUP_KEEP_DAYS:-14}
+    volumes:
+      - ./backups:/backups
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        while true; do
+          file=/backups/$$PGDATABASE-$$(date +%Y%m%d-%H%M%S).dump
+          if pg_dump -Fc -f "$$file.part" && mv "$$file.part" "$$file"; then echo "backup: $$file"; else rm -f "$$file.part"; echo "backup failed"; fi
+          find /backups -name '*.dump' -mtime +$$KEEP_DAYS -delete
+          sleep 86400
+        done
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   pg_data:

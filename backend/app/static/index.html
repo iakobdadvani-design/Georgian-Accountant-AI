@@ -372,6 +372,14 @@
   .review-form label { display: grid; gap: 5px; font-size: 13px; font-weight: 500; }
   .review-form textarea { resize: vertical; font: inherit; }
 
+  /* ---------- account ---------- */
+  .who-btn { background: none; border: none; padding: 0; text-align: left; cursor: pointer; color: inherit; font: inherit; min-width: 0; }
+  .who-btn:hover #userName { color: var(--accent); }
+  .danger-zone { border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--border)); border-radius: 12px; padding: 12px;
+    display: grid; gap: 8px; background: var(--accent-soft); }
+  .danger-zone p { margin: 0; font-size: 13px; color: var(--muted); }
+  .btn.danger { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
   /* ---------- reminders ---------- */
   .rem-telegram { border: 1px solid var(--border); border-radius: 12px; padding: 12px; display: grid; gap: 8px; background: var(--surface-2); }
   .rem-telegram-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 14px; }
@@ -463,6 +471,13 @@
   .lang-check { width: 16px; color: var(--accent); font-weight: 700; text-align: center; }
   @media (max-width: 860px) { .topbar .lang-current { display: none; } .topbar .lang-trigger { padding: 0 9px; } }
   .auth-top { display: flex; justify-content: flex-end; margin: -12px -8px 4px 0; }
+  .auth-links { display: flex; justify-content: space-between; gap: 12px; margin-top: 16px; font-size: 13px; }
+  .auth-links a, .linklike { color: var(--muted); background: none; border: none; padding: 0; font: inherit; cursor: pointer;
+    text-decoration: underline; text-underline-offset: 3px; }
+  .auth-links a:hover, .linklike:hover { color: var(--accent); }
+  .auth-links a:only-child { margin-left: auto; }
+  .reset-title { margin: 0; font-size: 17px; }
+  .reset-intro { margin: 0; color: var(--muted); font-size: 13.5px; }
 
   /* ---------- print / PDF ---------- */
   #printArea { display: none; }
@@ -560,7 +575,7 @@
     </div>
     <div class="account">
       <div class="initials" id="initials" aria-hidden="true"></div>
-      <div class="who"><div id="userName"></div><div id="userEmail"></div></div>
+      <button class="who who-btn" id="accountBtn" type="button" data-i18n-title="account.title"><div id="userName"></div><div id="userEmail"></div></button>
       <button class="icon-btn" id="remindersBtn" type="button" data-i18n-title="reminders.nav">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>
       </button>
@@ -630,6 +645,25 @@
       <p class="form-error" id="authError" role="alert"></p>
       <button class="btn primary block" id="authSubmit" type="submit"></button>
     </form>
+    <form class="form-grid" id="resetForm" hidden novalidate>
+      <h2 class="reset-title" data-i18n="auth.resetTitle"></h2>
+      <p class="reset-intro" id="resetIntro"></p>
+      <label id="resetEmailField"><span data-i18n="auth.email"></span>
+        <input class="field" name="email" type="email" autocomplete="email" maxlength="320">
+      </label>
+      <label id="resetPasswordField"><span data-i18n="auth.newPassword"></span>
+        <input class="field" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128">
+        <span class="hint-text" data-i18n="auth.passwordHint"></span>
+      </label>
+      <p class="form-error" id="resetError" role="alert"></p>
+      <p class="rs-note ok" id="resetDone" role="status"></p>
+      <button class="btn primary block" id="resetSubmit" type="submit"></button>
+      <button class="btn block" id="resetBack" type="button" data-i18n="auth.backToSignIn"></button>
+    </form>
+    <div class="auth-links">
+      <button type="button" class="linklike" id="forgotBtn" hidden data-i18n="auth.forgot"></button>
+      <a href="/privacy" target="_blank" rel="noopener" data-i18n="auth.privacy"></a>
+    </div>
   </div>
 </section>
 
@@ -670,6 +704,25 @@
     <div class="dialog-actions">
       <button class="btn" type="button" id="companyCancel" data-i18n="common.cancel"></button>
       <button class="btn primary" type="submit" data-i18n="companyDialog.save"></button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="accountDialog">
+  <form class="form-grid" id="accountForm" novalidate>
+    <h3 data-i18n="account.title"></h3>
+    <p id="accountWho"></p>
+    <div class="danger-zone">
+      <strong data-i18n="account.deleteTitle"></strong>
+      <p data-i18n="account.deleteWarning"></p>
+      <label><span data-i18n="account.password"></span>
+        <input class="field" name="password" type="password" autocomplete="current-password" maxlength="128">
+      </label>
+      <p class="form-error" id="accountError" role="alert"></p>
+    </div>
+    <div class="dialog-actions">
+      <button class="btn" type="button" id="accountClose" data-i18n="common.cancel"></button>
+      <button class="btn danger" type="submit" data-i18n="account.delete"></button>
     </div>
   </form>
 </dialog>
@@ -790,6 +843,7 @@ async function setLanguage(next, { save = true } = {}) {
   store.set("lang", next);
   applyStatic();
   setAuthMode(authMode);
+  if (resetMode) showReset(resetMode);
   renderStatus();
   renderProfile();
   renderDeadlines();
@@ -1626,6 +1680,33 @@ $("profileRsBtn").addEventListener("click", async () => {
   note.classList.add("ok");
 });
 
+/* ---------- account ---------- */
+$("accountBtn").addEventListener("click", () => {
+  if (!user) return;
+  $("accountWho").textContent = `${user.full_name} · ${user.email}`;
+  $("accountForm").elements.password.value = "";
+  $("accountError").textContent = "";
+  $("app").classList.remove("drawer-open");
+  $("accountDialog").showModal();
+});
+$("accountClose").addEventListener("click", () => $("accountDialog").close());
+$("accountForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const password = $("accountForm").elements.password.value;
+  if (!password) { $("accountError").textContent = t("account.needPassword"); return; }
+  if (!confirm(t("account.confirm"))) return;
+  try {
+    await api("/auth/me", { method: "DELETE", body: { password } });
+    $("accountDialog").close();
+    companies = [];
+    historyItems = [];
+    $("thread").replaceChildren();
+    showAuth();
+  } catch (err) {
+    if (!(err instanceof AuthError)) $("accountError").textContent = err.message;
+  }
+});
+
 /* ---------- reminders ---------- */
 let reminderSettings = null;
 let telegramPoll = null;
@@ -1734,6 +1815,73 @@ function setAuthMode(mode) {
   $("authSubmit").textContent = t(mode === "login" ? "auth.signIn" : "auth.register");
   $("authError").textContent = "";
 }
+// Password reset: "request" asks for the email, "confirm" sets the new password from an emailed #reset= link.
+let resetMode = null;
+let resetToken = null;
+
+function showReset(mode) {
+  resetMode = mode;
+  const f = $("resetForm");
+  f.hidden = !mode;
+  authForm.hidden = !!mode;
+  document.querySelector(".tabs").hidden = !!mode;
+  $("forgotBtn").hidden = !!mode || !authFeatures.password_reset;
+  if (!mode) return;
+  $("resetIntro").textContent = t(mode === "request" ? "auth.resetIntro" : "auth.newPasswordIntro");
+  $("resetEmailField").hidden = mode !== "request";
+  $("resetPasswordField").hidden = mode !== "confirm";
+  $("resetSubmit").textContent = t(mode === "request" ? "auth.resetSend" : "auth.resetSave");
+  $("resetSubmit").hidden = false;
+  $("resetError").textContent = $("resetDone").textContent = "";
+  (mode === "request" ? f.elements.email : f.elements.password).focus();
+}
+
+let authFeatures = { password_reset: false };
+async function loadAuthFeatures() {
+  try { authFeatures = await api("/auth/features"); } catch { /* keep defaults */ }
+  if (!resetMode) $("forgotBtn").hidden = !authFeatures.password_reset;
+}
+
+$("forgotBtn").addEventListener("click", () => {
+  showReset("request");
+  $("resetForm").elements.email.value = authForm.elements.email.value;
+});
+$("resetBack").addEventListener("click", () => { showReset(null); setAuthMode("login"); });
+$("resetForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const f = $("resetForm").elements;
+  $("resetError").textContent = "";
+  $("resetSubmit").disabled = true;
+  try {
+    if (resetMode === "request") {
+      await api("/auth/password-reset", { method: "POST", body: { email: f.email.value.trim(), language: lang } });
+      $("resetDone").textContent = t("auth.resetSent");
+    } else {
+      if (f.password.value.length < 8) { $("resetError").textContent = t("auth.errPassword"); return; }
+      await api("/auth/password-reset/confirm", { method: "POST", body: { token: resetToken, password: f.password.value } });
+      f.password.value = "";
+      history.replaceState(null, "", location.pathname);
+      resetToken = null;
+      $("resetDone").textContent = t("auth.resetDoneMsg");
+      $("resetPasswordField").hidden = true;
+      $("resetSubmit").hidden = true;
+    }
+  } catch (err) {
+    $("resetError").textContent = err.message;
+  } finally {
+    $("resetSubmit").disabled = false;
+  }
+});
+
+// A reset link pasted into a tab that already has the app open.
+window.addEventListener("hashchange", () => {
+  const reset = location.hash.match(/^#reset=([\w-]{20,128})$/);
+  if (!reset) return;
+  resetToken = reset[1];
+  showAuth();
+  showReset("confirm");
+});
+
 $("tabLogin").addEventListener("click", () => setAuthMode("login"));
 $("tabRegister").addEventListener("click", () => setAuthMode("register"));
 
@@ -1805,6 +1953,15 @@ async function startApp(me) {
   applyStatic();
   setAuthMode("login");
   $("title").textContent = t("chat.title");
+  loadAuthFeatures();
+  const reset = location.hash.match(/^#reset=([\w-]{20,128})$/);
+  if (reset) {
+    // A link from the reset email: set the new password first, whatever session this browser has.
+    resetToken = reset[1];
+    showAuth();
+    showReset("confirm");
+    return;
+  }
   try {
     const me = await api("/auth/me");
     await startApp(me);

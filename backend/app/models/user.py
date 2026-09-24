@@ -34,6 +34,17 @@ class User(Base):
     sessions: Mapped[list["AuthSession"]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
 
+class PasswordReset(Base):
+    """A one-time password reset link. Only a SHA-256 of the token is stored."""
+
+    __tablename__ = "password_resets"
+
+    token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
 class AuthSession(Base):
     """A login. Only a SHA-256 of the cookie token is stored, so a leaked table can't be replayed."""
 

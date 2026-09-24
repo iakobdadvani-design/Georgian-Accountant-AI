@@ -78,6 +78,8 @@
   "reminder.test_body": "Les rappels fonctionnent. Rien n’est dû dans les prochains jours.",
   "telegram.linked": "Connecté. Vous recevrez ici les rappels d’échéances.",
   "telegram.unknown": "Ce lien a expiré ou a déjà été utilisé. Ouvrez les rappels dans l’application et reconnectez Telegram.",
+  "reset.subject": "Réinitialiser votre mot de passe",
+  "reset.body": "Bonjour {name},\n\nOuvrez ce lien pour choisir un nouveau mot de passe :\n{link}\n\nIl ne fonctionne qu’une fois et expire dans {hours} heure. Si vous n’avez rien demandé, ignorez cet e-mail ; votre mot de passe reste inchangé.\n\nGeorgian AI Accountant",
   "date.months": [
     "janvier",
     "février",

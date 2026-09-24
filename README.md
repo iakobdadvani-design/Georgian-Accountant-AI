@@ -109,12 +109,32 @@ never call the real API, whatever is in your environment.
 
 Sessions last `SESSION_DAYS` (default 30). Behind HTTPS, set `SESSION_COOKIE_SECURE=true`.
 
+## Going public
+
+1. A server with Docker, and a domain whose DNS points at it (ports 80 and 443 open).
+2. Copy the project and a `.env` with strong `POSTGRES_PASSWORD`, `DOMAIN=your.domain`,
+   `PUBLIC_URL=https://your.domain` and the `SMTP_*` settings (needed for password reset).
+3. `docker compose -f docker-compose.yml -f deploy/docker-compose.prod.yml up -d --build`.
+   Caddy gets the HTTPS certificate by itself; the database and app ports stay closed.
+4. Have a lawyer review and complete `backend/app/static/privacy.html` (linked from the sign-in page).
+
+Already built in: sign-in / sign-up / reset rate limits, password reset by email, security headers
+(CSP, no framing), secure cookies behind HTTPS.
+
+Backups: the `backup` service writes `backups/<db>-<date>.dump` once a day and keeps 14 days
+(`BACKUP_KEEP_DAYS`). Copy that folder off the server too. To restore one (this **replaces** the
+current data):
+
+```powershell
+docker compose exec -T db pg_restore -U <POSTGRES_USER> -d <POSTGRES_DB> --clean --if-exists < backups\<file>.dump
+```
+
 ## Next steps
 
 1. Have a qualified accountant sign off every rule and deadline: add their account's email to
    `REVIEWER_EMAILS` in `.env`; they review each item under Rule review (shield icon, bottom of the sidebar).
 2. Add the Law on Funded Pension to the rad_law corpus so the 2% rate has a quotable excerpt.
-3. Before going public: login rate limiting, password reset, email verification.
+3. Email verification for new accounts, and an in-app "delete my account" (the privacy policy promises deletion on request).
 
 Answer quality: `backend/evals/` holds a set of realistic questions in all five languages with
 the expected answers. `python -m evals.run` scores the offline pipeline (instant);

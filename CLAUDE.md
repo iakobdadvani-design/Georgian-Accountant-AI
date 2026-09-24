@@ -155,7 +155,25 @@ without one the endpoint answers 503 "not set up". Never ask for or store a user
 and don't scrape rs.ge pages. RS data only pre-fills facts the user then saves; it never feeds a
 calculation directly. Tests override `get_rs_client` and must never call RS.
 
+## Going public
+
+- Sign-in, sign-up and reset are rate-limited in memory (`ratelimit.py`, cleared per test in `conftest`).
+  Per process: fine for the single-process deployment, move to Redis before running several.
+- Password reset: `POST /auth/password-reset` always answers 202 (never reveals accounts) and emails a
+  1-hour single-use link (`PUBLIC_URL/#reset=<token>`, only its SHA-256 stored); confirming signs out every
+  session. Needs SMTP; without it the page hides "Forgot password?".
+- Security headers and a Content-Security-Policy come from middleware in `main.py` (not on `/docs`,
+  which loads Swagger from a CDN). Anything the page loads from a new origin must be added there.
+- Production: `deploy/docker-compose.prod.yml` (Caddy for HTTPS, only 80/443 open, no `--reload`,
+  secure cookies). Backups: the `backup` service dumps nightly into `./backups` (git-ignored).
+- `static/privacy.html` is a draft for a lawyer; don't present it as reviewed.
+
 ## Gotchas (Windows dev box)
+
+- The local venv is Python 3.14, the container 3.12. 3.14 evaluates annotations lazily, so a missing
+  import used only in a type hint passes local tests and crashes the container on startup. Run
+  `docker compose exec -w /app backend python -m pytest -q` (Git Bash: prefix `MSYS_NO_PATHCONV=1`)
+  before calling a change done.
 
 - Git Bash heredocs mangle `\b`, `\n` and quotes inside inline Python. Write patch scripts to a
   file (Write tool) or edit files directly instead of `python -c "..."` with escapes.

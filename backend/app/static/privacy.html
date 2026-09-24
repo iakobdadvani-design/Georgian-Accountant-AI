@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ka">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy · Georgian AI Accountant</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%239f1d35'/><text x='16' y='23' font-size='20' text-anchor='middle' fill='white' font-family='sans-serif'>₾</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Georgian:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #f6f4f1; --surface: #fff; --ink: #1c1917; --muted: #78716c; --border: #e7e2dc; --accent: #9f1d35; --warn-soft: #fdf1e0; --warn: #b45309; color-scheme: light; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #131110; --surface: #1c1a18; --ink: #f3efeb; --muted: #a8a29e; --border: #2f2b28; --accent: #e0677f; --warn-soft: #3a2c12; --warn: #fbbf24; color-scheme: dark; }
+  }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.65 "Inter", "Noto Sans Georgian", system-ui, sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 32px 20px 64px; }
+  header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .logo { width: 40px; height: 40px; border-radius: 11px; background: var(--accent); color: #fff; display: grid; place-items: center; font-size: 22px; font-weight: 600; }
+  header a { color: inherit; text-decoration: none; font-weight: 600; }
+  nav { margin-left: auto; display: flex; gap: 6px; }
+  nav button { border: 1px solid var(--border); background: var(--surface); color: var(--ink); border-radius: 8px; padding: 5px 10px; cursor: pointer; font: inherit; font-size: 13px; }
+  nav button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+  article { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px 28px; }
+  h1 { font-size: 24px; margin: 0 0 4px; letter-spacing: -.01em; }
+  h2 { font-size: 16px; margin: 26px 0 6px; }
+  .meta { color: var(--muted); font-size: 13px; margin: 0 0 18px; }
+  .draft { background: var(--warn-soft); border: 1px solid var(--warn); border-radius: 10px; padding: 10px 14px; font-size: 13.5px; margin-bottom: 20px; }
+  ul { padding-left: 20px; }
+  li { margin: 3px 0; }
+  .fill { background: var(--warn-soft); padding: 0 4px; border-radius: 4px; }
+  [hidden] { display: none; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="logo" aria-hidden="true">₾</div>
+    <a href="/">Georgian AI Accountant</a>
+    <nav aria-label="Language">
+      <button type="button" data-lang="ka">ქართული</button>
+      <button type="button" data-lang="en">English</button>
+    </nav>
+  </header>
+
+  <article lang="ka" data-lang="ka">
+    <div class="draft"><strong>პროექტი.</strong> ეს ტექსტი იურისტმა უნდა გადახედოს „პერსონალურ მონაცემთა დაცვის შესახებ“ საქართველოს კანონთან შესაბამისობაზე და შეავსოს მონიშნული ველები, სანამ სერვისი საჯაროდ გაეშვება.</div>
+    <h1>კონფიდენციალურობის პოლიტიკა</h1>
+    <p class="meta">ბოლო განახლება: <span class="fill">[თარიღი]</span></p>
+
+    <h2>ვინ ამუშავებს მონაცემებს</h2>
+    <p>სერვისს მართავს <span class="fill">[ოპერატორის სახელი, საიდენტიფიკაციო კოდი, მისამართი]</span>. კონტაქტი: <span class="fill">[ელფოსტა]</span>.</p>
+
+    <h2>რა მონაცემებს ვინახავთ</h2>
+    <ul>
+      <li>ანგარიში: სახელი, ელფოსტა, არჩეული ენა და პაროლის ჰეში (თავად პაროლს არ ვინახავთ).</li>
+      <li>კომპანიები: სახელი, საიდენტიფიკაციო კოდი, სამართლებრივი ფორმა, რეგისტრაციის თარიღი და საგადასახადო პროფილი.</li>
+      <li>თანამშრომლები, თუ მათ შეიყვანთ: სახელი, პირადი ნომერი, ხელფასი.</li>
+      <li>გაყიდვები და ხარჯები: თქვენ მიერ შეყვანილი ან საბანკო ამონაწერიდან შემოტანილი ჩანაწერები (თარიღი, თანხა, კონტრაგენტი, დანიშნულება).</li>
+      <li>საუბრები ასისტენტთან და მათზე გაცემული პასუხები.</li>
+      <li>შეხსენებების პარამეტრები და, თუ დააკავშირებთ, Telegram-ის ჩატის იდენტიფიკატორი.</li>
+    </ul>
+
+    <h2>რისთვის ვიყენებთ</h2>
+    <p>მხოლოდ სერვისის მისაწოდებლად: გადასახადების გაანგარიშებისთვის, ვადების საჩვენებლად და შესახსენებლად, თქვენი ჩანაწერებისა და საუბრების შესანახად. მონაცემებს არ ვყიდით და რეკლამისთვის არ ვიყენებთ.</p>
+
+    <h2>ვის გადაეცემა</h2>
+    <ul>
+      <li>AI მოდელი: თუ სერვისი Claude-ს (Anthropic) იყენებს, მას მხოლოდ თქვენი შეტყობინების ტექსტი და გაანგარიშების შედეგი ეგზავნება, კომპანიის ჩანაწერები არა. ლოკალური მოდელის შემთხვევაში არაფერი გადის სერვერიდან. <span class="fill">[მიუთითეთ, რომელი გამოიყენება]</span></li>
+      <li>RS.ge: „RS.ge-ზე მოძებნისას“ შემოსავლების სამსახურს საიდენტიფიკაციო კოდი ეგზავნება.</li>
+      <li>ელფოსტისა და Telegram-ის მომწოდებლები: შეხსენებებისა და პაროლის აღდგენის წერილების გასაგზავნად. <span class="fill">[მომწოდებლები]</span></li>
+      <li>ჰოსტინგის მომწოდებელი, სადაც სერვერი და მონაცემთა ბაზა მდებარეობს. <span class="fill">[მომწოდებელი, ქვეყანა]</span></li>
+    </ul>
+
+    <h2>ქუქი-ფაილები</h2>
+    <p>ვიყენებთ მხოლოდ ერთ, აუცილებელ ქუქის სესიისთვის (რომ დარჩეთ შესული). თვალთვალის ან სარეკლამო ქუქებს არ ვიყენებთ. ენა და თემა თქვენს ბრაუზერში ინახება.</p>
+
+    <h2>რამდენ ხანს ვინახავთ</h2>
+    <p>სანამ ანგარიში აქტიურია. ანგარიშის წაშლისას იშლება მასთან დაკავშირებული ყველა კომპანია, ჩანაწერი და საუბარი; სარეზერვო ასლებიდან ისინი <span class="fill">[14]</span> დღეში ქრება.</p>
+
+    <h2>დაცვა</h2>
+    <p>პაროლები scrypt-ით იჰეშება, სესიის ტოკენებიდან მხოლოდ ჰეში ინახება, შესვლის მცდელობები შეზღუდულია, კავშირი HTTPS-ით არის დაცული.</p>
+
+    <h2>თქვენი უფლებები</h2>
+    <p>შეგიძლიათ მოითხოვოთ თქვენი მონაცემების ნახვა, გასწორება, წაშლა ან ასლის მიღება, აგრეთვე გაასაჩივროთ დამუშავება პერსონალურ მონაცემთა დაცვის სამსახურში. მოგვწერეთ: <span class="fill">[ელფოსტა]</span>.</p>
+
+    <h2>ცვლილებები</h2>
+    <p>პოლიტიკის არსებითი ცვლილების შესახებ წინასწარ შეგატყობინებთ ელფოსტით ან აპლიკაციაში.</p>
+  </article>
+
+  <article lang="en" data-lang="en" hidden>
+    <div class="draft"><strong>Draft.</strong> A lawyer must review this against Georgia's Law on Personal Data Protection and fill in the highlighted fields before the service is made public.</div>
+    <h1>Privacy policy</h1>
+    <p class="meta">Last updated: <span class="fill">[date]</span></p>
+
+    <h2>Who processes your data</h2>
+    <p>The service is run by <span class="fill">[operator name, identification code, address]</span>. Contact: <span class="fill">[email]</span>.</p>
+
+    <h2>What we store</h2>
+    <ul>
+      <li>Your account: name, email, chosen language and a hash of your password (never the password itself).</li>
+      <li>Companies: name, tax ID, legal form, registration date and tax profile.</li>
+      <li>Employees, if you add them: name, personal number, salary.</li>
+      <li>Sales and expenses: records you enter or import from a bank statement (date, amount, counterparty, description).</li>
+      <li>Your conversations with the assistant and its answers.</li>
+      <li>Reminder settings and, if you connect it, your Telegram chat ID.</li>
+    </ul>
+
+    <h2>What we use it for</h2>
+    <p>Only to provide the service: working out taxes, showing and reminding you of deadlines, and keeping your records and conversations. We don't sell your data or use it for advertising.</p>
+
+    <h2>Who receives it</h2>
+    <ul>
+      <li>The AI model: if the service uses Claude (Anthropic), only the text of your message and the calculated result are sent, never your company records. With a local model nothing leaves the server. <span class="fill">[state which is used]</span></li>
+      <li>RS.ge: "Look up on RS.ge" sends the tax ID to the Revenue Service.</li>
+      <li>Email and Telegram providers, to deliver reminders and password reset emails. <span class="fill">[providers]</span></li>
+      <li>The hosting provider where the server and database run. <span class="fill">[provider, country]</span></li>
+    </ul>
+
+    <h2>Cookies</h2>
+    <p>One essential cookie keeps you signed in. No tracking or advertising cookies. Your language and theme are kept in your browser.</p>
+
+    <h2>How long we keep it</h2>
+    <p>While your account is active. Deleting the account deletes its companies, records and conversations; they disappear from backups within <span class="fill">[14]</span> days.</p>
+
+    <h2>Security</h2>
+    <p>Passwords are hashed with scrypt, only hashes of session tokens are stored, sign-in attempts are rate-limited, and connections use HTTPS.</p>
+
+    <h2>Your rights</h2>
+    <p>You can ask to see, correct, delete or get a copy of your data, and you can complain to Georgia's Personal Data Protection Service. Write to <span class="fill">[email]</span>.</p>
+
+    <h2>Changes</h2>
+    <p>We'll tell you in advance, by email or in the app, before any significant change to this policy.</p>
+  </article>
+</main>
+<script>
+  // Georgian first; English for everyone else, or when asked (?lang=en). The chat's saved language wins.
+  const saved = (() => { try { return localStorage.getItem("lang"); } catch { return null; } })();
+  const wanted = new URLSearchParams(location.search).get("lang") || saved || (navigator.language || "ka").slice(0, 2);
+  function show(lang) {
+    const pick = lang === "ka" ? "ka" : "en";
+    document.documentElement.lang = pick;
+    for (const a of document.querySelectorAll("article")) a.hidden = a.dataset.lang !== pick;
+    for (const b of document.querySelectorAll("nav button")) b.setAttribute("aria-pressed", String(b.dataset.lang === pick));
+  }
+  for (const b of document.querySelectorAll("nav button")) b.addEventListener("click", () => show(b.dataset.lang));
+  show(wanted);
+</script>
+</body>
+</html>

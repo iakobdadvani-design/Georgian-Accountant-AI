@@ -78,6 +78,8 @@
   "reminder.test_body": "Erinnerungen funktionieren. In den nächsten Tagen ist nichts fällig.",
   "telegram.linked": "Verbunden. Hier erhalten Sie Fristerinnerungen.",
   "telegram.unknown": "Dieser Link ist abgelaufen oder wurde schon verwendet. Öffnen Sie die Erinnerungen in der App und verbinden Sie Telegram erneut.",
+  "reset.subject": "Passwort zurücksetzen",
+  "reset.body": "Hallo {name},\n\nöffnen Sie diesen Link, um ein neues Passwort festzulegen:\n{link}\n\nEr funktioniert einmal und läuft in {hours} Stunde ab. Falls Sie das nicht angefordert haben, ignorieren Sie diese E-Mail; Ihr Passwort bleibt unverändert.\n\nGeorgian AI Accountant",
   "date.months": [
     "Januar",
     "Februar",

@@ -10,18 +10,10 @@ from app.config import settings
 from app.database import get_db
 from app.i18n import t
 from app.models import User
-from app.notify import DeliveryError, EmailSender, Telegram, email_sender, telegram, telegram_username
+from app.notify import DeliveryError, EmailSender, Telegram, get_email, get_telegram, telegram_username
 from app.reminders import Due, due_for, message
 
 router = APIRouter(prefix="/reminders", tags=["reminders"])
-
-
-def get_email() -> EmailSender | None:
-    return email_sender()
-
-
-def get_telegram() -> Telegram | None:
-    return telegram()
 
 
 class ReminderSettings(BaseModel):

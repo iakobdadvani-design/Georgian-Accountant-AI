@@ -55,7 +55,7 @@ def _token_hash(token: str) -> str:
     return hashlib.sha256(token.encode()).hexdigest()
 
 
-def _as_utc(moment: datetime) -> datetime:
+def as_utc(moment: datetime) -> datetime:
     # SQLite drops tzinfo; everything is written in UTC.
     return moment if moment.tzinfo else moment.replace(tzinfo=UTC)
 
@@ -86,6 +86,6 @@ def end_session(db: Session, request: Request, response: Response) -> None:
 def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
     token = request.cookies.get(SESSION_COOKIE)
     session = db.get(AuthSession, _token_hash(token)) if token else None
-    if session is None or _as_utc(session.expires_at) <= datetime.now(UTC):
+    if session is None or as_utc(session.expires_at) <= datetime.now(UTC):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Not signed in")
     return session.user

@@ -78,6 +78,8 @@
   "reminder.test_body": "Reminders are working. Nothing is due in the next few days.",
   "telegram.linked": "Connected. You'll get deadline reminders here.",
   "telegram.unknown": "This link has expired or was already used. Open reminders in the app and connect Telegram again.",
+  "reset.subject": "Reset your password",
+  "reset.body": "Hello {name},\n\nOpen this link to choose a new password:\n{link}\n\nIt works once and expires in {hours} hour. If you didn't ask for this, ignore this email; your password stays the same.\n\nGeorgian AI Accountant",
   "date.months": [
     "January",
     "February",

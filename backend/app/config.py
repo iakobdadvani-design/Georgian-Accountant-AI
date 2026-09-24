@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     # Local models write poor Georgian and are slow, so by default Ollama only extracts and replies use templates.
     ollama_replies: bool = False
 
+    # Where users reach the app; used in emailed links (password reset).
+    public_url: str = "http://localhost:8000"
+
     # Login sessions. Set SESSION_COOKIE_SECURE=true when served over HTTPS.
     session_days: int = 30
     session_cookie_secure: bool = False

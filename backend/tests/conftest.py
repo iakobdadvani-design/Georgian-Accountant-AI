@@ -4,7 +4,7 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app import models  # noqa: F401 - registers all tables with Base
+from app import models, ratelimit  # noqa: F401 - models registers all tables with Base
 from app.api.chat import ChatPipeline, get_pipeline
 from app.api.legal import get_legal_index
 from app.api.reminders import get_email, get_telegram
@@ -51,6 +51,8 @@ def make_client():
             assert response.status_code == 201, response.text
         return client
 
+    for limiter in ratelimit.ALL:  # limits are per process; start every test with a clean slate
+        limiter.clear()
     yield make
     app.dependency_overrides.clear()
     engine.dispose()

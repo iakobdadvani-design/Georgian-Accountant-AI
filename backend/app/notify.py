@@ -73,6 +73,15 @@ class Telegram:
         return self._call("getUpdates", offset=offset, timeout=0, allowed_updates=["message"])
 
 
+def get_email() -> EmailSender | None:
+    """FastAPI dependency; tests override it with a fake."""
+    return email_sender()
+
+
+def get_telegram() -> Telegram | None:
+    return telegram()
+
+
 def email_sender() -> EmailSender | None:
     return SMTPEmail() if settings.smtp_host else None
 

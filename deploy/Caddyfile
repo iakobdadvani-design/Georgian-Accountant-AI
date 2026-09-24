@@ -1,0 +1,6 @@
+# HTTPS in front of the app. Caddy gets and renews the certificate automatically
+# (the domain's DNS must point at this server, and ports 80/443 must be open).
+{$DOMAIN} {
+	encode zstd gzip
+	reverse_proxy backend:8000
+}
