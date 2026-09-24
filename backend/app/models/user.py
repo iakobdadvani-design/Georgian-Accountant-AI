@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, String, Uuid, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, UniqueConstraint, Uuid, false, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.config import settings
@@ -10,6 +10,7 @@ from app.database import Base
 
 class User(Base):
     __tablename__ = "users"
+    __table_args__ = (UniqueConstraint("telegram_link_code", name="uq_users_telegram_link_code"),)
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     email: Mapped[str] = mapped_column(String(320), unique=True, index=True)
@@ -17,6 +18,11 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(String(255))
     # Interface/reply language chosen by the user (app.i18n.LANGUAGES); None until they pick one.
     language: Mapped[str | None] = mapped_column(String(5))
+    # Deadline reminders (app/reminders.py).
+    reminder_email: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
+    reminder_days: Mapped[int] = mapped_column(Integer, default=3, server_default="3")
+    telegram_chat_id: Mapped[str | None] = mapped_column(String(32))
+    telegram_link_code: Mapped[str | None] = mapped_column(String(32))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     companies: Mapped[list["Company"]] = relationship(back_populates="owner", cascade="all, delete-orphan")

@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -14,10 +15,14 @@ from app.api.conversations import router as conversations_router
 from app.api.deadlines import router as deadlines_router
 from app.api.health import router as health_router
 from app.api.legal import router as legal_router
+from app.api.reminders import router as reminders_router
 from app.api.reviews import router as reviews_router
 from app.api.rsge import router as rs_router
 from app.api.rules import router as rules_router
-from app.database import engine
+from app import reminders
+from app.config import settings
+from app.database import SessionLocal, engine
+from app.notify import email_sender, telegram
 from app.rules.calendar import get_deadlines
 from app.rules.loader import get_rules
 
@@ -29,7 +34,13 @@ async def lifespan(app: FastAPI):
     migrate.upgrade(engine)
     get_rules()  # fail fast on an invalid rule file
     get_deadlines()
+    task = None
+    if settings.reminders_enabled and (settings.smtp_host or settings.telegram_bot_token):
+        task = asyncio.create_task(reminders.run_forever(
+            SessionLocal, email_sender, telegram, settings.reminder_interval_minutes * 60))
     yield
+    if task:
+        task.cancel()
 
 
 app = FastAPI(title="Georgian AI Accountant", lifespan=lifespan)
@@ -45,6 +56,7 @@ app.include_router(legal_router)
 app.include_router(rs_router)
 app.include_router(books_router)
 app.include_router(reviews_router)
+app.include_router(reminders_router)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 

@@ -80,6 +80,10 @@ users, then set `RS_SERVICE_USER` and `RS_SERVICE_PASSWORD` in `.env` and run `d
 Without it the button says the lookup isn't set up. Only public taxpayer facts are read; personal
 tax data (income, declarations, debts) is behind the RS login and isn't accessed.
 
+Deadline reminders (bell icon next to your account) go by email and/or Telegram, a chosen number of
+days before each deadline. Set `SMTP_*` and/or `TELEGRAM_BOT_TOKEN` in `.env` (see `.env.example`),
+run `docker compose up -d`, then turn them on in the app and press "Send a test".
+
 Legal citations need rad_law's index. Compose mounts `LAW_INDEX_DIR`
 (default `../rag law/RAD law/data/index`) read-only; without it, results just have no
 citations.

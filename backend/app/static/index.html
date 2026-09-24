@@ -372,6 +372,12 @@
   .review-form label { display: grid; gap: 5px; font-size: 13px; font-weight: 500; }
   .review-form textarea { resize: vertical; font: inherit; }
 
+  /* ---------- reminders ---------- */
+  .rem-telegram { border: 1px solid var(--border); border-radius: 12px; padding: 12px; display: grid; gap: 8px; background: var(--surface-2); }
+  .rem-telegram-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 14px; }
+  .dialog-actions.start { justify-content: flex-start; margin: 0; }
+  #remindersDialog .hint-text { margin: 0; font-size: 12.5px; color: var(--faint); }
+
   /* ---------- auth screen ---------- */
   .auth { position: fixed; inset: 0; z-index: 50; background: var(--bg); display: grid; place-items: center; padding: 20px;
     overflow-y: auto; }
@@ -522,6 +528,9 @@
     <div class="account">
       <div class="initials" id="initials" aria-hidden="true"></div>
       <div class="who"><div id="userName"></div><div id="userEmail"></div></div>
+      <button class="icon-btn" id="remindersBtn" type="button" data-i18n-title="reminders.nav">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>
+      </button>
       <button class="icon-btn" id="logoutBtn" data-i18n-title="logout.title">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
       </button>
@@ -632,6 +641,35 @@
   </form>
 </dialog>
 
+<dialog id="remindersDialog">
+  <div class="form-grid">
+    <h3 data-i18n="reminders.title"></h3>
+    <p data-i18n="reminders.desc"></p>
+    <label class="check"><input type="checkbox" id="remEmail"> <span id="remEmailLabel"></span></label>
+    <p class="hint-text" id="remEmailOff" hidden data-i18n="reminders.emailOff"></p>
+    <div class="rem-telegram">
+      <div class="rem-telegram-head">
+        <strong data-i18n="reminders.telegram"></strong>
+        <span class="review-status" id="remTgStatus"></span>
+      </div>
+      <p class="hint-text" id="remTgOff" hidden data-i18n="reminders.telegramOff"></p>
+      <div class="dialog-actions start" id="remTgActions">
+        <button class="btn small" type="button" id="remTgConnect" data-i18n="reminders.telegramConnect"></button>
+        <button class="btn small" type="button" id="remTgDisconnect" data-i18n="reminders.telegramDisconnect"></button>
+      </div>
+      <p class="hint-text" id="remTgWaiting" hidden data-i18n="reminders.telegramWaiting"></p>
+    </div>
+    <label><span data-i18n="reminders.days"></span>
+      <select class="field" id="remDays"></select>
+    </label>
+    <p class="rs-note" id="remNote" role="status"></p>
+    <div class="dialog-actions">
+      <button class="btn" type="button" id="remTest" data-i18n="reminders.test"></button>
+      <button class="btn primary" type="button" id="remClose" data-i18n="reminders.done"></button>
+    </div>
+  </div>
+</dialog>
+
 <dialog id="profileDialog">
   <form class="form-grid" id="profileForm" novalidate>
     <h3 data-i18n="profileDialog.title"></h3>
@@ -725,6 +763,7 @@ async function setLanguage(next, { save = true } = {}) {
   renderHistory();
   window.Books?.onLanguageChange();
   window.Reviews?.onLanguageChange();
+  renderReminders();
   if ($("thread").querySelector(".empty.start")) renderEmpty();
   else if ($("thread").querySelector(".empty.welcome")) renderWelcome();
   if (!companies.length && user) $("title").textContent = t("noCompany.title");
@@ -1511,6 +1550,100 @@ $("profileRsBtn").addEventListener("click", async () => {
   $("profileVatDate").hidden = !r.vat_payer;
   note.textContent = t("rs.profileResult", { name: r.name, vat: rsVat(r), date: rsChecked(r) });
   note.classList.add("ok");
+});
+
+/* ---------- reminders ---------- */
+let reminderSettings = null;
+let telegramPoll = null;
+const REMINDER_DAYS = [0, 1, 2, 3, 5, 7, 14];
+
+function renderReminders() {
+  const r = reminderSettings;
+  if (!r) return;
+  $("remEmailLabel").textContent = t("reminders.email", { email: user ? user.email : "" });
+  $("remEmail").checked = r.email_enabled;
+  $("remEmail").disabled = !r.email_available;
+  $("remEmailOff").hidden = r.email_available;
+  $("remTgOff").hidden = r.telegram_available;
+  $("remTgActions").hidden = !r.telegram_available;
+  $("remTgConnect").hidden = r.telegram_linked;
+  $("remTgDisconnect").hidden = !r.telegram_linked;
+  const statusBadge = $("remTgStatus");
+  statusBadge.textContent = t(r.telegram_linked ? "reminders.telegramLinked" : "reminders.telegramNotLinked");
+  statusBadge.className = "review-status" + (r.telegram_linked ? " verified" : "");
+  if (r.telegram_linked) $("remTgWaiting").hidden = true;
+  $("remDays").replaceChildren(...REMINDER_DAYS.map((n) =>
+    new Option(n === 0 ? t("reminders.sameDay") : tp("reminders.daysBefore", n), String(n), false, n === r.days_before)));
+}
+
+async function openReminders() {
+  $("remNote").textContent = "";
+  $("app").classList.remove("drawer-open");
+  try {
+    reminderSettings = await api("/reminders");
+  } catch (err) {
+    if (err instanceof AuthError) return;
+  }
+  renderReminders();
+  $("remindersDialog").showModal();
+}
+
+async function saveReminders() {
+  try {
+    reminderSettings = await api("/reminders", { method: "PUT", body: {
+      email_enabled: $("remEmail").checked, days_before: Number($("remDays").value) } });
+    renderReminders();
+    $("remNote").className = "rs-note ok";
+    $("remNote").textContent = t("reminders.saved");
+  } catch (err) {
+    if (!(err instanceof AuthError)) { $("remNote").className = "rs-note err"; $("remNote").textContent = err.message; }
+  }
+}
+
+$("remindersBtn").addEventListener("click", openReminders);
+$("remEmail").addEventListener("change", saveReminders);
+$("remDays").addEventListener("change", saveReminders);
+$("remClose").addEventListener("click", () => $("remindersDialog").close());
+$("remindersDialog").addEventListener("close", () => { clearInterval(telegramPoll); telegramPoll = null; });
+$("remTgConnect").addEventListener("click", async () => {
+  // Open the tab synchronously so pop-up blockers allow it, then point it at the bot link.
+  const tab = window.open("", "_blank");
+  try {
+    const { url } = await api("/reminders/telegram", { method: "POST" });
+    if (tab) tab.location = url; else window.location.href = url;
+    $("remTgWaiting").hidden = false;
+    clearInterval(telegramPoll);
+    let tries = 0;
+    telegramPoll = setInterval(async () => {
+      tries += 1;
+      try { reminderSettings = await api("/reminders"); renderReminders(); } catch { /* retry */ }
+      if (reminderSettings.telegram_linked || tries > 40) { clearInterval(telegramPoll); telegramPoll = null; }
+    }, 3000);
+  } catch (err) {
+    if (tab) tab.close();
+    if (!(err instanceof AuthError)) { $("remNote").className = "rs-note err"; $("remNote").textContent = err.message; }
+  }
+});
+$("remTgDisconnect").addEventListener("click", async () => {
+  try {
+    await api("/reminders/telegram", { method: "DELETE" });
+    reminderSettings = await api("/reminders");
+    renderReminders();
+  } catch (err) { if (!(err instanceof AuthError)) $("remNote").textContent = err.message; }
+});
+$("remTest").addEventListener("click", async () => {
+  const note = $("remNote");
+  try {
+    const result = await api("/reminders/test", { method: "POST" });
+    const names = (list) => list.map((c) => t(`reminders.channel.${c}`)).join(", ");
+    const parts = [];
+    if (result.sent.length) parts.push(t("reminders.testSent", { channels: names(result.sent) }));
+    if (result.failed.length) parts.push(t("reminders.testFailed", { channels: names(result.failed) }));
+    note.className = "rs-note " + (result.failed.length || !result.sent.length ? "err" : "ok");
+    note.textContent = parts.join(" ") || t("reminders.testNone");
+  } catch (err) {
+    if (!(err instanceof AuthError)) { note.className = "rs-note err"; note.textContent = err.message; }
+  }
 });
 
 /* ---------- sign in / register ---------- */

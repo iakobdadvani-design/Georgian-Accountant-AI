@@ -7,6 +7,7 @@ from sqlalchemy.pool import StaticPool
 from app import models  # noqa: F401 - registers all tables with Base
 from app.api.chat import ChatPipeline, get_pipeline
 from app.api.legal import get_legal_index
+from app.api.reminders import get_email, get_telegram
 from app.api.rsge import get_rs_client
 from app.chat.extractor import KeywordExtractor
 from app.chat.responder import TemplateResponder
@@ -40,6 +41,8 @@ def make_client():
     app.dependency_overrides[get_pipeline] = lambda: ChatPipeline(KeywordExtractor(), TemplateResponder(), "keyword", "template")
     app.dependency_overrides[get_legal_index] = lambda: None
     app.dependency_overrides[get_rs_client] = lambda: None
+    app.dependency_overrides[get_email] = lambda: None
+    app.dependency_overrides[get_telegram] = lambda: None
 
     def make(email: str | None = None) -> TestClient:
         client = TestClient(app)

@@ -32,6 +32,16 @@ class Settings(BaseSettings):
     def reviewers(self) -> set[str]:
         return {e.strip().lower() for e in self.reviewer_emails.split(",") if e.strip()}
 
+    # Deadline reminders. Email over SMTP (port 465 = SSL, otherwise STARTTLS); Telegram via a bot from @BotFather.
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    smtp_from: str = ""
+    telegram_bot_token: str = ""
+    reminder_interval_minutes: int = 60
+    reminders_enabled: bool = True  # the background loop; tests never start it
+
     # RS.ge taxpayer lookup: a "service user" created in your eservices.rs.ge account. Empty -> lookup off.
     rs_service_user: str = ""
     rs_service_password: str = ""

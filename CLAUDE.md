@@ -129,6 +129,15 @@ fingerprint (`external_id`, unique per company) so re-imports add nothing. The c
 (`with_books` in `api/chat.py`) and says so (`Extraction.from_books`). `static/books.js` is a second
 script that reuses the page's globals; the page calls it only through `window.Books?.…`.
 
+## Reminders
+
+`reminders.py` runs as a background task (started in `main.py` lifespan only when SMTP or Telegram is
+configured): every minute it polls the Telegram bot for `/start <code>` links, every
+`REMINDER_INTERVAL_MINUTES` it sends due reminders. Dates come from `deadline_items`; `reminder_log`
+(unique per user/company/deadline/channel) makes sending idempotent, and a failed delivery isn't logged, so
+it's retried next round. Tests use `send_due`/`link_telegram` with fake senders and override
+`get_email`/`get_telegram`; they never start the loop (TestClient without `with` skips lifespan).
+
 ## RS.ge lookup
 
 `GET /rs/taxpayers/{tin}` (9 or 11 digits) asks services.rs.ge for the registered name and VAT status;
