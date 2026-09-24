@@ -78,6 +78,8 @@ in `api/chat.py`: pension participation, dividend to an individual, small busine
 - **Keywords** for each intent exist in all five languages (`chat/extractor.py`); a trailing `$` marks
   a whole-word keyword. Amount parsing is locale-independent (`2.500` = `2,500` = `2 500`).
 - Translations are Claude's: flag new ones for native-speaker review, especially tax terminology.
+  `python -m tools.translations export ../translations/review.csv` regenerates the review sheet (re-run it
+  after adding texts); `apply` writes reviewers' corrections back, refusing any that change a placeholder.
 
 ## Conventions
 

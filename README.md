@@ -136,6 +136,9 @@ docker compose exec -T db pg_restore -U <POSTGRES_USER> -d <POSTGRES_DB> --clean
 2. Add the Law on Funded Pension to the rad_law corpus so the 2% rate has a quotable excerpt.
 3. Email verification for new accounts, and an in-app "delete my account" (the privacy policy promises deletion on request).
 
+Translations: `translations/review.csv` lists every text in all five languages for native speakers
+to correct; `translations/README.md` explains how to review it and apply the corrections.
+
 Answer quality: `backend/evals/` holds a set of realistic questions in all five languages with
 the expected answers. `python -m evals.run` scores the offline pipeline (instant);
 `--provider ollama` scores your local model, `--provider claude --model-replies` Claude (paid).
