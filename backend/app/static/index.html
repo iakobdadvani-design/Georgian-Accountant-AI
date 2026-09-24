@@ -237,6 +237,7 @@
   .deadline .d-text { flex: 1; min-width: 0; }
   .deadline .d-title { font-size: 13px; font-weight: 500; line-height: 1.35; }
   .deadline .d-when { font-size: 12px; color: var(--muted); }
+  .deadline .d-shift { font-size: 11.5px; color: var(--faint); }
   .deadline.overdue .d-when { color: var(--accent); font-weight: 500; }
   .deadline.due_soon .d-when { color: var(--warn); font-weight: 500; }
   .deadlines-empty { font-size: 12.5px; color: var(--faint); padding: 2px 4px; line-height: 1.45; }
@@ -1113,7 +1114,8 @@ function renderDeadlines() {
     return el("div", { class: `deadline ${d.state}`, title: loc(d.description) || "" }, check,
       el("div", { class: "d-text" },
         el("div", { class: "d-title", text: `${loc(d.title)} · ${period}` }),
-        el("div", { class: "d-when", text: t("deadlines.by", { date: shortDate(d.due_date) }) + (when ? " · " + when : "") })));
+        el("div", { class: "d-when", text: t("deadlines.by", { date: shortDate(d.due_date) }) + (when ? " · " + when : "") }),
+        d.shifted_from ? el("div", { class: "d-shift", text: t("deadlines.shifted", { date: shortDate(d.shifted_from) }) }) : null));
   }));
   if (sorted.length > SIDEBAR_LIMIT) {
     box.append(el("button", { class: "btn small", type: "button",

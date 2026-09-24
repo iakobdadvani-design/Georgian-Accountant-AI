@@ -41,6 +41,8 @@ DEFAULT_FACTS: dict[str, dict[str, bool | str]] = {
     "calculate_payroll_tax": {"pension_participant": True},
     # Small-company dividends usually go to the owner personally (Tax Code Art. 130(1)).
     "calculate_distribution": {"dividend_recipient": "individual"},
+    # Most small businesses stay well under the GEL 500 000 limit that switches the rate to 3% (Art. 90(2)).
+    "calculate_small_business_tax": {"over_small_business_limit": False},
 }
 
 

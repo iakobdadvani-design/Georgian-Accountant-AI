@@ -177,8 +177,13 @@ class Annual(BaseModel):
 
     type: Literal["annual"]
     month: int = Field(ge=1, le=12)
-    day: int = Field(ge=1, le=28)
+    day: int = Field(ge=1, le=31)
     period: Literal["previous_year", "current_year"]
+
+    @model_validator(mode="after")
+    def check_day(self) -> "Annual":
+        date(2001, self.month, self.day)  # a non-leap year: no 29 February, no 31 April
+        return self
 
 
 class Deadline(BaseModel):

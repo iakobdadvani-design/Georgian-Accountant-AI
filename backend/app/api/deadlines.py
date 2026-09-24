@@ -28,6 +28,7 @@ class DeadlineItem(BaseModel):
     period_start: date
     period_end: date
     due_date: date
+    shifted_from: date | None = None  # the statutory date, when it fell on a day off
     days_left: int
     state: Literal["done", "overdue", "due_soon", "upcoming"]
     legal_source: LegalSource
@@ -62,7 +63,7 @@ def deadline_items(
         items.append(DeadlineItem(key=o.key, deadline_id=o.deadline.deadline_id, tax_type=o.deadline.tax_type,
                                   title=o.deadline.title, description=o.deadline.description,
                                   period_start=o.period_start, period_end=o.period_end, due_date=o.due_date,
-                                  days_left=days_left, state=state, legal_source=o.deadline.legal_source,
+                                  shifted_from=o.statutory_date if o.shifted else None, days_left=days_left, state=state, legal_source=o.deadline.legal_source,
                                   verification=o.deadline.verification))
     # Past deadlines only matter while they're still open.
     return [i for i in items if include_past_done or i.days_left >= 0 or i.state == "overdue"]

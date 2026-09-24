@@ -13,8 +13,8 @@ from pydantic import BaseModel
 from app.i18n import Language
 
 Intent = Literal[
-    "calculate_payroll_tax", "check_vat_registration", "calculate_vat", "calculate_distribution", "list_deadlines",
-    "unknown",
+    "calculate_payroll_tax", "check_vat_registration", "calculate_vat", "calculate_distribution",
+    "calculate_small_business_tax", "list_deadlines", "unknown",
 ]
 
 # Which input fact each intent's amount becomes; the rules engine decides which rules read that fact.
@@ -23,6 +23,7 @@ INTENT_AMOUNT_FACT: dict[str, str] = {
     "check_vat_registration": "taxable_turnover_12m",
     "calculate_vat": "sale_amount",
     "calculate_distribution": "distribution_amount",
+    "calculate_small_business_tax": "small_business_income",
 }
 
 
@@ -56,6 +57,13 @@ KEYWORDS: list[tuple[Intent, list[str]]] = [
         "дивиденд", "распредел", "налог на прибыль",
         "ausschütt", "gewinnausschütt", "gewinnsteuer", "körperschaftsteuer",
         "distribu", "impôt sur les bénéfices", "impot sur les benefices",
+    ]),
+    ("calculate_small_business_tax", [
+        "small business", "small-business", "1% tax", "individual entrepreneur",
+        "მცირე ბიზნეს", "მცირე მეწარმ", "ინდმეწარმე", "ინდ. მეწარმე", "ინდივიდუალური მეწარმე", "1%-იან",
+        "малый бизнес", "малого бизнеса", "малом бизнесе", "индивидуальн", "ип$",
+        "kleinunternehm", "einzelunternehm",
+        "petite entreprise", "entrepreneur individuel", "entreprise individuelle",
     ]),
     ("calculate_payroll_tax", [
         "salary", "payroll", "wage", "hired", "hire", "employee", "pension",
@@ -132,6 +140,20 @@ TO_COMPANY = re.compile(
     r"|\b(à|a)\s+(une|notre|la)?\s*(société|entreprise|holding)\b|société mère|maison mère",
     re.I,
 )
+
+
+# "income this year is over 500 000", "500 000-ს გადააჭარბა", "превысил 500 000", "über 500.000", "dépassé 500 000"
+OVER_LIMIT = re.compile(
+    r"(exceed|over|above|more than|passed|გადააჭარბ|გადაცდ|მეტი|აღემატ|превыс|больше|свыше|сверх|über|mehr als"
+    r"|überschritten|dépass|plus de|au-delà)[^.?!]{0,25}500[\s,.'\u00a0\u202f]?000"
+    r"|500[\s,.'\u00a0\u202f]?000[^.?!]{0,25}(exceed|გადააჭარბ|გადაცდ|მეტ|превыс|überschritt|dépass)",
+    re.I,
+)
+
+
+def over_limit_flag(message: str) -> bool | None:
+    """True when the user says the year's gross income has passed the GEL 500 000 small-business limit."""
+    return True if OVER_LIMIT.search(message) else None
 
 
 def vat_inclusive_flag(message: str) -> bool | None:
@@ -247,5 +269,14 @@ class KeywordExtractor:
                     entities["vat_inclusive"] = inclusive
                 if intent == "calculate_distribution" and (recipient := dividend_recipient(message)):
                     entities["dividend_recipient"] = recipient
+                if intent == "calculate_small_business_tax" and over_limit_flag(message):
+                    entities["over_small_business_limit"] = True
+                    # The largest number is then usually the limit itself, not this month's income.
+                    others = [a for m in AMOUNT.finditer(message) if (a := normalize_amount(m.group(0)))
+                              and Decimal(a) != 500000]
+                    if others:
+                        entities["small_business_income"] = max(others, key=Decimal)
+                    else:
+                        entities.pop("small_business_income", None)
                 return Extraction(intent=intent, entities=entities, language=language, matched_keywords=hits)
         return Extraction(intent="unknown", language=language)

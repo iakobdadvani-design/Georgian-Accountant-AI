@@ -171,6 +171,7 @@
    "other": "{n} days overdue"
   },
   "deadlines.by": "by {date}",
+  "deadlines.shifted": "moved from {date} (day off)",
   "deadlines.markDone": "Mark as done",
   "deadlines.showAll": "Show all ({n})",
   "deadlines.showLess": "Show less",
@@ -411,6 +412,7 @@
    "other": "ვადა გადაცილებულია {n} დღით"
   },
   "deadlines.by": "ვადა: {date}",
+  "deadlines.shifted": "გადმოტანილია {date}-დან (უქმე დღე)",
   "deadlines.markDone": "მონიშვნა შესრულებულად",
   "deadlines.showAll": "ყველას ნახვა ({n})",
   "deadlines.showLess": "ნაკლების ნახვა",
@@ -654,6 +656,7 @@
    "other": "просрочено на {n} дня"
   },
   "deadlines.by": "до {date}",
+  "deadlines.shifted": "перенесено с {date} (выходной)",
   "deadlines.markDone": "Отметить как выполненное",
   "deadlines.showAll": "Показать все ({n})",
   "deadlines.showLess": "Свернуть",
@@ -902,6 +905,7 @@
    "other": "seit {n} Tagen überfällig"
   },
   "deadlines.by": "bis {date}",
+  "deadlines.shifted": "verschoben vom {date} (arbeitsfrei)",
   "deadlines.markDone": "Als erledigt markieren",
   "deadlines.showAll": "Alle anzeigen ({n})",
   "deadlines.showLess": "Weniger anzeigen",
@@ -1144,6 +1148,7 @@
    "other": "en retard de {n} jours"
   },
   "deadlines.by": "échéance : {date}",
+  "deadlines.shifted": "reporté du {date} (jour non ouvré)",
   "deadlines.markDone": "Marquer comme fait",
   "deadlines.showAll": "Tout afficher ({n})",
   "deadlines.showLess": "Afficher moins",

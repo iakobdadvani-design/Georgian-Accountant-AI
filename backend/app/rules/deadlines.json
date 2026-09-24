@@ -34,7 +34,7 @@
         "fr": "Code des impôts de Géorgie, art. 168(1)"
       },
       "url": "https://matsne.gov.ge/en/document/view/1043717",
-      "note": "Art. 168(1): a VAT payer submits the VAT declaration not later than the 15th day of the month following the accounting period and pays the tax within the same period (rad_law snapshot). Weekend/holiday shifts are not applied. Needs accountant review.",
+      "note": "Art. 168(1): a VAT payer submits the VAT declaration not later than the 15th day of the month following the accounting period and pays the tax within the same period (rad_law snapshot). Needs accountant review.",
       "search_query": "VAT declaration not later than 15 day month following accounting period",
       "document_id": "1043717",
       "language": "en"
@@ -217,6 +217,92 @@
       "url": "https://matsne.gov.ge/en/document/view/1043717",
       "note": "Art. 205(3): current payment equal to the past year's annual tax by 15 June of the current tax year; 205(4): may be reduced or skipped if expected liability falls by at least 50% and the taxpayer notifies by 1 June (rad_law snapshot). Needs accountant review.",
       "search_query": "current payment amount annual tax paid past tax year 15 June",
+      "document_id": "1043717",
+      "language": "en"
+    },
+    "last_verified_date": null
+  },
+  {
+    "deadline_id": "ge.small_business.monthly_return",
+    "tax_type": "income",
+    "title": {
+      "ka": "მცირე ბიზნესის დეკლარაცია და გადახდა",
+      "en": "Small business return and payment",
+      "ru": "Декларация и уплата налога малого бизнеса",
+      "de": "Kleinunternehmer-Erklärung und Zahlung",
+      "fr": "Déclaration et paiement de la petite entreprise"
+    },
+    "description": {
+      "ka": "წარადგინეთ გასული თვის მცირე ბიზნესის დეკლარაცია და გადაიხადეთ გადასახადი (1%, ან 3% 500 000 ლარის გადაჭარბების შემდეგ).",
+      "en": "File last month's small business return and pay the tax (1%, or 3% after passing GEL 500,000).",
+      "ru": "Подайте декларацию малого бизнеса за прошлый месяц и уплатите налог (1%, или 3% после превышения 500 000 лари).",
+      "de": "Reichen Sie die Kleinunternehmer-Erklärung für den Vormonat ein und zahlen Sie die Steuer (1 %, oder 3 % nach Überschreiten von 500.000 GEL).",
+      "fr": "Déposez la déclaration de petite entreprise du mois précédent et payez l’impôt (1 %, ou 3 % au-delà de 500 000 GEL)."
+    },
+    "applies": {
+      "fact": "company.tax_regime",
+      "op": "eq",
+      "value": "small_business"
+    },
+    "schedule": {
+      "type": "monthly",
+      "day": 15
+    },
+    "legal_source": {
+      "citation": {
+        "ka": "საქართველოს საგადასახადო კოდექსი, მუხლი 93(1¹)",
+        "en": "Tax Code of Georgia, Art. 93(1¹)",
+        "ru": "Налоговый кодекс Грузии, ст. 93(1¹)",
+        "de": "Steuergesetzbuch Georgiens, Art. 93(1¹)",
+        "fr": "Code des impôts de Géorgie, art. 93(1¹)"
+      },
+      "url": "https://matsne.gov.ge/en/document/view/1043717",
+      "note": "Art. 93(1¹): a small business files its tax return and pays the tax not later than the 15th day of the month following the accounting month (rad_law snapshot). Needs accountant review.",
+      "search_query": "small business tax return filed tax paid not later than 15 month following accounting month",
+      "document_id": "1043717",
+      "language": "en"
+    },
+    "last_verified_date": null
+  },
+  {
+    "deadline_id": "ge.micro_business.annual_return",
+    "tax_type": "income",
+    "title": {
+      "ka": "მიკრო ბიზნესის წლიური დეკლარაცია",
+      "en": "Micro business annual return",
+      "ru": "Годовая декларация микробизнеса",
+      "de": "Jahreserklärung für Kleinstunternehmen",
+      "fr": "Déclaration annuelle de la micro-entreprise"
+    },
+    "description": {
+      "ka": "მიკრო ბიზნესი საშემოსავლო გადასახადს არ იხდის, მაგრამ წინა წლის დეკლარაცია 1 აპრილამდე უნდა წარადგინოს.",
+      "en": "A micro business pays no income tax, but files a return for the previous year before 1 April.",
+      "ru": "Микробизнес не платит подоходный налог, но подаёт декларацию за прошлый год до 1 апреля.",
+      "de": "Ein Kleinstunternehmen zahlt keine Einkommensteuer, reicht aber vor dem 1. April eine Erklärung für das Vorjahr ein.",
+      "fr": "Une micro-entreprise ne paie pas d’impôt sur le revenu, mais dépose une déclaration pour l’année précédente avant le 1er avril."
+    },
+    "applies": {
+      "fact": "company.tax_regime",
+      "op": "eq",
+      "value": "micro_business"
+    },
+    "schedule": {
+      "type": "annual",
+      "month": 3,
+      "day": 31,
+      "period": "previous_year"
+    },
+    "legal_source": {
+      "citation": {
+        "ka": "საქართველოს საგადასახადო კოდექსი, მუხლები 86, 93(1)",
+        "en": "Tax Code of Georgia, Art. 86, 93(1)",
+        "ru": "Налоговый кодекс Грузии, ст. 86, 93(1)",
+        "de": "Steuergesetzbuch Georgiens, Art. 86, 93(1)",
+        "fr": "Code des impôts de Géorgie, art. 86, 93(1)"
+      },
+      "url": "https://matsne.gov.ge/en/document/view/1043717",
+      "note": "Art. 86: a micro business pays no income tax. Art. 93(1): it files a tax return before 1 April of the year following the tax year, so the last day is 31 March (rad_law snapshot). Needs accountant review.",
+      "search_query": "micro business shall file tax return before 1 April year following tax year",
       "document_id": "1043717",
       "language": "en"
     },

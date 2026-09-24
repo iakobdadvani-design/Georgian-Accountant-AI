@@ -1,0 +1,105 @@
+[
+  {
+    "rule_id": "ge.small_business.tax",
+    "version": 1,
+    "title": {
+      "ka": "მცირე ბიზნესის გადასახადი",
+      "en": "Small business tax",
+      "ru": "Налог для малого бизнеса",
+      "de": "Kleinunternehmersteuer",
+      "fr": "Impôt de la petite entreprise"
+    },
+    "tax_type": "income",
+    "effective_from": "2023-12-27",
+    "conditions": {
+      "all": [
+        {
+          "fact": "company.legal_form",
+          "op": "eq",
+          "value": "IE",
+          "if_false": {
+            "ka": "მცირე ბიზნესის სტატუსი (1%) მხოლოდ ინდივიდუალურ მეწარმეს შეიძლება მიენიჭოს (მუხლი 88(1)); შპს-ს ან სს-ს მისი გამოყენება არ შეუძლია.",
+            "en": "Small business status (1%) can only be granted to an individual entrepreneur (Art. 88(1)); an LLC or JSC can't use it.",
+            "ru": "Статус малого бизнеса (1%) может получить только индивидуальный предприниматель (ст. 88(1)); ООО или АО им воспользоваться не могут.",
+            "de": "Der Kleinunternehmerstatus (1 %) kann nur einem Einzelunternehmer gewährt werden (Art. 88(1)); eine GmbH oder AG kann ihn nicht nutzen.",
+            "fr": "Le statut de petite entreprise (1 %) ne peut être accordé qu’à un entrepreneur individuel (art. 88(1)) : une SARL ou une SA ne peut pas en bénéficier."
+          }
+        },
+        {
+          "fact": "company.tax_regime",
+          "op": "eq",
+          "value": "small_business",
+          "if_false": {
+            "ka": "საგადასახადო პროფილში მცირე ბიზნესის სტატუსი არ არის მითითებული. ინდივიდუალურ მეწარმეს მისი მიღება შემოსავლების სამსახურში განცხადებით შეუძლია (მუხლი 89(1)); სტატუსის გარეშე შემოსავალი ზოგადი წესით იბეგრება.",
+            "en": "The tax profile doesn't have small business status. An individual entrepreneur can apply to the Revenue Service for it (Art. 89(1)); without it, income is taxed under the general rules.",
+            "ru": "В налоговом профиле не указан статус малого бизнеса. Индивидуальный предприниматель может получить его, подав заявление в Службу доходов (ст. 89(1)); без него доход облагается по общим правилам.",
+            "de": "Im Steuerprofil ist kein Kleinunternehmerstatus hinterlegt. Ein Einzelunternehmer kann ihn beim Finanzamt (Revenue Service) beantragen (Art. 89(1)); ohne ihn wird das Einkommen nach den allgemeinen Regeln besteuert.",
+            "fr": "Le profil fiscal n’indique pas le statut de petite entreprise. Un entrepreneur individuel peut le demander au Service des recettes (art. 89(1)) ; sans ce statut, le revenu est imposé selon les règles générales."
+          }
+        }
+      ]
+    },
+    "calculation": {
+      "type": "steps",
+      "result": "tax",
+      "steps": [
+        {
+          "name": "tax_at_1",
+          "label": "Tax at 1%",
+          "op": "multiply",
+          "args": ["input.small_business_income", "0.01"],
+          "when": {"fact": "input.over_small_business_limit", "op": "eq", "value": false},
+          "show": false
+        },
+        {
+          "name": "tax_at_3",
+          "label": "Tax at 3% (gross income this year above GEL 500 000)",
+          "op": "multiply",
+          "args": ["input.small_business_income", "0.03"],
+          "when": {"fact": "input.over_small_business_limit", "op": "eq", "value": true},
+          "show": false
+        },
+        {
+          "name": "tax",
+          "label": {
+            "ka": "მცირე ბიზნესის გადასახადი",
+            "en": "Small business tax",
+            "ru": "Налог для малого бизнеса",
+            "de": "Kleinunternehmersteuer",
+            "fr": "Impôt de la petite entreprise"
+          },
+          "op": "add",
+          "args": ["tax_at_1", "tax_at_3"]
+        },
+        {
+          "name": "after_tax",
+          "label": {
+            "ka": "შემოსავალი გადასახადის შემდეგ",
+            "en": "Income after tax",
+            "ru": "Доход после налога",
+            "de": "Einkommen nach Steuern",
+            "fr": "Revenu après impôt"
+          },
+          "op": "subtract",
+          "args": ["input.small_business_income", "tax"]
+        }
+      ]
+    },
+    "legal_source": {
+      "citation": {
+        "ka": "საქართველოს საგადასახადო კოდექსი, მუხლები 88(1), 90(1)-(2)",
+        "en": "Tax Code of Georgia, Articles 88(1), 90(1)-(2)",
+        "ru": "Налоговый кодекс Грузии, статьи 88(1), 90(1)-(2)",
+        "de": "Steuergesetzbuch Georgiens, Artikel 88(1), 90(1)-(2)",
+        "fr": "Code des impôts de Géorgie, articles 88(1), 90(1)-(2)"
+      },
+      "url": "https://matsne.gov.ge/en/document/view/1043717",
+      "note": "Art. 88(1): the status may be granted to an entrepreneur natural person. Art. 90(1): taxable income taxed at 1%; 90(2): 3% from the beginning of the month in which gross income from economic activities exceeded GEL 500 000 (GEL 700 000 for wine and agro tourism operators, not encoded) until the end of the calendar year. Art. 90(3): taxable income is Georgian-source income except salary and income types excluded under 88(3). Not covered: the 700 000 limit, excluded income types, revocation (Art. 89), the GEL 6 000 salary exemption (94(4)). effective_from is the publication date of Law No 3922 (27.12.2023), the latest amendment to Art. 88-90 in the rad_law snapshot, not a verified entry-into-force date. Needs review by a qualified accountant before last_verified_date is set.",
+      "search_query": "small business taxed 1% taxable income",
+      "document_id": "1043717",
+      "language": "en"
+    },
+    "last_verified_date": null,
+    "is_demo": false
+  }
+]

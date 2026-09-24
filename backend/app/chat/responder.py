@@ -14,9 +14,9 @@ from app.rules.schema import RuleResult, localize
 
 KNOWN_FACTS = {
     "input.gross_salary", "input.taxable_turnover_12m", "company.vat_registered", "input.sale_amount",
-    "input.vat_inclusive", "input.distribution_amount", "company.tax_regime",
+    "input.vat_inclusive", "input.distribution_amount", "company.tax_regime", "input.small_business_income",
 }
-KNOWN_ASSUMPTIONS = {"pension_participant", "dividend_recipient"}
+KNOWN_ASSUMPTIONS = {"pension_participant", "dividend_recipient", "over_small_business_limit"}
 
 SmallTalk = Literal["greeting", "thanks"]
 
@@ -141,6 +141,22 @@ def _distribution(results: list[RuleResult], extraction: Extraction, lang: Langu
     return [" ".join(lines)]
 
 
+def _small_business(results: list[RuleResult], extraction: Extraction, lang: Language) -> list[str] | None:
+    result = next((r for r in results if r.rule_id == "ge.small_business.tax"), None)
+    if result is None:
+        return None
+    if result.status == "applies":
+        v = _values(result, lang)
+        key = "phrase.small_business_3" if extraction.entities.get("over_small_business_limit") else "phrase.small_business_1"
+        return [t(key, lang, income=_entity(extraction, "small_business_income", lang), tax=v["tax"], net=v["after_tax"])]
+    if result.status == "not_applicable":
+        return [localize(result.reasons[0], lang) if result.reasons
+                else t("phrase.not_applicable", lang, title=localize(result.title, lang))]
+    if result.missing_facts == ["input.small_business_income"]:
+        return [t("phrase.small_business_ask", lang)]
+    return None
+
+
 def _generic(result: RuleResult, lang: Language) -> str | None:
     title = localize(result.title, lang)
     if result.status == "applies":
@@ -167,6 +183,7 @@ def compose_reply(extraction: Extraction, results: list[RuleResult], message: st
         "check_vat_registration": lambda: _vat_registration(results, lang),
         "calculate_vat": lambda: _vat_calculation(results, extraction, lang),
         "calculate_distribution": lambda: _distribution(results, extraction, lang),
+        "calculate_small_business_tax": lambda: _small_business(results, extraction, lang),
     }.get(extraction.intent, lambda: None)()
     lines = specific if specific is not None else [text for r in results if (text := _generic(r, lang))]
 
@@ -207,8 +224,10 @@ def deadlines_reply(items: list, lang: Language, today) -> str:
             when = tplural("deadline.in_days", item.days_left, lang)
         monthly = (item.period_start.year, item.period_start.month) == (item.period_end.year, item.period_end.month)
         period = format_month(item.period_start, lang) if monthly else t("deadline.year", lang, year=item.period_start.year)
-        lines.append(t("deadline.item", lang, title=localize(item.title, lang), period=period,
-                       date=format_date(item.due_date, lang), when=when))
+        due = format_date(item.due_date, lang)
+        if item.shifted_from:
+            due += t("deadline.shifted", lang, date=format_date(item.shifted_from, lang))
+        lines.append(t("deadline.item", lang, title=localize(item.title, lang), period=period, date=due, when=when))
     if len(open_items) > MAX_LISTED:
         lines.append(t("deadline.more", lang, n=len(open_items) - MAX_LISTED))
     lines += ["", t("deadline.unverified", lang)]

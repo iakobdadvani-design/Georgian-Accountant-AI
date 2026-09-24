@@ -10,6 +10,7 @@ from pydantic import BaseModel, TypeAdapter
 
 from app.rules.engine import Facts, check
 from app.rules.schema import Annual, Deadline, Monthly
+from app.rules.workdays import next_working_day
 
 DEADLINES_FILE = Path(__file__).parent / "deadlines.json"
 
@@ -22,7 +23,12 @@ class Occurrence(BaseModel):
     deadline: Deadline
     period_start: date
     period_end: date
-    due_date: date
+    due_date: date  # the statutory date, moved to the next working day if it's a day off (Tax Code Art. 3(6))
+    statutory_date: date
+
+    @property
+    def shifted(self) -> bool:
+        return self.due_date != self.statutory_date
 
     @property
     def key(self) -> str:
@@ -58,19 +64,22 @@ def _occurrences(deadline: Deadline, start: date, end: date) -> list[Occurrence]
         # Period P is due on `day` of the month after P.
         period = _month_start(start, -2)
         while True:
-            due = _month_start(period, 1).replace(day=schedule.day)
+            statutory = _month_start(period, 1).replace(day=schedule.day)
+            due = next_working_day(statutory)
             if due > end:
                 break
             if due >= start:
-                found.append(Occurrence(deadline=deadline, period_start=period, period_end=_month_end(period), due_date=due))
+                found.append(Occurrence(deadline=deadline, period_start=period, period_end=_month_end(period),
+                                        due_date=due, statutory_date=statutory))
             period = _month_start(period, 1)
     elif isinstance(schedule, Annual):
         for year in range(start.year, end.year + 1):
-            due = date(year, schedule.month, schedule.day)
+            statutory = date(year, schedule.month, schedule.day)
+            due = next_working_day(statutory)
             if start <= due <= end:
                 period_year = year - 1 if schedule.period == "previous_year" else year
                 found.append(Occurrence(deadline=deadline, period_start=date(period_year, 1, 1),
-                                        period_end=date(period_year, 12, 31), due_date=due))
+                                        period_end=date(period_year, 12, 31), due_date=due, statutory_date=statutory))
     return found
 
 

@@ -48,13 +48,15 @@ Schema changes go through Alembic (see "Database" below).
 | `ge.vat.output_vat` — VAT on a net price, or 18/118 of a VAT-inclusive one | 166 |
 | `ge.profit.distribution` — payout / 0.85 x 15% | 97(1), 97(10), 98(1) |
 | `ge.dividend.withholding` — 5% to individuals, none to companies | 130(1)-(2) |
-| Deadlines: VAT (15th), salary withholding (15th), profit tax return (15th), property tax (1 Apr, 15 Jun) | 168(1), 154(3)-(4), 153(10), 205(2)-(4) |
+| `ge.small_business.tax` — individual entrepreneur with small business status: 1%, or 3% once the year's gross income passes GEL 500 000 | 88(1), 90(1)-(2) |
+| Deadlines: VAT (15th), salary withholding (15th), profit tax return (15th), property tax (1 Apr, 15 Jun), small business return (15th), micro business return (31 Mar) | 168(1), 154(3)-(4), 153(10), 205(2)-(4), 93(1¹), 93(1) |
+| Deadline on a weekend or Labour Code holiday → next working day (`rules/workdays.py`, Orthodox Easter computed) | 3(2), 3(6); Labour Code 30(1) |
 
 Chat intents (`chat/extractor.py`): `calculate_payroll_tax`, `check_vat_registration`, `calculate_vat`,
-`calculate_distribution`, `list_deadlines`, `unknown`. Each has an amount fact in `INTENT_AMOUNT_FACT`
+`calculate_distribution`, `calculate_small_business_tax`, `list_deadlines`, `unknown`. Each has an amount fact in `INTENT_AMOUNT_FACT`
 (except deadlines), keyword group(s) in priority order, answer phrasing in `responder.py`, and a field
 in the LLM extraction schema. Defaults the chat assumes (and says it assumed) live in `DEFAULT_FACTS`
-in `api/chat.py`: pension participation, dividend to an individual.
+in `api/chat.py`: pension participation, dividend to an individual, small business under the GEL 500 000 limit.
 
 ## Languages (ka, en, ru, de, fr)
 

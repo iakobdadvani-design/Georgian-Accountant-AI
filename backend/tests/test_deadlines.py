@@ -14,7 +14,8 @@ def test_shipped_deadlines_load_and_cite_the_tax_code():
     deadlines = load_deadlines()
     assert {d.deadline_id for d in deadlines} == {
         "ge.vat.monthly_return", "ge.withholding.monthly_return", "ge.profit.monthly_return",
-        "ge.property.annual_return", "ge.property.current_payment"}
+        "ge.property.annual_return", "ge.property.current_payment", "ge.small_business.monthly_return",
+        "ge.micro_business.annual_return"}
     assert all(d.legal_source.url and d.verification == "unverified" for d in deadlines)
 
 
