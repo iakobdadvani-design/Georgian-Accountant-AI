@@ -463,6 +463,39 @@
   .lang-check { width: 16px; color: var(--accent); font-weight: 700; text-align: center; }
   @media (max-width: 860px) { .topbar .lang-current { display: none; } .topbar .lang-trigger { padding: 0 9px; } }
   .auth-top { display: flex; justify-content: flex-end; margin: -12px -8px 4px 0; }
+
+  /* ---------- print / PDF ---------- */
+  #printArea { display: none; }
+  @media print {
+    :root, :root:not([data-theme="light"]), :root[data-theme="dark"] {
+      --bg: #fff; --surface: #fff; --surface-2: #f7f7f7; --ink: #111; --muted: #444; --faint: #666; --border: #d6d6d6;
+      --accent: #9f1d35; --accent-ink: #fff; --accent-soft: #f8e9ec; --ok: #15803d; --ok-soft: #e7f5ec;
+      --warn: #b45309; --warn-soft: #fdf1e0; --info: #444; --info-soft: #f1f1f1; --shadow: none;
+      color-scheme: light !important;
+    }
+    @page { margin: 16mm 14mm; }
+    html, body { background: #fff !important; height: auto !important; overflow: visible !important; }
+    body { display: block !important; }
+    body > *:not(#printArea) { display: none !important; }
+    #printArea { display: block; color: var(--ink); font-size: 12.5px; width: 100%; max-width: 100%; }
+    .print-head { display: flex; gap: 12px; align-items: center; border-bottom: 2px solid var(--accent); padding-bottom: 10px; margin-bottom: 16px; }
+    .print-head .logo { width: 36px; height: 36px; font-size: 20px; }
+    .print-head h1 { margin: 0; font-size: 18px; }
+    .print-head p { margin: 2px 0 0; color: var(--muted); font-size: 11.5px; }
+    .print-section { margin: 0 0 14px; }
+    .print-section.keep { break-inside: avoid; }
+    .print-section h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--faint); margin: 0 0 4px; }
+    .print-section .reply { white-space: pre-wrap; line-height: 1.55; overflow-wrap: anywhere; max-width: 100%; padding-right: 4px; }
+    #printArea .card { margin-bottom: 10px; }
+    #printArea .card, #printArea .books-panel { box-shadow: none; }
+    #printArea .books-card, #printArea .card-head, #printArea .breakdown tr { break-inside: avoid; }
+    #printArea .books-cards { grid-template-columns: repeat(3, 1fr); }
+    #printArea details > summary { list-style: none; font-weight: 600; }
+    #printArea details > summary::-webkit-details-marker { display: none; }
+    #printArea a { color: var(--ink); text-decoration: none; }
+    #printArea button { display: none !important; }
+    .print-foot { margin-top: 20px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 10.5px; color: var(--faint); }
+  }
 </style>
 
 </head>
@@ -1039,9 +1072,50 @@ function renderResponse(body, live = true) {
     el("span", { text: `${tt("meta.reply")}: ${tt("source." + body.reply_source)}` }),
     el("span", { text: `${tt("meta.understood")}: ${tt("source." + body.extraction.source)}` }),
     el("button", { class: "debug-toggle", type: "button", text: tt("meta.rawJson"),
-      onclick: () => { debug.hidden = !debug.hidden; } })));
+      onclick: () => { debug.hidden = !debug.hidden; } }),
+    body.results.length ? el("button", { class: "debug-toggle print-btn", type: "button", text: t("print.pdf"),
+      onclick: (e) => printAnswer(e.target.closest(".row")) }) : null));
   parts.push(debug);
   addBot(...parts);
+}
+
+/* ---------- print / PDF ---------- */
+// The browser's print dialog saves as PDF, with Georgian fonts intact. Content is cloned so the screen is untouched.
+function printable(node) {
+  const copy = node.cloneNode(true);
+  for (const d of copy.querySelectorAll("details")) {
+    if (d.querySelector(".trace")) d.remove(); else d.open = true;
+  }
+  for (const b of copy.querySelectorAll("button, .debug, .meta, .chips")) b.remove();
+  return copy;
+}
+
+function printDocument(title, ...sections) {
+  const company = currentCompany();
+  const who = company ? [company.name, `${t("profile.taxId")}: ${company.tax_id}`] : [];
+  $("printArea").replaceChildren(
+    el("header", { class: "print-head" }, el("div", { class: "logo", text: "₾" }),
+      el("div", {}, el("h1", { text: title }),
+        el("p", { text: [...who, t("print.generated", { date: fullDate(new Date()) })].join(" · ") }))),
+    ...sections,
+    el("footer", { class: "print-foot", text: t("print.disclaimer") }));
+  const previous = document.title;
+  document.title = [title, company && company.name].filter(Boolean).join(" · ");
+  window.addEventListener("afterprint", () => { document.title = previous; $("printArea").replaceChildren(); }, { once: true });
+  window.print();
+}
+
+function printAnswer(row) {
+  const question = row.previousElementSibling && row.previousElementSibling.classList.contains("user")
+    ? row.previousElementSibling.textContent : "";
+  const body = row.querySelector(".bot-body");
+  const reply = body.querySelector(".reply");
+  const cards = [...body.querySelectorAll(".card")].map(printable);
+  printDocument(t("print.chatTitle"),
+    question ? el("section", { class: "print-section keep" }, el("h2", { text: t("print.question") }), el("p", { text: question })) : null,
+    el("section", { class: "print-section" }, el("h2", { text: t("print.answer") }),
+      el("div", { class: "reply", text: reply ? reply.textContent : "" })),
+    cards.length ? el("section", { class: "print-section" }, cards) : null);
 }
 
 /* ---------- API ---------- */
@@ -1739,6 +1813,7 @@ async function startApp(me) {
   }
 })();
 </script>
+<div id="printArea" aria-hidden="true"></div>
 <script src="/static/books.js"></script>
 <script src="/static/reviews.js"></script>
 </body>

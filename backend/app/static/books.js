@@ -240,6 +240,7 @@
         el("button", { class: "icon-btn", type: "button", title: t("books.nextMonth"), "aria-label": t("books.nextMonth"),
                        text: "›", onclick: () => { month = shiftMonth(month, 1); load(); } })),
       el("div", { class: "books-actions" },
+        el("button", { class: "btn", type: "button", text: t("books.print"), onclick: printMonth }),
         el("button", { class: "btn", type: "button", text: t("books.import"), onclick: openImport }),
         el("button", { class: "btn primary", type: "button", text: t("books.add"),
                        onclick: () => { adding = true; render(); } })));
@@ -293,6 +294,14 @@
     parts.push(el("section", { class: "books-panel" }, el("h3", { text: t("books.records") }), table));
 
     $("booksInner").replaceChildren(...parts);
+  }
+
+  function printMonth() {
+    const inner = $("booksInner");
+    const sections = [...inner.children].slice(1)  // skip the header with its buttons
+      .filter((node) => !node.querySelector("form"))
+      .map((node) => printable(node));
+    printDocument(`${t("books.title")} · ${monthYear(monthStartIso(month))}`, ...sections);
   }
 
   /* ---------- import ---------- */
