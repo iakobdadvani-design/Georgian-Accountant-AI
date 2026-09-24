@@ -24,6 +24,7 @@
   /* ---------- view switching ---------- */
   function show() {
     if (!currentCompany()) return;
+    window.Reviews?.hide();
     open = true;
     document.body.classList.add("books-open");
     $("books").hidden = false;

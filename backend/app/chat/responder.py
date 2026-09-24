@@ -255,7 +255,8 @@ def deadlines_reply(items: list, lang: Language, today) -> str:
         lines.append(t("deadline.item", lang, title=localize(item.title, lang), period=period, date=due, when=when))
     if len(open_items) > MAX_LISTED:
         lines.append(t("deadline.more", lang, n=len(open_items) - MAX_LISTED))
-    lines += ["", t("deadline.unverified", lang)]
+    if any(i.verification != "verified" for i in open_items[:MAX_LISTED]):
+        lines += ["", t("deadline.unverified", lang)]
     return "\n".join(lines)
 
 

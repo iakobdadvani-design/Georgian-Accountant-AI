@@ -162,6 +162,7 @@ class RuleResult(BaseModel):
     is_demo: bool
     verification: Verification
     last_verified_date: date | None = None
+    reviewed_by: str | None = None  # "name, credentials" of the accountant who signed this version off
     citations: list[Passage] = []
 
 

@@ -14,6 +14,7 @@ from app.api.conversations import router as conversations_router
 from app.api.deadlines import router as deadlines_router
 from app.api.health import router as health_router
 from app.api.legal import router as legal_router
+from app.api.reviews import router as reviews_router
 from app.api.rsge import router as rs_router
 from app.api.rules import router as rules_router
 from app.database import engine
@@ -43,6 +44,7 @@ app.include_router(deadlines_router)
 app.include_router(legal_router)
 app.include_router(rs_router)
 app.include_router(books_router)
+app.include_router(reviews_router)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 

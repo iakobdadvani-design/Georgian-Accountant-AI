@@ -25,6 +25,13 @@ class Settings(BaseSettings):
     # rad_law's SQLite FTS5 index of Matsne legal texts. Empty -> no legal citations.
     law_index_path: str = ""
 
+    # Emails (comma-separated) of qualified accountants allowed to sign off rules and deadlines.
+    reviewer_emails: str = ""
+
+    @property
+    def reviewers(self) -> set[str]:
+        return {e.strip().lower() for e in self.reviewer_emails.split(",") if e.strip()}
+
     # RS.ge taxpayer lookup: a "service user" created in your eservices.rs.ge account. Empty -> lookup off.
     rs_service_user: str = ""
     rs_service_password: str = ""

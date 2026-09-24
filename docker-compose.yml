@@ -28,6 +28,7 @@ services:
       OLLAMA_REPLIES: ${OLLAMA_REPLIES:-false}
       LAW_INDEX_PATH: /law_index/laws.sqlite3
       RS_SERVICE_USER: ${RS_SERVICE_USER:-}
+      REVIEWER_EMAILS: ${REVIEWER_EMAILS:-}
       RS_SERVICE_PASSWORD: ${RS_SERVICE_PASSWORD:-}
     ports:
       - "8000:8000"

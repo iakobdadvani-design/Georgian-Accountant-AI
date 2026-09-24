@@ -46,6 +46,7 @@ class UserRead(BaseModel):
     email: str
     full_name: str
     language: Language | None = None
+    is_reviewer: bool = False
 
 
 class UserUpdate(BaseModel):

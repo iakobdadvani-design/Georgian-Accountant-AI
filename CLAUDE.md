@@ -41,7 +41,7 @@ cd backend; .\.venv\Scripts\python -m pytest -q -p no:warnings   # tests: SQLite
 
 Schema changes go through Alembic (see "Database" below).
 
-## Rules in the app (all "unverified")
+## Rules in the app (unverified until an accountant signs them off)
 
 | Rule / deadline | Law |
 |---|---|
@@ -87,8 +87,12 @@ in `api/chat.py`: pension participation, dividend to an individual, small busine
   conversation's language.
 - **Every new rule** needs: a legal source (article + Matsne URL, `search_query` for the excerpt),
   `if_false` explanations on its conditions (en + ka), answer phrasing in `responder.py`, and tests
-  with worked examples. Real rules stay `last_verified_date: null` (shown as "Unverified") until a
-  qualified accountant signs off; never set it yourself.
+  with worked examples. Real rules stay `last_verified_date: null` in the files. A qualified
+  accountant signs them off in the app's Rule review screen (`api/reviews.py`, `reviews.py`): only
+  emails in `REVIEWER_EMAILS` can, each decision stores who/credentials/when and a hash of the exact
+  rule content, and editing a rule afterwards turns it back to unverified. Never set
+  `last_verified_date` or create reviews yourself. Any new place that returns `RuleResult`s must pass
+  them through `reviews.apply_to_results` so sign-offs show.
 - **Source rules from the Tax Code text** in the rad_law corpus (or Matsne), not from memory or
   secondary guides. `C:\Users\iakob\Desktop\rag law\RAD law\data\index\laws.sqlite3`.
 - **Money is `Decimal`**, rounded half-up to 0.01 only where a step says so. Never floats.

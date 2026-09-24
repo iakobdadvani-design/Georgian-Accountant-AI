@@ -4,6 +4,7 @@ from datetime import datetime
 from sqlalchemy import DateTime, ForeignKey, String, Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.config import settings
 from app.database import Base
 
 
@@ -19,6 +20,11 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     companies: Mapped[list["Company"]] = relationship(back_populates="owner", cascade="all, delete-orphan")
+
+    @property
+    def is_reviewer(self) -> bool:
+        """Qualified accountants who may sign off rules, listed in REVIEWER_EMAILS."""
+        return self.email.lower() in settings.reviewers
     sessions: Mapped[list["AuthSession"]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
 

@@ -11,6 +11,7 @@ from app.facts import company_facts
 from app.database import get_db
 from app.models import Company, TaxEvent
 from app.models.enums import TaxEventStatus
+from app.reviews import deadline_standing
 from app.rules.calendar import get_deadlines, upcoming
 from app.rules.schema import LegalSource, LocalizedText, Verification
 
@@ -33,6 +34,7 @@ class DeadlineItem(BaseModel):
     state: Literal["done", "overdue", "due_soon", "upcoming"]
     legal_source: LegalSource
     verification: Verification
+    reviewed_by: str | None = None
 
 
 class DoneUpdate(BaseModel):
@@ -48,6 +50,7 @@ def deadline_items(
         for e in db.scalars(select(TaxEvent).where(TaxEvent.company_id == company.id,
                                                    TaxEvent.status != TaxEventStatus.pending))
     }
+    signed = deadline_standing(db)
     items = []
     for o in occurrences:
         days_left = (o.due_date - today).days
@@ -64,7 +67,9 @@ def deadline_items(
                                   title=o.deadline.title, description=o.deadline.description,
                                   period_start=o.period_start, period_end=o.period_end, due_date=o.due_date,
                                   shifted_from=o.statutory_date if o.shifted else None, days_left=days_left, state=state, legal_source=o.deadline.legal_source,
-                                  verification=o.deadline.verification))
+                                  verification="verified" if signed[o.deadline.deadline_id].status == "verified"
+                                  else o.deadline.verification,
+                                  reviewed_by=signed[o.deadline.deadline_id].reviewed_by))
     # Past deadlines only matter while they're still open.
     return [i for i in items if include_past_done or i.days_left >= 0 or i.state == "overdue"]
 

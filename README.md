@@ -104,7 +104,8 @@ Sessions last `SESSION_DAYS` (default 30). Behind HTTPS, set `SESSION_COOKIE_SEC
 
 ## Next steps
 
-1. Have a qualified accountant verify every rule and deadline (and their effective dates).
+1. Have a qualified accountant sign off every rule and deadline: add their account's email to
+   `REVIEWER_EMAILS` in `.env`; they review each item under Rule review (shield icon, bottom of the sidebar).
 2. Add the Law on Funded Pension to the rad_law corpus so the 2% rate has a quotable excerpt.
 3. Before going public: login rate limiting, password reset, email verification.
 

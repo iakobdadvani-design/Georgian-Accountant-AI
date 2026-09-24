@@ -25,6 +25,7 @@ from app.models import Company, Transaction
 from app.models.enums import TransactionDirection
 from app.rules.engine import evaluate
 from app.rules.loader import get_rules
+from app.reviews import apply_to_results
 from app.rules.schema import RuleResult
 
 router = APIRouter(prefix="/companies/{company_id}/books", tags=["books"])
@@ -63,9 +64,10 @@ def rule(rule_id: str):
     return next(r for r in get_rules() if r.rule_id == rule_id)
 
 
-def run(rule_id: str, facts: dict, as_of: date) -> RuleResult | None:
-    """The rule's result on as_of, or None if no version is in effect then."""
-    return next(iter(evaluate([r for r in get_rules() if r.rule_id == rule_id], facts, as_of)), None)
+def run(rule_id: str, facts: dict, as_of: date, db: Session) -> RuleResult | None:
+    """The rule's result on as_of (with its sign-off status), or None if no version is in effect then."""
+    rules = [r for r in get_rules() if r.rule_id == rule_id]
+    return next(iter(apply_to_results(evaluate(rules, facts, as_of), rules, db)), None)
 
 
 def summary(company: Company, db: Session, month: date) -> BooksSummary:
@@ -79,10 +81,10 @@ def summary(company: Company, db: Session, month: date) -> BooksSummary:
     registered = facts.get("company.vat_registered")
     vat_registration = vat_payable = None
     if registered is False:
-        vat_registration = run("ge.vat.registration_threshold", {**facts, "input.taxable_turnover_12m": str(turnover)}, end)
+        vat_registration = run("ge.vat.registration_threshold", {**facts, "input.taxable_turnover_12m": str(turnover)}, end, db)
     if registered:
         vat_payable = run("ge.vat.payable", {**facts, "input.output_vat": str(month_totals.output_vat),
-                                             "input.input_vat": str(month_totals.input_vat)}, end)
+                                             "input.input_vat": str(month_totals.input_vat)}, end, db)
     vat_limit = rule_threshold(rule("ge.vat.registration_threshold"), "input.taxable_turnover_12m")
     turnover_status = LimitStatus(
         amount=turnover, limit=vat_limit, start=window_start, end=window_end,
@@ -98,7 +100,7 @@ def summary(company: Company, db: Session, month: date) -> BooksSummary:
         year_income = LimitStatus(amount=so_far, limit=limit, alert=alert(so_far, limit, over),
                                   start=date(month.year, 1, 1), end=end)
         small_business_tax = run("ge.small_business.tax", {**facts, "input.small_business_income": str(month_totals.income),
-                                                           "input.over_small_business_limit": over}, end)
+                                                           "input.over_small_business_limit": over}, end, db)
 
     return BooksSummary(month=start, totals=TotalsRead(**month_totals.__dict__), turnover_12m=turnover_status,
                         vat_registration=vat_registration, vat_payable=vat_payable, year_income=year_income,

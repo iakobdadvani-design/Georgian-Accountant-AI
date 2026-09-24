@@ -335,6 +335,43 @@
     .books-card-value { font-size: 17px; }
   }
 
+  /* ---------- rule review ---------- */
+  body.reviews-open #log, body.reviews-open .composer-wrap, body.reviews-open #booksAlert { display: none; }
+  body.reviews-open #reviewsBtn { color: var(--accent); border-color: var(--accent); }
+  .review-heading { margin: 0 0 4px; font-size: 18px; letter-spacing: -.01em; }
+  .review-list { display: grid; gap: 10px; }
+  .review-item { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--faint);
+    border-radius: 12px; box-shadow: var(--shadow); }
+  .review-item.verified { border-left-color: var(--ok); }
+  .review-item.changes_requested, .review-item.outdated { border-left-color: var(--warn); }
+  .review-item > summary { display: flex; align-items: center; gap: 10px; padding: 12px 14px; cursor: pointer; list-style: none; }
+  .review-item > summary::-webkit-details-marker { display: none; }
+  .review-item > summary::after { content: ""; width: 7px; height: 7px; border-right: 1.6px solid var(--muted);
+    border-bottom: 1.6px solid var(--muted); transform: rotate(45deg); margin-left: 4px; transition: transform .2s; }
+  .review-item[open] > summary::after { transform: rotate(225deg); }
+  .review-kind { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--faint); flex: none; }
+  .review-title { flex: 1; min-width: 0; font-weight: 600; font-size: 14px; }
+  .review-status { font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; background: var(--info-soft);
+    color: var(--info); white-space: nowrap; }
+  .review-status.verified { background: var(--ok-soft); color: var(--ok); }
+  .review-status.changes_requested, .review-status.outdated { background: var(--warn-soft); color: var(--warn); }
+  .review-body { padding: 0 16px 16px; display: grid; gap: 12px; font-size: 13.5px; }
+  .review-body h4 { margin: 0 0 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--faint); }
+  .review-body p { margin: 0; }
+  .review-meta a { color: var(--accent); font-weight: 500; }
+  .cond-list, .step-list { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+  .cond-group { list-style: none; margin-left: -20px; color: var(--muted); }
+  .cond-why { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+  .review-body code { font-family: var(--mono); font-size: 12px; background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 1px 6px; }
+  .raw summary { cursor: pointer; color: var(--muted); font-size: 12.5px; }
+  .raw pre { font-family: var(--mono); font-size: 11.5px; background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px; overflow: auto; max-height: 320px; margin: 8px 0 0; }
+  .review-history ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+  .review-form { display: grid; gap: 10px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .review-form label { display: grid; gap: 5px; font-size: 13px; font-weight: 500; }
+  .review-form textarea { resize: vertical; font: inherit; }
+
   /* ---------- auth screen ---------- */
   .auth { position: fixed; inset: 0; z-index: 50; background: var(--bg); display: grid; place-items: center; padding: 20px;
     overflow-y: auto; }
@@ -474,6 +511,9 @@
         <a class="icon-btn" href="/docs" target="_blank" rel="noopener" data-i18n-title="docs.title" style="display:inline-grid">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>
         </a>
+        <button class="icon-btn" id="reviewsBtn" type="button" data-i18n-title="review.nav" style="display:inline-grid">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>
+        </button>
         <button class="icon-btn" id="themeBtn" data-i18n-title="theme.title" style="display:inline-grid">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
         </button>
@@ -501,6 +541,9 @@
 
     <section class="books" id="books" hidden data-i18n-aria="books.title">
       <div class="books-inner" id="booksInner"></div>
+    </section>
+    <section class="books" id="reviews" hidden data-i18n-aria="review.title">
+      <div class="books-inner" id="reviewsInner"></div>
     </section>
 
     <div id="log" aria-live="polite">
@@ -681,6 +724,7 @@ async function setLanguage(next, { save = true } = {}) {
   renderDeadlines();
   renderHistory();
   window.Books?.onLanguageChange();
+  window.Reviews?.onLanguageChange();
   if ($("thread").querySelector(".empty.start")) renderEmpty();
   else if ($("thread").querySelector(".empty.welcome")) renderWelcome();
   if (!companies.length && user) $("title").textContent = t("noCompany.title");
@@ -897,7 +941,8 @@ function resultCard(r, l) {
     el("div", { class: "card-head" },
       el("span", { class: "card-title", text: cleanTitle(loc(r.title, l)) }),
       el("span", { class: `badge ${r.status}`, text: tt(`card.${r.status}`) }),
-      el("span", { class: `badge ${r.verification}`, text: tt(`card.${r.verification}`), title: tt(`card.${r.verification}Tip`) })));
+      el("span", { class: `badge ${r.verification}`, text: tt(`card.${r.verification}`),
+        title: r.reviewed_by ? t("card.reviewedBy", { who: r.reviewed_by }, l) : tt(`card.${r.verification}Tip`) })));
 
   if (r.amount !== null && r.amount !== undefined) {
     if (r.amount_label) card.append(el("div", { class: "amount-label", text: loc(r.amount_label, l) }));
@@ -1109,6 +1154,7 @@ function touchHistory() {
 async function openConversation(id) {
   $("app").classList.remove("drawer-open");
   window.Books?.hide();
+  window.Reviews?.hide();
   if (busy) return;
   try {
     const conv = await api(`/conversations/${id}`);
@@ -1145,6 +1191,7 @@ async function deleteConversation(c) {
 
 function newChat() {
   window.Books?.hide();
+  window.Reviews?.hide();
   conversationId = null;
   $("asOf").value = new Date().toISOString().slice(0, 10);
   renderEmpty();
@@ -1485,6 +1532,7 @@ $("tabRegister").addEventListener("click", () => setAuthMode("register"));
 
 function showAuth() {
   window.Books?.hide();
+  window.Reviews?.hide();
   user = null;
   conversationId = null;
   $("auth").hidden = false;
@@ -1559,5 +1607,6 @@ async function startApp(me) {
 })();
 </script>
 <script src="/static/books.js"></script>
+<script src="/static/reviews.js"></script>
 </body>
 </html>

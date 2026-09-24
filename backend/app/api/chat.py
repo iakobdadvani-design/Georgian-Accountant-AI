@@ -27,6 +27,7 @@ from app.database import get_db
 from app.legal.index import LegalIndex
 from app.models import Company, Conversation, Message, Transaction, User
 from app.models.enums import MessageRole
+from app.reviews import apply_to_results
 from app.rules.engine import evaluate, referenced_facts
 from app.rules.loader import get_rules
 from app.rules.schema import RuleResult
@@ -198,7 +199,7 @@ def chat(
         topic_fact = f"input.{INTENT_AMOUNT_FACT[extraction.intent]}"
         rules = [r for r in get_rules() if topic_fact in referenced_facts(r)]
         facts = company_facts(company, db) | {f"input.{k}": v for k, v in extraction.entities.items()}
-        results = attach_citations(evaluate(rules, facts, payload.as_of), legal_index)
+        results = attach_citations(apply_to_results(evaluate(rules, facts, payload.as_of), rules, db), legal_index)
 
     warnings = [t("warning.extraction", extraction.language, detail=failure)] if failure else []
     reply_source = pipeline.responder_source

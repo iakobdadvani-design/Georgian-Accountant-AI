@@ -1,6 +1,7 @@
 from app.models.company import Company
 from app.models.conversation import Conversation, Message
 from app.models.employee import Employee
+from app.models.review import RuleReview
 from app.models.tax_event import TaxEvent
 from app.models.tax_profile import CompanyTaxProfile
 from app.models.transaction import Transaction
@@ -13,6 +14,7 @@ __all__ = [
     "Conversation",
     "Employee",
     "Message",
+    "RuleReview",
     "TaxEvent",
     "Transaction",
     "User",
