@@ -219,6 +219,13 @@
   "time.daysAgo": {
    "one": "{n} day ago",
    "other": "{n} days ago"
+  },
+  "lang.names": {
+   "ka": "Georgian",
+   "en": "English",
+   "ru": "Russian",
+   "de": "German",
+   "fr": "French"
   }
  },
  "ka": {
@@ -436,6 +443,13 @@
   },
   "time.daysAgo": {
    "other": "{n} დღის წინ"
+  },
+  "lang.names": {
+   "ka": "ქართული",
+   "en": "ინგლისური",
+   "ru": "რუსული",
+   "de": "გერმანული",
+   "fr": "ფრანგული"
   }
  },
  "ru": {
@@ -668,6 +682,13 @@
    "few": "{n} дня назад",
    "many": "{n} дней назад",
    "other": "{n} дня назад"
+  },
+  "lang.names": {
+   "ka": "грузинский",
+   "en": "английский",
+   "ru": "русский",
+   "de": "немецкий",
+   "fr": "французский"
   }
  },
  "de": {
@@ -890,6 +911,13 @@
   "time.daysAgo": {
    "one": "vor {n} Tag",
    "other": "vor {n} Tagen"
+  },
+  "lang.names": {
+   "ka": "Georgisch",
+   "en": "Englisch",
+   "ru": "Russisch",
+   "de": "Deutsch",
+   "fr": "Französisch"
   }
  },
  "fr": {
@@ -1112,6 +1140,13 @@
   "time.daysAgo": {
    "one": "il y a {n} jour",
    "other": "il y a {n} jours"
+  },
+  "lang.names": {
+   "ka": "géorgien",
+   "en": "anglais",
+   "ru": "russe",
+   "de": "allemand",
+   "fr": "français"
   }
  }
 }
