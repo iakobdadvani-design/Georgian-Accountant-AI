@@ -14,7 +14,7 @@ from app.i18n import Language
 
 Intent = Literal[
     "calculate_payroll_tax", "check_vat_registration", "calculate_vat", "calculate_distribution",
-    "calculate_small_business_tax", "list_deadlines", "unknown",
+    "calculate_small_business_tax", "calculate_vat_payable", "list_deadlines", "unknown",
 ]
 
 # Which input fact each intent's amount becomes; the rules engine decides which rules read that fact.
@@ -24,7 +24,10 @@ INTENT_AMOUNT_FACT: dict[str, str] = {
     "calculate_vat": "sale_amount",
     "calculate_distribution": "distribution_amount",
     "calculate_small_business_tax": "small_business_income",
+    "calculate_vat_payable": "output_vat",
 }
+# Intents that take a second amount; context.py fills whichever one the engine is still waiting for.
+SECOND_AMOUNT_FACT: dict[str, str] = {"calculate_vat_payable": "input_vat"}
 
 
 class Extraction(BaseModel):
@@ -57,6 +60,16 @@ KEYWORDS: list[tuple[Intent, list[str]]] = [
         "дивиденд", "распредел", "налог на прибыль",
         "ausschütt", "gewinnausschütt", "gewinnsteuer", "körperschaftsteuer",
         "distribu", "impôt sur les bénéfices", "impot sur les benefices",
+    ]),
+    ("calculate_vat_payable", [
+        "input vat", "vat payable", "vat to pay", "vat credit", "deductible vat", "deduct", "offset", "purchase vat",
+        "vat on purchases", "output vat",
+        "ჩასათვლელ", "ჩაითვლ", "ჩათვლის უფლება", "დღგ-ის ჩათვლ", "გადასახდელი დღგ", "შესყიდვებზე დღგ",
+        "შესყიდვების დღგ",
+        "входящ", "к зачету", "к зачёту", "зачет ндс", "зачёт ндс", "вычет ндс", "ндс к уплате", "к возмещению",
+        "vorsteuer", "zahllast", "abziehbar",
+        "tva déductible", "tva deductible", "tva à payer", "tva a payer", "crédit de tva", "credit de tva",
+        "tva collectée", "tva collectee",
     ]),
     ("calculate_small_business_tax", [
         "small business", "small-business", "1% tax", "individual entrepreneur",
@@ -154,6 +167,47 @@ OVER_LIMIT = re.compile(
 def over_limit_flag(message: str) -> bool | None:
     """True when the user says the year's gross income has passed the GEL 500 000 small-business limit."""
     return True if OVER_LIMIT.search(message) else None
+
+
+INPUT_VAT_WORDS = re.compile(
+    r"input|purchas|bought|buy|expense|supplier|deduct|credit|შესყიდ|ჩასათვლ|ჩაითვლ|ხარჯ|მომწოდებ|ვიყიდე"
+    r"|входящ|покуп|закуп|вычет|зач[её]т|поставщ|vorsteuer|einkauf|eingekauft|lieferant|abzieh"
+    r"|achat|acheté|déductible|deductible|fournisseur", re.I)
+OUTPUT_VAT_WORDS = re.compile(
+    r"output|sales|sold|sell|charged|გაყიდ|რეალიზაც|გავყიდე|исходящ|продаж|продал|начисл"
+    r"|umsatzsteuer|verkauf|verkauft|collect|vente|vendu", re.I)
+
+
+# Clause breaks: ", " and ";" (not the comma inside "9,000") and "and" in the five languages.
+CLAUSE_BREAK = re.compile(r",\s|;|\b(?:and|und|et|и|და)\b", re.I)
+
+
+def vat_amounts(message: str) -> dict[str, str]:
+    """Output and input VAT amounts, each labelled by the sales/purchase words in its own clause; in order if unclear."""
+    labelled: list[tuple[str | None, str]] = []
+    for clause in CLAUSE_BREAK.split(message):
+        if not clause:
+            continue
+        outputs = [m.start() for m in OUTPUT_VAT_WORDS.finditer(clause)]
+        inputs = [m.start() for m in INPUT_VAT_WORDS.finditer(clause)]
+        for m in AMOUNT.finditer(clause):
+            if (amount := normalize_amount(m.group(0))) is None:
+                continue
+            distance = lambda positions: min((abs(p - m.start()) for p in positions), default=None)
+            out, inp = distance(outputs), distance(inputs)
+            kind = None if out is None and inp is None else (
+                "output_vat" if inp is None or (out is not None and out < inp) else "input_vat")
+            labelled.append((kind, amount))
+
+    found: dict[str, str] = {}
+    if len(labelled) >= 2 and len({k for k, _ in labelled[:2]}) < 2:
+        labelled = [("output_vat", labelled[0][1]), ("input_vat", labelled[1][1])]
+    for name, amount in labelled:
+        if name and name not in found:
+            found[name] = amount
+    if len(labelled) == 1 and not found:
+        found["output_vat"] = labelled[0][1]
+    return found
 
 
 def vat_inclusive_flag(message: str) -> bool | None:
@@ -269,6 +323,9 @@ class KeywordExtractor:
                     entities["vat_inclusive"] = inclusive
                 if intent == "calculate_distribution" and (recipient := dividend_recipient(message)):
                     entities["dividend_recipient"] = recipient
+                if intent == "calculate_vat_payable":
+                    entities.pop("output_vat", None)
+                    entities.update(vat_amounts(message))
                 if intent == "calculate_small_business_tax" and over_limit_flag(message):
                     entities["over_small_business_limit"] = True
                     # The largest number is then usually the limit itself, not this month's income.

@@ -195,5 +195,102 @@
     },
     "last_verified_date": null,
     "is_demo": false
+  },
+  {
+    "rule_id": "ge.vat.payable",
+    "version": 1,
+    "title": {
+      "ka": "გადასახდელი დღგ (ჩათვლის შემდეგ)",
+      "en": "VAT payable after input VAT credit",
+      "ru": "НДС к уплате после зачёта",
+      "de": "Mehrwertsteuer-Zahllast nach Vorsteuerabzug",
+      "fr": "TVA due après déduction"
+    },
+    "tax_type": "vat",
+    "effective_from": "2020-07-22",
+    "conditions": {
+      "fact": "company.vat_registered",
+      "op": "eq",
+      "value": true,
+      "if_false": {
+        "ka": "დღგ-ის ჩათვლის უფლება მხოლოდ დღგ-ის გადამხდელად რეგისტრირებულ პირს აქვს (მუხლი 174(3)).",
+        "en": "Only a person registered as a VAT payer can deduct input VAT (Art. 174(3)).",
+        "ru": "Право на зачёт НДС есть только у лица, зарегистрированного плательщиком НДС (ст. 174(3)).",
+        "de": "Nur wer für die Mehrwertsteuer registriert ist, darf Vorsteuer abziehen (Art. 174(3)).",
+        "fr": "Seule une personne enregistrée à la TVA peut déduire la TVA sur ses achats (art. 174(3))."
+      }
+    },
+    "calculation": {
+      "type": "steps",
+      "result": "payable",
+      "steps": [
+        {
+          "name": "balance",
+          "label": "Output VAT minus input VAT",
+          "op": "subtract",
+          "args": [
+            "input.output_vat",
+            "input.input_vat"
+          ],
+          "show": false
+        },
+        {
+          "name": "payable",
+          "label": {
+            "ka": "გადასახდელი დღგ",
+            "en": "VAT payable",
+            "ru": "НДС к уплате",
+            "de": "Zahllast",
+            "fr": "TVA à payer"
+          },
+          "op": "max",
+          "args": [
+            "balance",
+            "0"
+          ]
+        },
+        {
+          "name": "negative_balance",
+          "label": "Input VAT minus output VAT",
+          "op": "subtract",
+          "args": [
+            "input.input_vat",
+            "input.output_vat"
+          ],
+          "show": false
+        },
+        {
+          "name": "excess_credit",
+          "label": {
+            "ka": "ჩასათვლელი დღგ-ის ზედმეტობა (დასაბრუნებელი)",
+            "en": "Excess input VAT (refundable)",
+            "ru": "Превышение НДС к зачёту (к возврату)",
+            "de": "Vorsteuerüberhang (erstattungsfähig)",
+            "fr": "Excédent de TVA déductible (remboursable)"
+          },
+          "op": "max",
+          "args": [
+            "negative_balance",
+            "0"
+          ]
+        }
+      ]
+    },
+    "legal_source": {
+      "citation": {
+        "ka": "საქართველოს საგადასახადო კოდექსი, მუხლები 174-176, 181(1)",
+        "en": "Tax Code of Georgia, Articles 174-176, 181(1)",
+        "ru": "Налоговый кодекс Грузии, статьи 174-176, 181(1)",
+        "de": "Steuergesetzbuch Georgiens, Artikel 174-176, 181(1)",
+        "fr": "Code des impôts de Géorgie, articles 174-176, 181(1)"
+      },
+      "url": "https://matsne.gov.ge/en/document/view/1043717",
+      "note": "Art. 174(1): the deduction reduces the VAT due by the VAT on charges related to supplies; 174(3): only a registered VAT payer may deduct. Art. 175(1): VAT paid/payable on purchases from another taxable person in Georgia, on imports and under reverse charge is deductible when the goods/services are used for VAT-taxable transactions. Art. 176(1): the ground is a tax invoice (import declaration for imports). Art. 181(1): a refund right arises when deductible VAT exceeds VAT assessed in the period (procedure: Art. 63). The user supplies both VAT amounts; the engine does not check invoices. Not covered: proportional deduction (Art. 177), restrictions (Art. 178), adjustments. effective_from mirrors Chapter XXVI as amended by Law No 6817 (published 22.7.2020), not a verified date. Needs review by a qualified accountant before last_verified_date is set.",
+      "search_query": "VAT deduction right reduce amount VAT due",
+      "document_id": "1043717",
+      "language": "en"
+    },
+    "last_verified_date": null,
+    "is_demo": false
   }
 ]

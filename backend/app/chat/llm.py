@@ -11,7 +11,9 @@ from typing import Literal, Protocol
 
 from pydantic import BaseModel, ValidationError
 
-from app.chat.extractor import AMOUNT, INTENT_AMOUNT_FACT, Extraction, Intent, detect_language, normalize_amount
+from app.chat.extractor import (
+    AMOUNT, INTENT_AMOUNT_FACT, SECOND_AMOUNT_FACT, Extraction, Intent, detect_language, normalize_amount,
+)
 from app.i18n import LANGUAGE_NAMES, LANGUAGES, Language
 from app.rules.schema import RuleResult
 
@@ -53,12 +55,14 @@ Intents:
 - calculate_vat: how much VAT is on or inside a specific sale, price or invoice.
 - calculate_distribution: paying out profit / dividends to owners, or profit tax on a distribution.
 - calculate_small_business_tax: tax of an individual entrepreneur with small business status (1% / 3% on income).
+- calculate_vat_payable: how much VAT a VAT payer owes for a period after deducting input VAT on purchases.
 - list_deadlines: what is due, filing or payment deadlines, the tax calendar.
 - unknown: anything else.
 
 amount: the single money amount the user states for that intent, copied as written using only digits, spaces, commas and one decimal point (e.g. "2,500" or "150000"). Do not convert currencies, annualise, add, or otherwise compute. null if no amount is stated.
 vat_inclusive: for calculate_vat, true if the stated price already includes VAT, false if VAT comes on top; otherwise null.
 dividend_recipient: for calculate_distribution, "company" if the dividend goes to another company, "individual" if to a person; otherwise null.
+input_vat: for calculate_vat_payable, the deductible VAT on purchases the user states, copied as written; the VAT on sales goes in amount. null if not stated.
 over_small_business_limit: for calculate_small_business_tax, true if the user says gross income this calendar year has exceeded GEL 500 000, false if they say it hasn't; otherwise null.
 pension_participant: false only if the user says the employee is not in (or opted out of) the funded pension scheme; true if they say the employee is in it; otherwise null.
 language: the language of the message: "ka", "en", "ru", "de" or "fr"."""
@@ -68,16 +72,17 @@ EXTRACTION_SCHEMA = {
     "properties": {
         "intent": {"type": "string", "enum": ["calculate_payroll_tax", "check_vat_registration", "calculate_vat",
                                               "calculate_distribution", "calculate_small_business_tax",
-                                              "list_deadlines", "unknown"]},
+                                              "calculate_vat_payable", "list_deadlines", "unknown"]},
         "amount": {"anyOf": [{"type": "string"}, {"type": "null"}]},
         "pension_participant": {"anyOf": [{"type": "boolean"}, {"type": "null"}]},
         "vat_inclusive": {"anyOf": [{"type": "boolean"}, {"type": "null"}]},
         "dividend_recipient": {"anyOf": [{"type": "string", "enum": ["individual", "company"]}, {"type": "null"}]},
         "over_small_business_limit": {"anyOf": [{"type": "boolean"}, {"type": "null"}]},
+        "input_vat": {"anyOf": [{"type": "string"}, {"type": "null"}]},
         "language": {"type": "string", "enum": list(LANGUAGES)},
     },
     "required": ["intent", "amount", "pension_participant", "vat_inclusive", "dividend_recipient",
-                 "over_small_business_limit", "language"],
+                 "over_small_business_limit", "input_vat", "language"],
     "additionalProperties": False,
 }
 
@@ -89,6 +94,7 @@ class _ExtractionOutput(BaseModel):
     vat_inclusive: bool | None = None
     dividend_recipient: Literal["individual", "company"] | None = None
     over_small_business_limit: bool | None = None
+    input_vat: str | None = None
     language: Language
 
 
@@ -112,12 +118,17 @@ class LLMExtractor:
             entities["dividend_recipient"] = out.dividend_recipient
         if out.intent == "calculate_small_business_tax" and out.over_small_business_limit is not None:
             entities["over_small_business_limit"] = out.over_small_business_limit
-        if out.intent in INTENT_AMOUNT_FACT and out.amount is not None:
-            amount = normalize_amount(out.amount)
+        amounts = {INTENT_AMOUNT_FACT.get(out.intent): out.amount}
+        if out.intent in SECOND_AMOUNT_FACT:
+            amounts[SECOND_AMOUNT_FACT[out.intent]] = out.input_vat
+        for fact, raw in amounts.items():
+            if fact is None or raw is None:
+                continue
+            amount = normalize_amount(raw)
             if amount is None:
-                log.warning("Discarding unparseable amount from %s: %r", self.backend.name, out.amount)
+                log.warning("Discarding unparseable amount from %s: %r", self.backend.name, raw)
             else:
-                entities[INTENT_AMOUNT_FACT[out.intent]] = amount
+                entities[fact] = amount
         # Script detection is deterministic; trust it over the model's language field.
         return Extraction(intent=out.intent, entities=entities, language=detect_language(message, preferred),
                           source=self.backend.name)

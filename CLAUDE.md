@@ -46,6 +46,7 @@ Schema changes go through Alembic (see "Database" below).
 | `ge.payroll.income_tax` — 2% pension, 20% income tax, take-home, employer cost | Tax Code 81(1), 82(1)(b3); Funded Pension law 3(6) (from Matsne, not in the corpus) |
 | `ge.vat.registration_threshold` — register once 12-month taxable supplies > GEL 100 000 | 165(1) |
 | `ge.vat.output_vat` — VAT on a net price, or 18/118 of a VAT-inclusive one | 166 |
+| `ge.vat.payable` — output VAT minus deductible input VAT; `max` step keeps payable and the refundable excess at 0 or more | 174-176, 181(1) |
 | `ge.profit.distribution` — payout / 0.85 x 15% | 97(1), 97(10), 98(1) |
 | `ge.dividend.withholding` — 5% to individuals, none to companies | 130(1)-(2) |
 | `ge.small_business.tax` — individual entrepreneur with small business status: 1%, or 3% once the year's gross income passes GEL 500 000 | 88(1), 90(1)-(2) |
@@ -53,7 +54,7 @@ Schema changes go through Alembic (see "Database" below).
 | Deadline on a weekend or Labour Code holiday → next working day (`rules/workdays.py`, Orthodox Easter computed) | 3(2), 3(6); Labour Code 30(1) |
 
 Chat intents (`chat/extractor.py`): `calculate_payroll_tax`, `check_vat_registration`, `calculate_vat`,
-`calculate_distribution`, `calculate_small_business_tax`, `list_deadlines`, `unknown`. Each has an amount fact in `INTENT_AMOUNT_FACT`
+`calculate_distribution`, `calculate_small_business_tax`, `calculate_vat_payable` (two amounts: `SECOND_AMOUNT_FACT`), `list_deadlines`, `unknown`. Each has an amount fact in `INTENT_AMOUNT_FACT`
 (except deadlines), keyword group(s) in priority order, answer phrasing in `responder.py`, and a field
 in the LLM extraction schema. Defaults the chat assumes (and says it assumed) live in `DEFAULT_FACTS`
 in `api/chat.py`: pension participation, dividend to an individual, small business under the GEL 500 000 limit.

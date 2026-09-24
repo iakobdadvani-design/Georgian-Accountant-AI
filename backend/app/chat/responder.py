@@ -15,6 +15,7 @@ from app.rules.schema import RuleResult, localize
 KNOWN_FACTS = {
     "input.gross_salary", "input.taxable_turnover_12m", "company.vat_registered", "input.sale_amount",
     "input.vat_inclusive", "input.distribution_amount", "company.tax_regime", "input.small_business_income",
+    "input.output_vat", "input.input_vat",
 }
 KNOWN_ASSUMPTIONS = {"pension_participant", "dividend_recipient", "over_small_business_limit"}
 
@@ -157,6 +158,25 @@ def _small_business(results: list[RuleResult], extraction: Extraction, lang: Lan
     return None
 
 
+def _vat_payable(results: list[RuleResult], extraction: Extraction, lang: Language) -> list[str] | None:
+    result = next((r for r in results if r.rule_id == "ge.vat.payable"), None)
+    if result is None:
+        return None
+    if result.status == "applies":
+        v = _values(result, lang)
+        amounts = {"output": _entity(extraction, "output_vat", lang), "input": _entity(extraction, "input_vat", lang)}
+        if result.amount:
+            return [t("phrase.vat_payable", lang, payable=v["payable"], **amounts)]
+        return [t("phrase.vat_refund", lang, refund=v["excess_credit"], **amounts)]
+    if result.status == "not_applicable":
+        return [" ".join([t("phrase.vat_not_registered_credit", lang), *(localize(r, lang) for r in result.reasons)])]
+    if "input.output_vat" in result.missing_facts:
+        return [t("phrase.vat_payable_ask_output", lang)]
+    if result.missing_facts == ["input.input_vat"]:
+        return [t("phrase.vat_payable_ask_input", lang, output=_entity(extraction, "output_vat", lang))]
+    return None
+
+
 def _generic(result: RuleResult, lang: Language) -> str | None:
     title = localize(result.title, lang)
     if result.status == "applies":
@@ -184,6 +204,7 @@ def compose_reply(extraction: Extraction, results: list[RuleResult], message: st
         "calculate_vat": lambda: _vat_calculation(results, extraction, lang),
         "calculate_distribution": lambda: _distribution(results, extraction, lang),
         "calculate_small_business_tax": lambda: _small_business(results, extraction, lang),
+        "calculate_vat_payable": lambda: _vat_payable(results, extraction, lang),
     }.get(extraction.intent, lambda: None)()
     lines = specific if specific is not None else [text for r in results if (text := _generic(r, lang))]
 

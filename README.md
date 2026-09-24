@@ -106,8 +106,7 @@ Sessions last `SESSION_DAYS` (default 30). Behind HTTPS, set `SESSION_COOKIE_SEC
 
 1. Have a qualified accountant verify every rule and deadline (and their effective dates).
 2. Add the Law on Funded Pension to the rad_law corpus so the 2% rate has a quotable excerpt.
-3. Input VAT credit (Art. 175-176).
-4. Before going public: login rate limiting, password reset, email verification.
+3. Before going public: login rate limiting, password reset, email verification.
 
 Schema changes go through Alembic (`backend/migrations/`); see CLAUDE.md.
 

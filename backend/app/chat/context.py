@@ -6,7 +6,7 @@ and entities. A bare follow-up ("2500") then completes that question instead of 
 
 import re
 
-from app.chat.extractor import INTENT_AMOUNT_FACT, Extraction, parse_amount, yes_no
+from app.chat.extractor import INTENT_AMOUNT_FACT, SECOND_AMOUNT_FACT, Extraction, parse_amount, yes_no
 from app.i18n import Language
 
 # Facts a bare "yes"/"no" can answer when the assistant just asked about them.
@@ -68,7 +68,9 @@ def apply_context(
         if answer is not None and yes_no_fact:
             entities = {**prior, yes_no_fact: answer}
         elif intent in INTENT_AMOUNT_FACT and (amount := parse_amount(message)) is not None:
-            entities = {**prior, INTENT_AMOUNT_FACT[intent]: amount}
+            amount_facts = [INTENT_AMOUNT_FACT[intent], SECOND_AMOUNT_FACT.get(intent)]
+            target = next((f for f in amount_facts if f in awaiting), INTENT_AMOUNT_FACT[intent])
+            entities = {**prior, target: amount}
         else:
             return extraction, False
         return Extraction(intent=intent, entities=entities, language=extraction.language,
