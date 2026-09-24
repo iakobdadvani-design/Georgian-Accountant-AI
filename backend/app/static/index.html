@@ -1,0 +1,976 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Georgian AI Accountant</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%239f1d35'/><text x='16' y='23' font-size='20' text-anchor='middle' fill='white' font-family='sans-serif'>₾</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Georgian:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f6f4f1; --surface: #ffffff; --surface-2: #faf8f6; --ink: #1c1917; --muted: #78716c; --faint: #a8a29e;
+    --border: #e7e2dc; --accent: #9f1d35; --accent-ink: #ffffff; --accent-soft: #f8e9ec;
+    --ok: #15803d; --ok-soft: #e7f5ec; --warn: #b45309; --warn-soft: #fdf1e0; --info: #57534e; --info-soft: #f1efec;
+    --demo: #6d28d9; --demo-soft: #efe9fb;
+    --shadow: 0 1px 2px rgb(28 25 23 / .04), 0 4px 16px rgb(28 25 23 / .06);
+    --radius: 14px;
+    --font: "Inter", "Noto Sans Georgian", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #131110; --surface: #1c1a18; --surface-2: #211e1c; --ink: #f3efeb; --muted: #a8a29e; --faint: #78716c;
+      --border: #2f2b28; --accent: #e0677f; --accent-ink: #1c1917; --accent-soft: #3a1f26;
+      --ok: #4ade80; --ok-soft: #173222; --warn: #fbbf24; --warn-soft: #3a2c12; --info: #d6d3d1; --info-soft: #292524;
+      --demo: #b79cf5; --demo-soft: #2a2140;
+      --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 6px 20px rgb(0 0 0 / .25);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #131110; --surface: #1c1a18; --surface-2: #211e1c; --ink: #f3efeb; --muted: #a8a29e; --faint: #78716c;
+    --border: #2f2b28; --accent: #e0677f; --accent-ink: #1c1917; --accent-soft: #3a1f26;
+    --ok: #4ade80; --ok-soft: #173222; --warn: #fbbf24; --warn-soft: #3a2c12; --info: #d6d3d1; --info-soft: #292524;
+    --demo: #b79cf5; --demo-soft: #2a2140;
+    --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 6px 20px rgb(0 0 0 / .25);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.55 var(--font); -webkit-font-smoothing: antialiased; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  a { color: var(--accent); }
+
+  .app { display: grid; grid-template-columns: 300px 1fr; grid-template-rows: 100%; height: 100vh; height: 100dvh; overflow: hidden; }
+
+  /* ---------- sidebar ---------- */
+  .sidebar { background: var(--surface); border-right: 1px solid var(--border); padding: 20px 18px; display: flex;
+    flex-direction: column; gap: 22px; overflow-y: auto; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .logo { width: 40px; height: 40px; border-radius: 11px; background: var(--accent); color: var(--accent-ink);
+    display: grid; place-items: center; font-size: 22px; font-weight: 600; flex: none; }
+  .brand h1 { font-size: 15px; line-height: 1.25; margin: 0; font-weight: 650; letter-spacing: -.01em; }
+  .brand p { margin: 1px 0 0; font-size: 12.5px; color: var(--muted); }
+  .section-label { font-size: 11.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--faint); margin: 0 0 8px; }
+  .field { width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 9px 11px; outline: none; transition: border-color .15s; }
+  .field:focus { border-color: var(--accent); }
+  .profile { margin-top: 10px; border: 1px solid var(--border); border-radius: 12px; padding: 12px; background: var(--surface-2);
+    display: grid; gap: 8px; font-size: 13px; }
+  .profile-row { display: flex; justify-content: space-between; gap: 8px; }
+  .profile-row span:first-child { color: var(--muted); }
+  .profile-row span:last-child { font-weight: 500; text-align: right; }
+  .suggestions { display: grid; gap: 6px; }
+  .suggestion { text-align: left; background: transparent; border: 1px solid var(--border); border-radius: 10px;
+    padding: 9px 11px; font-size: 13.5px; cursor: pointer; transition: background .15s, border-color .15s; }
+  .suggestion:hover { background: var(--accent-soft); border-color: var(--accent); }
+  .sidebar-foot { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    font-size: 12.5px; color: var(--muted); }
+  .icon-btn { background: transparent; border: 1px solid var(--border); border-radius: 9px; width: 34px; height: 34px;
+    display: grid; place-items: center; cursor: pointer; color: var(--muted); }
+  .icon-btn:hover { color: var(--ink); border-color: var(--faint); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; background: var(--faint); margin-right: 6px; }
+  .dot.on { background: var(--ok); }
+
+  /* ---------- chat ---------- */
+  .chat { display: flex; flex-direction: column; min-width: 0; min-height: 0; height: 100%; }
+  .topbar { display: flex; align-items: center; gap: 12px; padding: 14px 24px; border-bottom: 1px solid var(--border);
+    background: color-mix(in srgb, var(--bg) 85%, transparent); backdrop-filter: blur(8px); }
+  .topbar h2 { font-size: 15px; font-weight: 600; margin: 0; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; }
+  .menu-btn { display: none; }
+  .pill { display: inline-flex; align-items: center; gap: 7px; padding: 5px 11px; border-radius: 999px; font-size: 12.5px;
+    font-weight: 500; border: 1px solid var(--border); background: var(--surface); white-space: nowrap; }
+  .pill .dot { margin: 0; }
+  .pill.ai { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 35%, var(--border)); background: var(--ok-soft); }
+  .pill.ai .dot { background: var(--ok); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 25%, transparent); }
+
+  #log { flex: 1; min-height: 0; overflow-y: auto; padding: 28px 24px 12px; scroll-behavior: smooth; }
+  .thread { max-width: 780px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+
+  .empty { text-align: center; padding: 8vh 12px 0; }
+  .empty .logo { width: 56px; height: 56px; font-size: 30px; border-radius: 16px; margin: 0 auto 18px; }
+  .empty h3 { font-size: 24px; letter-spacing: -.02em; margin: 0 0 6px; font-weight: 650; }
+  .empty p { color: var(--muted); margin: 0 auto 26px; max-width: 460px; }
+  .empty-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; max-width: 620px; margin: 0 auto; }
+  .empty-card { text-align: left; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 14px 16px; cursor: pointer; box-shadow: var(--shadow); transition: transform .15s, border-color .15s; }
+  .empty-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .empty-card strong { display: block; font-size: 13px; color: var(--accent); margin-bottom: 3px; font-weight: 600; }
+  .empty-card span { font-size: 14px; }
+
+  .row { display: flex; gap: 12px; align-items: flex-start; animation: rise .25s ease-out; }
+  .row.user { justify-content: flex-end; }
+  .row.restored { animation: none; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .avatar { width: 32px; height: 32px; border-radius: 10px; background: var(--accent); color: var(--accent-ink);
+    display: grid; place-items: center; font-size: 17px; font-weight: 600; flex: none; }
+  .bubble-user { background: var(--accent); color: var(--accent-ink); padding: 10px 15px; border-radius: 16px 16px 4px 16px;
+    max-width: min(560px, 85%); white-space: pre-wrap; overflow-wrap: anywhere; }
+  .bot-body { flex: 1; min-width: 0; display: grid; gap: 12px; }
+  .reply { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 15.5px; line-height: 1.6; }
+  .divider { text-align: center; font-size: 12px; color: var(--faint); display: flex; align-items: center; gap: 12px; }
+  .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px;
+    box-shadow: var(--shadow); display: grid; gap: 10px; position: relative; overflow: hidden; }
+  .card::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 4px; background: var(--info); }
+  .card.applies::before { background: var(--accent); }
+  .card.insufficient_data::before { background: var(--warn); }
+  .card-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .card-title { font-weight: 600; font-size: 15px; flex: 1; min-width: 160px; }
+  .badge { font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px; letter-spacing: .01em; white-space: nowrap; }
+  .badge.applies { background: var(--accent-soft); color: var(--accent); }
+  .badge.not_applicable { background: var(--info-soft); color: var(--info); }
+  .badge.insufficient_data { background: var(--warn-soft); color: var(--warn); }
+  .badge.demo { background: var(--demo-soft); color: var(--demo); }
+  .badge.unverified { background: var(--warn-soft); color: var(--warn); }
+  .badge.verified { background: var(--ok-soft); color: var(--ok); }
+  .amount { font-size: 30px; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .amount small { font-size: 15px; font-weight: 500; color: var(--muted); margin-left: 4px; }
+  .card p { margin: 0; color: var(--ink); }
+  .source { font-size: 12.5px; color: var(--muted); }
+  .source code { font-family: var(--mono); font-size: 11.5px; }
+  details { border-top: 1px dashed var(--border); padding-top: 8px; }
+  summary { cursor: pointer; font-size: 13px; font-weight: 500; color: var(--muted); list-style: none; display: flex;
+    align-items: center; gap: 6px; user-select: none; }
+  summary::-webkit-details-marker { display: none; }
+  summary::before { content: "›"; display: inline-block; transition: transform .15s; font-size: 16px; line-height: 1; }
+  details[open] summary::before { transform: rotate(90deg); }
+  summary:hover { color: var(--ink); }
+  blockquote { margin: 8px 0 6px; padding: 10px 14px; border-left: 3px solid var(--accent); background: var(--surface-2);
+    border-radius: 0 10px 10px 0; font-size: 13.5px; white-space: pre-wrap; color: var(--ink); }
+  .cite-link { font-size: 12.5px; text-decoration: none; font-weight: 500; }
+  .cite-link:hover { text-decoration: underline; }
+  .trace { margin: 8px 0 0; padding-left: 20px; font-family: var(--mono); font-size: 12px; color: var(--muted); display: grid; gap: 3px; }
+
+  .callout { border-radius: 12px; padding: 12px 14px; font-size: 14px; display: grid; gap: 8px; }
+  .callout.questions { background: var(--warn-soft); }
+  .callout.questions strong { color: var(--warn); font-size: 13px; }
+  .callout ul { margin: 0; padding-left: 18px; }
+  .callout.warning { background: var(--warn-soft); color: var(--warn); font-size: 12.5px; padding: 8px 12px; }
+  .callout.error { background: var(--accent-soft); color: var(--accent); }
+  .meta { font-size: 12px; color: var(--faint); display: flex; gap: 10px; flex-wrap: wrap; }
+  .meta .debug-toggle { background: none; border: none; padding: 0; color: inherit; cursor: pointer; text-decoration: underline; }
+  .debug { font-family: var(--mono); font-size: 11.5px; background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 320px; overflow: auto; }
+
+  .typing { display: inline-flex; gap: 5px; padding: 12px 4px; }
+  .typing span { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); animation: blink 1.2s infinite ease-in-out; }
+  .typing span:nth-child(2) { animation-delay: .15s; }
+  .typing span:nth-child(3) { animation-delay: .3s; }
+  @keyframes blink { 0%, 80%, 100% { opacity: .3; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
+
+  /* ---------- composer ---------- */
+  .composer-wrap { padding: 12px 24px 18px; }
+  .composer { max-width: 780px; margin: 0 auto; background: var(--surface); border: 1px solid var(--border); border-radius: 18px;
+    box-shadow: var(--shadow); display: flex; align-items: flex-end; gap: 8px; padding: 8px 8px 8px 16px;
+    transition: border-color .15s; }
+  .composer:focus-within { border-color: var(--accent); }
+  .composer textarea { flex: 1; border: none; outline: none; background: transparent; resize: none; padding: 8px 0;
+    max-height: 180px; min-height: 24px; line-height: 1.5; }
+  .send { width: 40px; height: 40px; border-radius: 12px; border: none; background: var(--accent); color: var(--accent-ink);
+    display: grid; place-items: center; cursor: pointer; flex: none; transition: opacity .15s, transform .1s; }
+  .send:active { transform: scale(.95); }
+  .send:disabled { opacity: .35; cursor: default; }
+  .fineprint { max-width: 780px; margin: 8px auto 0; text-align: center; font-size: 11.5px; color: var(--faint); }
+
+  .scrim { display: none; }
+
+  /* ---------- sidebar: new chat, history, account ---------- */
+  .btn { border: 1px solid var(--border); background: var(--surface); border-radius: 10px; padding: 9px 12px; cursor: pointer;
+    font-weight: 500; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: background .15s, border-color .15s; }
+  .btn:hover { border-color: var(--faint); }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .btn.primary:hover { filter: brightness(1.06); }
+  .btn.primary:disabled { opacity: .6; cursor: default; }
+  .btn.block { width: 100%; }
+  .btn.small { padding: 4px 9px; font-size: 12.5px; border-radius: 8px; }
+  .label-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .label-row .section-label { margin: 0; }
+  .history { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; margin: 0 -6px; }
+  .history-item { display: flex; align-items: center; gap: 6px; border-radius: 9px; padding: 7px 8px 7px 10px; cursor: pointer;
+    border: 1px solid transparent; }
+  .history-item:hover { background: var(--surface-2); }
+  .history-item.active { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+  .history-item .h-text { flex: 1; min-width: 0; }
+  .history-item .h-title { font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .history-item .h-time { font-size: 11.5px; color: var(--faint); }
+  .history-item .h-del { opacity: 0; border: none; background: none; color: var(--faint); cursor: pointer; padding: 4px; border-radius: 6px;
+    line-height: 0; }
+  .history-item:hover .h-del, .history-item .h-del:focus-visible { opacity: 1; }
+  .history-item .h-del:hover { color: var(--accent); background: var(--surface); }
+  @media (hover: none) { .history-item .h-del { opacity: 1; } }
+  .history-empty { font-size: 13px; color: var(--faint); padding: 2px 6px; }
+  .account { display: flex; align-items: center; gap: 10px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .initials { width: 32px; height: 32px; border-radius: 50%; background: var(--surface-2); border: 1px solid var(--border);
+    display: grid; place-items: center; font-size: 12.5px; font-weight: 600; flex: none; }
+  .account .who { flex: 1; min-width: 0; font-size: 13px; line-height: 1.3; }
+  .account .who div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .account .who div:last-child { color: var(--faint); font-size: 12px; }
+  .context-note { color: var(--muted); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { border: 1px solid var(--border); background: var(--surface); border-radius: 999px; padding: 7px 14px;
+    font-size: 13.5px; cursor: pointer; box-shadow: var(--shadow); transition: border-color .15s, background .15s; text-align: left; }
+  .chip:hover { border-color: var(--accent); background: var(--accent-soft); }
+
+  /* ---------- auth screen ---------- */
+  .auth { position: fixed; inset: 0; z-index: 50; background: var(--bg); display: grid; place-items: center; padding: 20px;
+    overflow-y: auto; }
+  .auth[hidden] { display: none; }
+  .auth-card { width: min(400px, 100%); background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+    box-shadow: var(--shadow); padding: 30px 28px; }
+  .auth-card .logo { margin: 0 auto 16px; width: 52px; height: 52px; font-size: 28px; border-radius: 15px; }
+  .auth-card h1 { text-align: center; font-size: 21px; margin: 0 0 4px; letter-spacing: -.01em; }
+  .auth-card > p { text-align: center; color: var(--muted); margin: 0 0 22px; font-size: 14px; }
+  .tabs { display: grid; grid-template-columns: 1fr 1fr; background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 11px; padding: 3px; margin-bottom: 18px; }
+  .tabs button { border: none; background: none; padding: 8px; border-radius: 8px; cursor: pointer; font-weight: 500; color: var(--muted); }
+  .tabs button[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+  .form-grid { display: grid; gap: 12px; }
+  .form-grid label { display: grid; gap: 5px; font-size: 13px; font-weight: 500; }
+  .form-grid label[hidden] { display: none; }
+  .form-grid .check { display: flex; align-items: center; gap: 8px; font-weight: 400; font-size: 14px; }
+  .form-grid .hint-text { font-size: 12px; color: var(--faint); font-weight: 400; }
+  .form-error { color: var(--accent); font-size: 13px; min-height: 18px; margin: 0; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* ---------- dialog ---------- */
+  dialog { border: 1px solid var(--border); border-radius: 18px; padding: 24px; width: min(460px, calc(100vw - 32px));
+    background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+  dialog::backdrop { background: rgb(0 0 0 / .4); }
+  dialog h3 { margin: 0; font-size: 18px; }
+  dialog .form-grid > p { margin: -6px 0 6px; color: var(--muted); font-size: 13.5px; }
+  .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { position: fixed; inset: 0 auto 0 0; width: min(310px, 86vw); z-index: 20; transform: translateX(-100%);
+      transition: transform .25s ease; box-shadow: var(--shadow); }
+    .app.drawer-open .sidebar { transform: none; }
+    .app.drawer-open .scrim { display: block; position: fixed; inset: 0; background: rgb(0 0 0 / .35); z-index: 10; }
+    .menu-btn { display: grid; }
+    .topbar, #log, .composer-wrap { padding-left: 16px; padding-right: 16px; }
+    .empty-grid { grid-template-columns: 1fr; }
+    .pill .label-long { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <aside class="sidebar" aria-label="Settings">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">₾</div>
+      <div>
+        <h1>Georgian AI Accountant</h1>
+        <p>Tax assistant · საგადასახადო ასისტენტი</p>
+      </div>
+    </div>
+
+    <button class="btn primary block" id="newChatBtn" type="button">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      New chat
+    </button>
+
+    <div>
+      <div class="label-row">
+        <p class="section-label">Company</p>
+        <button class="btn small" id="addCompanyBtn" type="button">+ Add</button>
+      </div>
+      <select id="company" class="field" aria-label="Company"></select>
+      <div class="profile" id="profile" hidden></div>
+    </div>
+
+    <div>
+      <p class="section-label">History</p>
+      <div class="history" id="history"></div>
+    </div>
+
+    <div>
+      <p class="section-label">Evaluate as of</p>
+      <input id="asOf" type="date" class="field" aria-label="Evaluate rules as of date">
+    </div>
+
+    <div class="sidebar-foot">
+      <span id="indexStatus"><span class="dot"></span>Legal index</span>
+      <span>
+        <a class="icon-btn" href="/docs" target="_blank" rel="noopener" title="API docs" aria-label="API docs" style="display:inline-grid">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>
+        </a>
+        <button class="icon-btn" id="themeBtn" title="Toggle theme" aria-label="Toggle theme" style="display:inline-grid">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        </button>
+      </span>
+    </div>
+    <div class="account">
+      <div class="initials" id="initials" aria-hidden="true"></div>
+      <div class="who"><div id="userName"></div><div id="userEmail"></div></div>
+      <button class="icon-btn" id="logoutBtn" title="Sign out" aria-label="Sign out">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+      </button>
+    </div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <main class="chat">
+    <header class="topbar">
+      <button class="icon-btn menu-btn" id="menuBtn" aria-label="Open settings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <h2 id="title">Chat</h2>
+      <span class="pill" id="aiPill" title="Checking AI status"><span class="dot"></span><span>Checking…</span></span>
+    </header>
+
+    <div id="log" aria-live="polite">
+      <div class="thread" id="thread"></div>
+    </div>
+
+    <div class="composer-wrap">
+      <form class="composer" id="form">
+        <textarea id="message" rows="1" placeholder="Ask about salary, payroll or VAT… · მკითხეთ ხელფასზე ან დღგ-ზე" aria-label="Message"></textarea>
+        <button class="send" id="send" type="submit" aria-label="Send" disabled>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </form>
+      <p class="fineprint">Every number comes from the rules engine, not the AI. Not professional tax advice.</p>
+    </div>
+  </main>
+</div>
+
+<section class="auth" id="auth" hidden aria-label="Sign in">
+  <div class="auth-card">
+    <div class="logo" aria-hidden="true">₾</div>
+    <h1>Georgian AI Accountant</h1>
+    <p>Your companies and conversations are saved to your account.</p>
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="tabLogin" aria-selected="true">Sign in</button>
+      <button type="button" role="tab" id="tabRegister" aria-selected="false">Create account</button>
+    </div>
+    <form class="form-grid" id="authForm" novalidate>
+      <label id="nameField" hidden>Full name
+        <input class="field" name="full_name" autocomplete="name" maxlength="255">
+      </label>
+      <label>Email
+        <input class="field" name="email" type="email" autocomplete="email" required maxlength="320">
+      </label>
+      <label>Password
+        <input class="field" name="password" type="password" autocomplete="current-password" required minlength="8" maxlength="128">
+        <span class="hint-text" id="passwordHint" hidden>At least 8 characters.</span>
+      </label>
+      <p class="form-error" id="authError" role="alert"></p>
+      <button class="btn primary block" id="authSubmit" type="submit">Sign in</button>
+    </form>
+  </div>
+</section>
+
+<dialog id="companyDialog">
+  <form class="form-grid" id="companyForm" novalidate>
+    <h3>Add a company</h3>
+    <p>The rules engine uses these details, e.g. whether the VAT registration rule can apply.</p>
+    <label>Company name
+      <input class="field" name="name" required maxlength="255" placeholder="e.g. Tbilisi Trading LLC">
+    </label>
+    <div class="form-row">
+      <label>Tax ID
+        <input class="field" name="tax_id" required maxlength="64" inputmode="numeric" placeholder="9 digits">
+      </label>
+      <label>Legal form
+        <select class="field" name="legal_form">
+          <option value="LLC">LLC (შპს)</option>
+          <option value="JSC">JSC (სს)</option>
+          <option value="IE">Individual entrepreneur (ი/მ)</option>
+          <option value="Other">Other</option>
+        </select>
+      </label>
+    </div>
+    <label>Registration date
+      <input class="field" name="registration_date" type="date" required>
+    </label>
+    <label class="check"><input type="checkbox" name="vat_registered"> VAT-registered</label>
+    <label id="vatDateField" hidden>VAT registration date
+      <input class="field" name="vat_registration_date" type="date">
+    </label>
+    <p class="form-error" id="companyError" role="alert"></p>
+    <div class="dialog-actions">
+      <button class="btn" type="button" id="companyCancel">Cancel</button>
+      <button class="btn primary" type="submit">Save company</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const store = {
+  get(key) { try { return localStorage.getItem(key); } catch { return null; } },
+  set(key, value) { try { localStorage.setItem(key, value); } catch { /* storage unavailable */ } },
+};
+
+const SUGGESTIONS = [
+  { tag: "Payroll", text: "I hired someone for GEL 2,500" },
+  { tag: "VAT", text: "Our turnover for the last 12 months is 150,000" },
+  { tag: "ქართულად", text: "ხელფასი 1800 ლარი" },
+  { tag: "VAT", text: "Do I need to register for VAT?" },
+];
+// Interface text in the language the user wrote in (Georgian strings: have a native speaker review).
+const UI = {
+  en: {
+    applies: "Applies", not_applicable: "Does not apply", insufficient_data: "Needs info",
+    demo: "Demo", unverified: "Unverified", verified: "Verified",
+    demoTip: "Placeholder rule, not real Georgian tax law",
+    unverifiedTip: "Taken from the Tax Code text; not yet reviewed by an accountant",
+    verifiedTip: "Reviewed against the current law",
+    source: "Source", excerpt: "Tax Code excerpt", how: "How this was worked out", rule: "Rule",
+    openMatsne: "open on Matsne ↗", publication: "publication", otherLanguage: " (English text)",
+    continued: "↳ continued from your earlier question", reply: "Reply", understood: "Understood by",
+    currency: "GEL",
+    sources: { claude: "Claude", ollama: "local model", keyword: "keywords", template: "template" },
+  },
+  ka: {
+    applies: "ვრცელდება", not_applicable: "არ ვრცელდება", insufficient_data: "საჭიროა ინფორმაცია",
+    demo: "დემო", unverified: "გადაუმოწმებელი", verified: "გადამოწმებული",
+    demoTip: "სანიმუშო წესი; არ არის საქართველოს რეალური კანონმდებლობა",
+    unverifiedTip: "აღებულია საგადასახადო კოდექსის ტექსტიდან; ბუღალტერს ჯერ არ შეუმოწმებია",
+    verifiedTip: "შემოწმებულია მოქმედ კანონმდებლობასთან",
+    source: "წყარო", excerpt: "ამონარიდი საგადასახადო კოდექსიდან", how: "როგორ დაითვალა", rule: "წესი",
+    openMatsne: "Matsne-ზე ნახვა ↗", publication: "პუბლიკაცია", otherLanguage: " (ინგლისური ტექსტი)",
+    continued: "↳ წინა კითხვის გაგრძელება", reply: "პასუხი", understood: "გაიგო",
+    currency: "ლარი",
+    sources: { claude: "Claude", ollama: "ლოკალური მოდელი", keyword: "საკვანძო სიტყვები", template: "შაბლონი" },
+  },
+};
+
+// Rule text may be a plain string or {"en": ..., "ka": ...}.
+const loc = (text, lang) =>
+  text === null || text === undefined || typeof text === "string" ? text : (text[lang] || text.en || Object.values(text)[0]);
+
+let companies = [];
+let busy = false;
+
+function el(tag, attrs = {}, ...children) {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v === undefined || v === null || v === false) continue;
+    if (k === "class") node.className = v;
+    else if (k === "text") node.textContent = v;
+    else if (k.startsWith("on")) node.addEventListener(k.slice(2), v);
+    else node.setAttribute(k, v);
+  }
+  for (const child of children.flat()) if (child) node.append(child);
+  return node;
+}
+
+function scrollDown() { $("log").scrollTop = $("log").scrollHeight; }
+
+function formatAmount(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return value;
+  // Display only: grouping digits of the exact engine value; no rounding beyond its 2 decimals.
+  const [whole, frac] = String(value).split(".");
+  return whole.replace(/\B(?=(\d{3})+(?!\d))/g, " ") + (frac ? "." + frac : "");
+}
+
+/* ---------- theme ---------- */
+function applyTheme(theme) {
+  if (theme) document.documentElement.dataset.theme = theme;
+  else delete document.documentElement.dataset.theme;
+}
+applyTheme(store.get("theme"));
+$("themeBtn").addEventListener("click", () => {
+  const dark = document.documentElement.dataset.theme
+    ? document.documentElement.dataset.theme === "dark"
+    : matchMedia("(prefers-color-scheme: dark)").matches;
+  const next = dark ? "light" : "dark";
+  applyTheme(next);
+  store.set("theme", next);
+});
+
+/* ---------- drawer (mobile) ---------- */
+$("menuBtn").addEventListener("click", () => $("app").classList.add("drawer-open"));
+$("scrim").addEventListener("click", () => $("app").classList.remove("drawer-open"));
+
+/* ---------- suggestions & empty state ---------- */
+function ask(text) {
+  $("app").classList.remove("drawer-open");
+  $("message").value = text;
+  send();
+}
+
+function renderEmpty() {
+  $("thread").replaceChildren(el("div", { class: "empty" },
+    el("div", { class: "logo", "aria-hidden": "true", text: "₾" }),
+    el("h3", { text: "How can I help today?" }),
+    el("p", { text: "Ask about payroll or VAT in English or Georgian. Answers are computed by a rules engine and cite the Tax Code." }),
+    el("div", { class: "empty-grid" }, SUGGESTIONS.map((s) =>
+      el("button", { class: "empty-card", type: "button", onclick: () => ask(s.text) },
+        el("strong", { text: s.tag }), el("span", { text: s.text }))))));
+}
+
+function clearEmpty() {
+  const empty = $("thread").querySelector(".empty");
+  if (empty) empty.remove();
+}
+
+/* ---------- messages ---------- */
+function addUser(text) {
+  clearEmpty();
+  $("thread").append(el("div", { class: "row user" }, el("div", { class: "bubble-user", text })));
+  scrollDown();
+}
+
+function addBot(...content) {
+  clearEmpty();
+  const row = el("div", { class: "row bot" }, el("div", { class: "avatar", "aria-hidden": "true", text: "₾" }),
+    el("div", { class: "bot-body" }, content));
+  $("thread").append(row);
+  scrollDown();
+  return row;
+}
+
+const capitalize = (t) => t.charAt(0).toUpperCase() + t.slice(1);
+const cleanTitle = (t) => capitalize(t.replace(/^(DEMO|დემო):\s*/, ""));
+// Matsne titles are often ALL CAPS ("TAX CODE OF GEORGIA").
+const titleCase = (t) => t === t.toUpperCase() ? t.toLowerCase().replace(/(^|\s)(\S)/g, (m, sp, ch) => sp + ch.toUpperCase()).replace(/ Of /g, " of ") : t;
+
+// The reply carries the explanation; the card is the receipt: outcome, amount, source, workings.
+function resultCard(r, lang) {
+  const ui = UI[lang] || UI.en;
+  const card = el("div", { class: `card ${r.status}` },
+    el("div", { class: "card-head" },
+      el("span", { class: "card-title", text: cleanTitle(loc(r.title, lang)) }),
+      el("span", { class: `badge ${r.status}`, text: ui[r.status] || r.status }),
+      el("span", { class: `badge ${r.verification}`, text: ui[r.verification] || r.verification,
+        title: ui[r.verification + "Tip"] })));
+
+  if (r.amount !== null && r.amount !== undefined) {
+    card.append(el("div", { class: "amount" }, formatAmount(r.amount), el("small", { text: ui.currency })));
+  }
+  card.append(el("div", { class: "source", text: `${ui.source}: ${loc(r.legal_source.citation, lang)}` }));
+
+  for (const c of r.citations || []) {
+    const pub = /^\d+$/.test(c.publication) ? ` · ${ui.publication} ${c.publication}` : "";
+    card.append(el("details", {},
+      el("summary", { text: ui.excerpt + (c.language !== lang ? ui.otherLanguage : "") }),
+      el("blockquote", { text: c.excerpt }),
+      el("a", { class: "cite-link", href: c.url, target: "_blank", rel: "noopener",
+        text: `${titleCase(c.title)}${pub} · ${ui.openMatsne}` })));
+  }
+  if (r.trace && r.trace.length) {
+    card.append(el("details", {},
+      el("summary", { text: ui.how }),
+      el("ol", { class: "trace" }, r.trace.map((step) => el("li", { text: step }))),
+      el("div", { class: "source" }, `${ui.rule}: `, el("code", { text: `${r.rule_id} v${r.version}` }))));
+  }
+  return card;
+}
+
+function renderResponse(body) {
+  const lang = body.extraction.language in UI ? body.extraction.language : "en";
+  const ui = UI[lang];
+  const parts = [];
+
+  // The reply is the answer. Example questions become chips, so drop their plain-text copies.
+  const chips = body.suggestions || [];
+  const listed = new Set(chips.map((c) => "- " + c));
+  const text = body.reply.split("\n").filter((line) => !listed.has(line.trim())).join("\n").trim();
+  parts.push(el("div", { class: "reply", text }));
+
+  parts.push(...body.results.map((r) => resultCard(r, lang)));
+  if (chips.length) {
+    parts.push(el("div", { class: "chips" }, chips.map((c) =>
+      el("button", { class: "chip", type: "button", text: c, onclick: () => ask(c) }))));
+  }
+  for (const w of body.warnings || []) parts.push(el("div", { class: "callout warning", text: w }));
+
+  const debug = el("pre", { class: "debug", hidden: true,
+    text: JSON.stringify({ extraction: body.extraction, results: body.results }, null, 2) });
+  parts.push(el("div", { class: "meta" },
+    body.used_context ? el("span", { class: "context-note", text: ui.continued }) : null,
+    el("span", { text: `${ui.reply}: ${ui.sources[body.reply_source] || body.reply_source}` }),
+    el("span", { text: `${ui.understood}: ${ui.sources[body.extraction.source] || body.extraction.source}` }),
+    el("button", { class: "debug-toggle", type: "button", text: "raw JSON",
+      onclick: () => { debug.hidden = !debug.hidden; } })));
+  parts.push(debug);
+  addBot(...parts);
+}
+
+/* ---------- API ---------- */
+class AuthError extends Error {}
+
+async function api(path, { method = "GET", body } = {}) {
+  const res = await fetch(path, {
+    method,
+    headers: body === undefined ? {} : { "content-type": "application/json" },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  if (res.status === 401 && !path.startsWith("/auth/")) {
+    showAuth();
+    throw new AuthError("Please sign in again.");
+  }
+  if (res.status === 204) return null;
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(errorText(data.detail) || `Request failed (${res.status})`);
+  return data;
+}
+
+function errorText(detail) {
+  if (!detail) return "";
+  if (typeof detail === "string") return detail;
+  // FastAPI validation errors: [{loc: [..., "field"], msg}]
+  return detail.map((d) => `${d.loc[d.loc.length - 1]}: ${d.msg.replace(/^Value error, /, "")}`).join("; ");
+}
+
+/* ---------- state ---------- */
+let user = null;
+let conversationId = null;
+
+function currentCompany() { return companies.find((c) => c.id === $("company").value); }
+
+/* ---------- sending ---------- */
+const input = $("message");
+function autosize() {
+  input.style.height = "auto";
+  input.style.height = Math.min(input.scrollHeight, 180) + "px";
+  $("send").disabled = busy || !input.value.trim() || !companies.length;
+}
+input.addEventListener("input", autosize);
+input.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); send(); }
+});
+$("form").addEventListener("submit", (e) => { e.preventDefault(); send(); });
+
+async function send() {
+  const message = input.value.trim();
+  if (!message || busy || !companies.length) return;
+  busy = true;
+  input.value = "";
+  autosize();
+  addUser(message);
+  const typing = addBot(el("div", { class: "typing", "aria-label": "Thinking" }, el("span"), el("span"), el("span")));
+  try {
+    const body = await api(`/companies/${$("company").value}/chat`, {
+      method: "POST",
+      body: { message, as_of: $("asOf").value, conversation_id: conversationId || undefined },
+    });
+    typing.remove();
+    const isNew = conversationId !== body.conversation_id;
+    conversationId = body.conversation_id;
+    renderResponse(body);
+    if (isNew) loadHistory(); else touchHistory();
+  } catch (err) {
+    typing.remove();
+    if (!(err instanceof AuthError)) addBot(el("div", { class: "callout error", text: "Something went wrong: " + err.message }));
+  } finally {
+    busy = false;
+    autosize();
+    input.focus();
+  }
+}
+
+/* ---------- conversations ---------- */
+function relativeTime(iso) {
+  // SQLite (tests) returns naive UTC timestamps; Postgres returns an offset.
+  const then = new Date(/[zZ]|[+-]\d\d:?\d\d$/.test(iso) ? iso : iso + "Z");
+  const minutes = Math.round((Date.now() - then) / 60000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours} h ago`;
+  const days = Math.round(hours / 24);
+  if (days < 7) return `${days} d ago`;
+  return then.toLocaleDateString();
+}
+
+let historyItems = [];
+
+function svgIcon(d) {
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns, "svg");
+  const attrs = { width: 14, height: 14, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor",
+    "stroke-width": 2, "stroke-linecap": "round", "stroke-linejoin": "round" };
+  for (const [k, v] of Object.entries(attrs)) svg.setAttribute(k, v);
+  const path = document.createElementNS(ns, "path");
+  path.setAttribute("d", d);
+  svg.append(path);
+  return svg;
+}
+
+function renderHistory() {
+  const box = $("history");
+  if (!historyItems.length) {
+    box.replaceChildren(el("div", { class: "history-empty", text: "No conversations yet." }));
+    return;
+  }
+  box.replaceChildren(...historyItems.map((c) =>
+    el("div", { class: "history-item" + (c.id === conversationId ? " active" : ""), role: "button", tabindex: "0",
+        onclick: () => openConversation(c.id),
+        onkeydown: (e) => { if (e.key === "Enter") openConversation(c.id); } },
+      el("div", { class: "h-text" },
+        el("div", { class: "h-title", text: c.title }),
+        el("div", { class: "h-time", text: relativeTime(c.updated_at) })),
+      el("button", { class: "h-del", type: "button", title: "Delete conversation", "aria-label": `Delete ${c.title}`,
+          onclick: (e) => { e.stopPropagation(); deleteConversation(c); } },
+        svgIcon("M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14")))));
+}
+
+async function loadHistory() {
+  const company = currentCompany();
+  if (!company) { historyItems = []; renderHistory(); return; }
+  try {
+    historyItems = await api(`/conversations?company_id=${company.id}`);
+  } catch { historyItems = []; }
+  renderHistory();
+}
+
+function touchHistory() {
+  const item = historyItems.find((c) => c.id === conversationId);
+  if (item) {
+    item.updated_at = new Date().toISOString();
+    historyItems = [item, ...historyItems.filter((c) => c !== item)];
+  }
+  renderHistory();
+}
+
+async function openConversation(id) {
+  $("app").classList.remove("drawer-open");
+  if (busy) return;
+  try {
+    const conv = await api(`/conversations/${id}`);
+    conversationId = conv.id;
+    $("thread").replaceChildren();
+    for (const m of conv.messages) {
+      if (m.role === "user") addUser(m.content);
+      else if (m.payload) renderResponse(m.payload);
+      else addBot(el("div", { class: "reply", text: m.content }));
+    }
+    // Re-open with the date the conversation was evaluated at, so follow-ups use the same rule versions.
+    const last = [...conv.messages].reverse().find((m) => m.payload && m.payload.as_of);
+    if (last) $("asOf").value = last.payload.as_of;
+    // Saved messages appear at once; the arrival animation is only for new ones.
+    for (const row of $("thread").querySelectorAll(".row")) row.classList.add("restored");
+    renderHistory();
+    scrollDown();
+  } catch (err) {
+    if (!(err instanceof AuthError)) addBot(el("div", { class: "callout error", text: "Couldn't open that conversation: " + err.message }));
+  }
+}
+
+async function deleteConversation(c) {
+  if (!confirm(`Delete “${c.title}”? This can't be undone.`)) return;
+  try {
+    await api(`/conversations/${c.id}`, { method: "DELETE" });
+    if (c.id === conversationId) newChat();
+    historyItems = historyItems.filter((x) => x.id !== c.id);
+    renderHistory();
+  } catch (err) {
+    if (!(err instanceof AuthError)) alert("Couldn't delete: " + err.message);
+  }
+}
+
+function newChat() {
+  conversationId = null;
+  $("asOf").value = new Date().toISOString().slice(0, 10);
+  renderEmpty();
+  renderHistory();
+  $("app").classList.remove("drawer-open");
+  input.focus();
+}
+$("newChatBtn").addEventListener("click", newChat);
+
+/* ---------- company & status ---------- */
+async function loadProfile(company) {
+  $("title").textContent = company.name;
+  const box = $("profile");
+  const rows = [["Tax ID", company.tax_id], ["Legal form", company.legal_form]];
+  try {
+    const p = await api(`/companies/${company.id}/tax-profile`);
+    rows.push(["VAT registered", p.vat_registered ? "Yes" : "No"], ["Regime", p.tax_regime.replace(/_/g, " ")]);
+  } catch (err) {
+    if (err instanceof AuthError) return;
+    rows.push(["Tax profile", "Not set"]);
+  }
+  box.replaceChildren(...rows.map(([k, v]) => el("div", { class: "profile-row" }, el("span", { text: k }), el("span", { text: v }))));
+  box.hidden = false;
+}
+
+async function loadCompanies(selectId) {
+  try {
+    companies = await api("/companies");
+  } catch { companies = []; }
+  const select = $("company");
+  select.replaceChildren(...companies.map((c) => new Option(c.name, c.id)));
+  select.disabled = !companies.length;
+  if (!companies.length) {
+    $("title").textContent = "Add your first company";
+    $("profile").hidden = true;
+    historyItems = [];
+    renderHistory();
+    $("thread").replaceChildren(el("div", { class: "empty" },
+      el("div", { class: "logo", "aria-hidden": "true", text: "₾" }),
+      el("h3", { text: `Welcome${user ? ", " + user.full_name.split(" ")[0] : ""}!` }),
+      el("p", { text: "Add a company to start. The rules engine uses its details, like VAT registration, to answer your questions." }),
+      el("button", { class: "btn primary", type: "button", text: "+ Add a company", onclick: openCompanyDialog })));
+    autosize();
+    return;
+  }
+  const wanted = selectId || store.get("companyId");
+  if (wanted && companies.some((c) => c.id === wanted)) select.value = wanted;
+  store.set("companyId", select.value);
+  loadProfile(currentCompany());
+  autosize();
+}
+
+$("company").addEventListener("change", () => {
+  store.set("companyId", $("company").value);
+  loadProfile(currentCompany());
+  newChat();
+  loadHistory();
+});
+
+async function loadStatus() {
+  const pill = $("aiPill");
+  try {
+    const s = await api("/chat/status");
+    pill.classList.toggle("ai", s.ai_enabled);
+    const label = { claude: "Claude connected", ollama: "Local AI" }[s.provider] || "Offline mode";
+    pill.title = !s.ai_enabled ? "No AI configured: keyword matching and template replies"
+      : `${s.model} reads messages; replies by ${UI.en.sources[s.replies]}` +
+        (s.provider === "ollama" ? ". Runs on this computer; nothing leaves it." : "");
+    pill.replaceChildren(el("span", { class: "dot" }),
+      el("span", {}, label, el("span", { class: "label-long", text: s.ai_enabled ? ` · ${s.model}` : " · keywords" })));
+    $("indexStatus").replaceChildren(el("span", { class: s.legal_index ? "dot on" : "dot" }),
+      s.legal_index ? "Legal index connected" : "Legal index offline");
+  } catch {
+    pill.replaceChildren(el("span", { class: "dot" }), el("span", { text: "Status unknown" }));
+  }
+}
+
+/* ---------- add company ---------- */
+const companyDialog = $("companyDialog");
+const companyForm = $("companyForm");
+
+function openCompanyDialog() {
+  companyForm.reset();
+  $("companyError").textContent = "";
+  $("vatDateField").hidden = true;
+  $("app").classList.remove("drawer-open");
+  companyDialog.showModal();
+  companyForm.elements.name.focus();
+}
+$("addCompanyBtn").addEventListener("click", openCompanyDialog);
+$("companyCancel").addEventListener("click", () => companyDialog.close());
+companyForm.elements.vat_registered.addEventListener("change", (e) => { $("vatDateField").hidden = !e.target.checked; });
+
+companyForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const f = companyForm.elements;
+  const error = $("companyError");
+  if (!f.name.value.trim() || !f.tax_id.value.trim() || !f.registration_date.value) {
+    error.textContent = "Name, tax ID and registration date are required.";
+    return;
+  }
+  error.textContent = "";
+  try {
+    const company = await api("/companies", { method: "POST", body: {
+      name: f.name.value.trim(), tax_id: f.tax_id.value.trim(), legal_form: f.legal_form.value,
+      registration_date: f.registration_date.value,
+    } });
+    await api(`/companies/${company.id}/tax-profile`, { method: "PUT", body: {
+      vat_registered: f.vat_registered.checked,
+      vat_registration_date: f.vat_registered.checked && f.vat_registration_date.value ? f.vat_registration_date.value : null,
+    } });
+    companyDialog.close();
+    await loadCompanies(company.id);
+    newChat();
+    loadHistory();
+  } catch (err) {
+    if (!(err instanceof AuthError)) error.textContent = err.message;
+  }
+});
+
+/* ---------- sign in / register ---------- */
+let authMode = "login";
+const authForm = $("authForm");
+
+function setAuthMode(mode) {
+  authMode = mode;
+  $("tabLogin").setAttribute("aria-selected", mode === "login");
+  $("tabRegister").setAttribute("aria-selected", mode === "register");
+  $("nameField").hidden = mode === "login";
+  $("passwordHint").hidden = mode === "login";
+  authForm.elements.password.autocomplete = mode === "login" ? "current-password" : "new-password";
+  $("authSubmit").textContent = mode === "login" ? "Sign in" : "Create account";
+  $("authError").textContent = "";
+}
+$("tabLogin").addEventListener("click", () => setAuthMode("login"));
+$("tabRegister").addEventListener("click", () => setAuthMode("register"));
+
+function showAuth() {
+  user = null;
+  conversationId = null;
+  $("auth").hidden = false;
+  authForm.elements.password.value = "";
+  authForm.elements.email.focus();
+}
+
+authForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const f = authForm.elements;
+  const body = { email: f.email.value.trim(), password: f.password.value };
+  if (authMode === "register") {
+    body.full_name = f.full_name.value.trim();
+    if (!body.full_name) { $("authError").textContent = "Please enter your name."; return; }
+    if (body.password.length < 8) { $("authError").textContent = "Password must be at least 8 characters."; return; }
+  }
+  $("authSubmit").disabled = true;
+  try {
+    const me = await api(`/auth/${authMode}`, { method: "POST", body });
+    f.password.value = "";
+    await startApp(me);
+  } catch (err) {
+    $("authError").textContent = err.message;
+  } finally {
+    $("authSubmit").disabled = false;
+  }
+});
+
+$("logoutBtn").addEventListener("click", async () => {
+  try { await api("/auth/logout", { method: "POST" }); } catch { /* signing out locally regardless */ }
+  companies = [];
+  historyItems = [];
+  $("thread").replaceChildren();
+  showAuth();
+});
+
+/* ---------- boot ---------- */
+async function startApp(me) {
+  user = me;
+  $("auth").hidden = true;
+  $("userName").textContent = me.full_name;
+  $("userEmail").textContent = me.email;
+  $("initials").textContent = me.full_name.split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+  conversationId = null;
+  $("asOf").value = new Date().toISOString().slice(0, 10);
+  renderEmpty();
+  loadStatus();
+  await loadCompanies();
+  loadHistory();
+}
+
+(async function boot() {
+  try {
+    const me = await api("/auth/me");
+    await startApp(me);
+  } catch {
+    setAuthMode("login");
+    showAuth();
+  }
+})();
+</script>
+</body>
+</html>

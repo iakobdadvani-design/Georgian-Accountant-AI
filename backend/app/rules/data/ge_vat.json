@@ -1,0 +1,51 @@
+[
+  {
+    "rule_id": "ge.vat.registration_threshold",
+    "version": 1,
+    "title": {
+      "en": "VAT registration threshold",
+      "ka": "დღგ-ის გადამხდელად რეგისტრაციის ზღვარი"
+    },
+    "tax_type": "vat",
+    "effective_from": "2020-07-22",
+    "conditions": {
+      "all": [
+        {
+          "fact": "company.vat_registered",
+          "op": "eq",
+          "value": false,
+          "if_false": {
+            "en": "The company is already registered as a VAT payer, so it doesn't need to register again.",
+            "ka": "კომპანია უკვე რეგისტრირებულია დღგ-ის გადამხდელად, ამიტომ ხელახლა რეგისტრაცია არ სჭირდება."
+          }
+        },
+        {
+          "fact": "input.taxable_turnover_12m",
+          "op": "gt",
+          "value": 100000,
+          "if_false": {
+            "en": "Taxable supplies over the last 12 months do not exceed GEL 100 000, so VAT registration is not required yet. It becomes mandatory once they exceed that amount.",
+            "ka": "ბოლო 12 თვის დასაბეგრი ოპერაციების ჯამი არ აღემატება 100 000 ლარს, ამიტომ დღგ-ის გადამხდელად რეგისტრაცია ჯერ სავალდებულო არ არის. ის სავალდებულო ხდება, როგორც კი ეს ჯამი 100 000 ლარს გადააჭარბებს."
+          }
+        }
+      ]
+    },
+    "message": {
+      "en": "Taxable supplies over 12 consecutive calendar months exceeded GEL 100 000: apply to the tax authority for VAT registration within 2 business days. The VAT obligation starts with the transaction that crossed the threshold (Art. 165(2)). Exceptions elsewhere in the Code may apply.",
+      "ka": "ბოლო 12 თვის დასაბეგრი ოპერაციების ჯამმა 100 000 ლარს გადააჭარბა: დღგ-ის გადამხდელად რეგისტრაციისთვის საგადასახადო ორგანოს 2 სამუშაო დღის ვადაში უნდა მიმართოთ. დღგ-ის ვალდებულება წარმოიშობა იმ ოპერაციიდან, რომლითაც ზღვარი გადაიჭარბა (მუხლი 165(2)). კოდექსი შეიძლება ითვალისწინებდეს გამონაკლისებს."
+    },
+    "legal_source": {
+      "citation": {
+        "en": "Tax Code of Georgia, Article 165(1)",
+        "ka": "საქართველოს საგადასახადო კოდექსი, მუხლი 165(1)"
+      },
+      "url": "https://matsne.gov.ge/en/document/view/1043717",
+      "note": "Encoded from the English Tax Code text in the rad_law snapshot (unspecified publication; chapter amended by Law No 6817 of 14 July 2020, published 22.7.2020). effective_from is that publication date, not a verified entry-into-force date. Needs review by a qualified accountant before last_verified_date is set.",
+      "search_query": "registration VAT taxpayer 100 000 12 consecutive calendar months",
+      "document_id": "1043717",
+      "language": "en"
+    },
+    "last_verified_date": null,
+    "is_demo": false
+  }
+]
