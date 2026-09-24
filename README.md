@@ -22,15 +22,23 @@ message -> extractor (Claude, or offline keywords) -> intent + facts
 | Rules engine | `app/rules/` | Rules are JSON in `app/rules/data/`, versioned by effective date |
 | Chat | `app/api/chat.py`, `app/chat/` | `POST /companies/{id}/chat`; test page at `/` |
 | Legal citations | `app/legal/`, `app/api/legal.py` | Read-only over rad_law's SQLite FTS5 index; `GET /legal/search` |
+| Tax calendar | `app/rules/deadlines.json`, `app/rules/calendar.py`, `app/api/deadlines.py` | Deadlines that apply to the company's profile; done state stored per period |
 
 ### Rules and their status
 
 Every result carries `verification`:
 
-- `demo` - placeholder logic (`demo_rules.json`), not real law.
+- `demo` - placeholder logic, not real law (none shipped any more).
 - `unverified` - encoded from the Tax Code text, **not yet reviewed by a qualified
-  accountant**. Currently: `ge.vat.registration_threshold` (Tax Code Art. 165(1): register
-  within 2 business days once 12-month taxable supplies exceed GEL 100 000).
+  accountant**. All current rules and deadlines:
+  - Salary: 2% pension, 20% income tax, take-home pay, employer cost (Art. 81(1), 82(1)(b³);
+    Law on Funded Pension Art. 3(6))
+  - VAT registration once 12-month taxable supplies exceed GEL 100 000 (Art. 165(1))
+  - VAT on a sale, net or VAT-inclusive (Art. 166)
+  - Profit tax on distributions, payout ÷ 0.85 × 15% (Art. 97, 98) and 5% dividend withholding
+    (Art. 130)
+  - Deadlines: VAT, salary withholding and profit tax returns by the 15th; property tax by 1 April
+    and 15 June (Art. 168, 154, 153(10), 205)
 - `verified` - set `last_verified_date` on the rule once a professional has checked it
   against the current Matsne consolidated text, including its `effective_from` date.
 
@@ -89,8 +97,9 @@ Sessions last `SESSION_DAYS` (default 30). Behind HTTPS, set `SESSION_COOKIE_SEC
 
 ## Next steps
 
-1. Have a qualified accountant verify `ge.vat.registration_threshold` (and its effective date).
-2. Add more real rules the same way (payroll income tax, pension contributions, filing deadlines).
-3. Generate `TaxEvent`s (tax calendar) from rules.
-4. Alembic migrations (schema changes currently need `docker compose down -v`).
-5. Before going public: login rate limiting, password reset, email verification.
+1. Have a qualified accountant verify every rule and deadline (and their effective dates).
+2. Add the Law on Funded Pension to the rad_law corpus so the 2% rate has a quotable excerpt.
+3. Input VAT credit (Art. 175-176), small business status (Art. 90), weekend/holiday deadline shifts.
+4. Before going public: login rate limiting, password reset, email verification.
+
+Schema changes go through Alembic (`backend/migrations/`); see CLAUDE.md.

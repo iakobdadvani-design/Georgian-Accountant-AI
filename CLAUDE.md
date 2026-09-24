@@ -16,7 +16,8 @@ the date. Model replies are rejected if they contain a number the engine didn't 
 | Path | What |
 |---|---|
 | `rules/data/*.json` | Tax rules: versioned by `effective_from/to`, with conditions, calculation, legal source |
-| `rules/engine.py` | Pure evaluation: tri-state conditions (True / False / missing fact), Decimal math, trace |
+| `rules/engine.py` | Pure evaluation: tri-state conditions (True / False / missing fact), Decimal math, trace, `steps` calculations with a breakdown |
+| `rules/deadlines.json`, `rules/calendar.py` | Filing/payment deadlines; applicability uses the same conditions as rules |
 | `rules/schema.py` | Rule/result models; `LocalizedText` = `str` or `{"en": ..., "ka": ...}` |
 | `chat/extractor.py` | Intents, keyword extractor, amount parsing |
 | `chat/llm.py` | Model-agnostic extractor/responder + grounding check; `claude.py`, `ollama.py` are backends |
@@ -34,6 +35,23 @@ cd backend; .\.venv\Scripts\python -m pytest -q -p no:warnings   # tests: SQLite
 ```
 
 Schema changes go through Alembic (see "Database" below).
+
+## Rules in the app (all "unverified")
+
+| Rule / deadline | Law |
+|---|---|
+| `ge.payroll.income_tax` — 2% pension, 20% income tax, take-home, employer cost | Tax Code 81(1), 82(1)(b3); Funded Pension law 3(6) (from Matsne, not in the corpus) |
+| `ge.vat.registration_threshold` — register once 12-month taxable supplies > GEL 100 000 | 165(1) |
+| `ge.vat.output_vat` — VAT on a net price, or 18/118 of a VAT-inclusive one | 166 |
+| `ge.profit.distribution` — payout / 0.85 x 15% | 97(1), 97(10), 98(1) |
+| `ge.dividend.withholding` — 5% to individuals, none to companies | 130(1)-(2) |
+| Deadlines: VAT (15th), salary withholding (15th), profit tax return (15th), property tax (1 Apr, 15 Jun) | 168(1), 154(3)-(4), 153(10), 205(2)-(4) |
+
+Chat intents (`chat/extractor.py`): `calculate_payroll_tax`, `check_vat_registration`, `calculate_vat`,
+`calculate_distribution`, `list_deadlines`, `unknown`. Each has an amount fact in `INTENT_AMOUNT_FACT`
+(except deadlines), keyword group(s) in priority order, answer phrasing in `responder.py`, and a field
+in the LLM extraction schema. Defaults the chat assumes (and says it assumed) live in `DEFAULT_FACTS`
+in `api/chat.py`: pension participation, dividend to an individual.
 
 ## Conventions
 
@@ -56,8 +74,11 @@ Schema changes go through Alembic (see "Database" below).
 - The local Postgres holds the owner's **real account and data**. Never run `docker compose down -v`,
   drop tables, or delete rows you didn't create. Test accounts use `@example.com`; delete only those.
 - Migrations: `backend/migrations/` (Alembic). The app runs `alembic upgrade head` on startup.
-  After changing a model: `alembic revision --autogenerate -m "..."` inside the backend container,
-  review the file, then restart.
+  After changing a model: `docker compose exec -w /app backend alembic revision --autogenerate
+  -m "..." --rev-id 000N_name`, review the file, then restart. **Name every constraint in the model
+  first** (`UniqueConstraint(..., name="uq_...")`): uvicorn `--reload` applies a new migration as soon
+  as the file appears, so an unnamed constraint lands with a Postgres-chosen name. Finish with
+  `alembic check` (must say "No new upgrade operations detected").
 
 ## AI providers
 
@@ -72,4 +93,5 @@ Tests override the pipeline and must never call a real model.
   file (Write tool) or edit files directly instead of `python -c "..."` with escapes.
 - There's no local Node; syntax-check the page's JS with `docker run node:20-alpine node --check`.
 - Paths contain spaces (`rag law/RAD law`); quote them.
-- Verify UI changes in a real browser (Playwright) — tests don't cover the page.
+- Verify UI changes in a real browser (Playwright) — tests don't cover the page. Allow ~60 s for
+  the first chat reply when `AI_PROVIDER=ollama` (the model loads on first use).
