@@ -163,3 +163,36 @@ class RuleResult(BaseModel):
 
 
 Step.model_rebuild()
+
+
+class Monthly(BaseModel):
+    """Due on `day` of the month after each monthly period."""
+
+    type: Literal["monthly"]
+    day: int = Field(ge=1, le=28)
+
+
+class Annual(BaseModel):
+    """Due each year on month/day; the period is the previous or the current calendar year."""
+
+    type: Literal["annual"]
+    month: int = Field(ge=1, le=12)
+    day: int = Field(ge=1, le=28)
+    period: Literal["previous_year", "current_year"]
+
+
+class Deadline(BaseModel):
+    """A recurring filing or payment date, shown in the calendar when `applies` holds for the company."""
+
+    deadline_id: str
+    tax_type: str
+    title: LocalizedText
+    description: LocalizedText | None = None
+    applies: Condition
+    schedule: Monthly | Annual = Field(discriminator="type")
+    legal_source: LegalSource
+    last_verified_date: date | None = None
+
+    @property
+    def verification(self) -> Verification:
+        return "verified" if self.last_verified_date else "unverified"

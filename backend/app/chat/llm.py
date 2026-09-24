@@ -52,6 +52,7 @@ Intents:
 - check_vat_registration: turnover, revenue or sales volume, or whether the business must register for VAT.
 - calculate_vat: how much VAT is on or inside a specific sale, price or invoice.
 - calculate_distribution: paying out profit / dividends to owners, or profit tax on a distribution.
+- list_deadlines: what is due, filing or payment deadlines, the tax calendar.
 - unknown: anything else.
 
 amount: the single money amount the user states for that intent, copied as written using only digits, spaces, commas and one decimal point (e.g. "2,500" or "150000"). Do not convert currencies, annualise, add, or otherwise compute. null if no amount is stated.
@@ -64,7 +65,7 @@ EXTRACTION_SCHEMA = {
     "type": "object",
     "properties": {
         "intent": {"type": "string", "enum": ["calculate_payroll_tax", "check_vat_registration", "calculate_vat",
-                                              "calculate_distribution", "unknown"]},
+                                              "calculate_distribution", "list_deadlines", "unknown"]},
         "amount": {"anyOf": [{"type": "string"}, {"type": "null"}]},
         "pension_participant": {"anyOf": [{"type": "boolean"}, {"type": "null"}]},
         "vat_inclusive": {"anyOf": [{"type": "boolean"}, {"type": "null"}]},
@@ -103,7 +104,7 @@ class LLMExtractor:
             entities["vat_inclusive"] = out.vat_inclusive
         if out.intent == "calculate_distribution" and out.dividend_recipient is not None:
             entities["dividend_recipient"] = out.dividend_recipient
-        if out.intent != "unknown" and out.amount is not None:
+        if out.intent in INTENT_AMOUNT_FACT and out.amount is not None:
             amount = normalize_amount(out.amount)
             if amount is None:
                 log.warning("Discarding unparseable amount from %s: %r", self.backend.name, out.amount)

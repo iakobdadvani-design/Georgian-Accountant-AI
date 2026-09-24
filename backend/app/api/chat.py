@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.api.companies import get_company
+from app.api.deadlines import DeadlineItem, deadline_items
 from app.api.legal import attach_citations, get_legal_index
 from app.api.rules import company_facts
 from app.auth import get_current_user
@@ -17,7 +18,7 @@ from app.chat.context import apply_context, inherit_language, pending_state, top
 from app.chat.extractor import INTENT_AMOUNT_FACT, Extraction, Extractor, KeywordExtractor
 from app.chat.llm import AIUnavailable, LLMExtractor, LLMResponder
 from app.chat.ollama import OllamaBackend
-from app.chat.responder import TemplateResponder, compose_reply, missing_questions, suggestions_for
+from app.chat.responder import TemplateResponder, compose_reply, deadlines_reply, missing_questions, suggestions_for
 from app.config import settings
 from app.database import get_db
 from app.legal.index import LegalIndex
@@ -69,6 +70,7 @@ class ChatResponse(BaseModel):
     results: list[RuleResult]
     questions: list[str] = Field(default=[], description="Follow-up questions for facts the engine still needs")
     suggestions: list[str] = Field(default=[], description="Example questions to offer when the turn wasn't a tax question")
+    deadlines: list[DeadlineItem] = []
     warnings: list[str] = []
 
 
@@ -158,7 +160,10 @@ def chat(
     extraction = with_defaults(extraction)
 
     results: list[RuleResult] = []
-    if extraction.intent != "unknown":
+    deadlines: list[DeadlineItem] = []
+    if extraction.intent == "list_deadlines":
+        deadlines = deadline_items(company, db, payload.as_of)
+    elif extraction.intent != "unknown":
         topic_fact = f"input.{INTENT_AMOUNT_FACT[extraction.intent]}"
         rules = [r for r in get_rules() if topic_fact in referenced_facts(r)]
         facts = company_facts(company, db) | {f"input.{k}": v for k, v in extraction.entities.items()}
@@ -166,7 +171,10 @@ def chat(
 
     reply_source = pipeline.responder_source
     try:
-        reply = pipeline.responder.compose(payload.message, extraction, results)
+        if extraction.intent == "list_deadlines":  # dates straight from the calendar; nothing to phrase
+            reply, reply_source = deadlines_reply(deadlines, extraction.language, payload.as_of), "template"
+        else:
+            reply = pipeline.responder.compose(payload.message, extraction, results)
     except AIUnavailable as e:
         log.warning("%s reply failed, using template: %s", pipeline.responder_source, e)
         warnings.append(f"AI reply unavailable ({e}); used template.")
@@ -176,7 +184,7 @@ def chat(
     response = ChatResponse(conversation_id=conversation.id, reply=reply, reply_source=reply_source,
                             extraction=extraction, used_context=used_context, results=results,
                             questions=questions, suggestions=suggestions_for(extraction, payload.message),
-                            warnings=warnings)
+                            deadlines=deadlines, warnings=warnings)
 
     record = response.model_dump(mode="json", exclude={"conversation_id"})
     record["as_of"] = payload.as_of.isoformat()

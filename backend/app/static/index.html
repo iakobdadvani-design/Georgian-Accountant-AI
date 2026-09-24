@@ -225,6 +225,23 @@
     font-size: 13.5px; cursor: pointer; box-shadow: var(--shadow); transition: border-color .15s, background .15s; text-align: left; }
   .chip:hover { border-color: var(--accent); background: var(--accent-soft); }
 
+  /* ---------- deadlines ---------- */
+  .deadlines { display: grid; gap: 6px; }
+  .deadline { display: flex; gap: 9px; align-items: flex-start; padding: 8px 10px; border-radius: 10px;
+    border: 1px solid var(--border); background: var(--surface-2); border-left: 3px solid var(--faint); }
+  .deadline.overdue { border-left-color: var(--accent); }
+  .deadline.due_soon { border-left-color: var(--warn); }
+  .deadline.done { opacity: .6; }
+  .deadline.done .d-title { text-decoration: line-through; }
+  .deadline input { margin-top: 3px; accent-color: var(--accent); cursor: pointer; }
+  .deadline .d-text { flex: 1; min-width: 0; }
+  .deadline .d-title { font-size: 13px; font-weight: 500; line-height: 1.35; }
+  .deadline .d-when { font-size: 12px; color: var(--muted); }
+  .deadline.overdue .d-when { color: var(--accent); font-weight: 500; }
+  .deadline.due_soon .d-when { color: var(--warn); font-weight: 500; }
+  .deadlines-empty { font-size: 12.5px; color: var(--faint); padding: 2px 4px; line-height: 1.45; }
+  .profile .profile-actions { display: flex; justify-content: flex-end; }
+
   /* ---------- auth screen ---------- */
   .auth { position: fixed; inset: 0; z-index: 50; background: var(--bg); display: grid; place-items: center; padding: 20px;
     overflow-y: auto; }
@@ -290,6 +307,11 @@
       </div>
       <select id="company" class="field" aria-label="Company"></select>
       <div class="profile" id="profile" hidden></div>
+    </div>
+
+    <div id="deadlinesSection" hidden>
+      <p class="section-label" id="deadlinesLabel">Deadlines</p>
+      <div class="deadlines" id="deadlines"></div>
     </div>
 
     <div>
@@ -401,10 +423,37 @@
     <label id="vatDateField" hidden>VAT registration date
       <input class="field" name="vat_registration_date" type="date">
     </label>
+    <label class="check"><input type="checkbox" name="has_employees"> Has employees</label>
+    <label class="check"><input type="checkbox" name="owns_property"> Owns taxable property (buildings, land, equipment)</label>
     <p class="form-error" id="companyError" role="alert"></p>
     <div class="dialog-actions">
       <button class="btn" type="button" id="companyCancel">Cancel</button>
       <button class="btn primary" type="submit">Save company</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="profileDialog">
+  <form class="form-grid" id="profileForm" novalidate>
+    <h3>Tax profile</h3>
+    <p>These facts decide which rules and deadlines apply to the company.</p>
+    <label class="check"><input type="checkbox" name="vat_registered"> VAT-registered</label>
+    <label id="profileVatDate" hidden>VAT registration date
+      <input class="field" name="vat_registration_date" type="date">
+    </label>
+    <label class="check"><input type="checkbox" name="has_employees"> Has employees</label>
+    <label class="check"><input type="checkbox" name="owns_property"> Owns taxable property (buildings, land, equipment)</label>
+    <label>Tax regime
+      <select class="field" name="tax_regime">
+        <option value="standard">Standard</option>
+        <option value="small_business">Small business status</option>
+        <option value="micro_business">Micro business status</option>
+      </select>
+    </label>
+    <p class="form-error" id="profileError" role="alert"></p>
+    <div class="dialog-actions">
+      <button class="btn" type="button" id="profileCancel">Cancel</button>
+      <button class="btn primary" type="submit">Save</button>
     </div>
   </form>
 </dialog>
@@ -582,8 +631,12 @@ function resultCard(r, lang) {
   return card;
 }
 
-function renderResponse(body) {
+function renderResponse(body, live = true) {
   const lang = body.extraction.language in UI ? body.extraction.language : "en";
+  if (live) {
+    setUiLang(lang);
+    if (body.extraction.intent === "list_deadlines") loadDeadlines();
+  }
   const ui = UI[lang];
   const parts = [];
 
@@ -758,7 +811,7 @@ async function openConversation(id) {
     $("thread").replaceChildren();
     for (const m of conv.messages) {
       if (m.role === "user") addUser(m.content);
-      else if (m.payload) renderResponse(m.payload);
+      else if (m.payload) renderResponse(m.payload, false);
       else addBot(el("div", { class: "reply", text: m.content }));
     }
     // Re-open with the date the conversation was evaluated at, so follow-ups use the same rule versions.
@@ -796,20 +849,152 @@ function newChat() {
 $("newChatBtn").addEventListener("click", newChat);
 
 /* ---------- company & status ---------- */
+let currentProfile = null;
+
 async function loadProfile(company) {
   $("title").textContent = company.name;
   const box = $("profile");
+  const yes = (b) => (b ? "Yes" : "No");
   const rows = [["Tax ID", company.tax_id], ["Legal form", company.legal_form]];
+  currentProfile = null;
   try {
     const p = await api(`/companies/${company.id}/tax-profile`);
-    rows.push(["VAT registered", p.vat_registered ? "Yes" : "No"], ["Regime", p.tax_regime.replace(/_/g, " ")]);
+    currentProfile = p;
+    rows.push(["VAT registered", yes(p.vat_registered)], ["Employees", yes(p.has_employees)],
+      ["Property", yes(p.owns_property)], ["Regime", p.tax_regime.replace(/_/g, " ")]);
   } catch (err) {
     if (err instanceof AuthError) return;
     rows.push(["Tax profile", "Not set"]);
   }
-  box.replaceChildren(...rows.map(([k, v]) => el("div", { class: "profile-row" }, el("span", { text: k }), el("span", { text: v }))));
+  box.replaceChildren(
+    ...rows.map(([k, v]) => el("div", { class: "profile-row" }, el("span", { text: k }), el("span", { text: v }))),
+    el("div", { class: "profile-actions" },
+      el("button", { class: "btn small", type: "button", text: "Edit", onclick: openProfileDialog })));
   box.hidden = false;
 }
+
+/* ---------- deadlines ---------- */
+const SIDEBAR = {
+  en: {
+    deadlines: "Deadlines", none: "No deadlines apply yet. Edit the profile if the company is VAT-registered, has employees or owns property.",
+    today: "today", tomorrow: "tomorrow", inDays: (n) => `in ${n} days`, overdue: (n) => `${n} days overdue`,
+    by: "by", months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    periodMonths: ["January", "February", "March", "April", "May", "June", "July", "August", "September",
+      "October", "November", "December"], markDone: "Mark as done", showAll: (n) => `Show all (${n})`, showLess: "Show less",
+  },
+  ka: {
+    deadlines: "ვადები", none: "ვადები ჯერ არ გაქვთ. თუ კომპანია დღგ-ის გადამხდელია, ჰყავს თანამშრომლები ან ფლობს ქონებას, შეცვალეთ პროფილი.",
+    today: "დღეს", tomorrow: "ხვალ", inDays: (n) => `${n} დღეში`, overdue: (n) => `ვადა გადაცილებულია ${n} დღით`,
+    by: "ვადა:", months: ["იან", "თებ", "მარ", "აპრ", "მაი", "ივნ", "ივლ", "აგვ", "სექ", "ოქტ", "ნოე", "დეკ"],
+    periodMonths: ["იანვარი", "თებერვალი", "მარტი", "აპრილი", "მაისი", "ივნისი", "ივლისი", "აგვისტო",
+      "სექტემბერი", "ოქტომბერი", "ნოემბერი", "დეკემბერი"], markDone: "მონიშნე შესრულებულად",
+    showAll: (n) => `ყველას ნახვა (${n})`, showLess: "ნაკლების ნახვა",
+  },
+};
+let uiLang = store.get("uiLang") || ((navigator.language || "").startsWith("ka") ? "ka" : "en");
+let deadlineItems = [];
+let showAllDeadlines = false;
+const SIDEBAR_LIMIT = 6;
+
+function setUiLang(lang) {
+  if (!(lang in SIDEBAR) || lang === uiLang) return;
+  uiLang = lang;
+  store.set("uiLang", lang);
+  renderDeadlines();
+}
+
+function renderDeadlines() {
+  const t = SIDEBAR[uiLang];
+  $("deadlinesLabel").textContent = t.deadlines;
+  const box = $("deadlines");
+  $("deadlinesSection").hidden = !currentCompany();
+  if (!deadlineItems.length) {
+    box.replaceChildren(el("div", { class: "deadlines-empty", text: t.none }));
+    return;
+  }
+  // Open items first (overdue, then soonest); done ones stay visible at the end until they age out.
+  const sorted = [...deadlineItems].sort((a, b) => (a.state === "done") - (b.state === "done") || a.days_left - b.days_left);
+  const shown = showAllDeadlines ? sorted : sorted.slice(0, SIDEBAR_LIMIT);
+  box.replaceChildren(...shown.map((d) => {
+    const due = new Date(d.due_date + "T00:00:00");
+    const when = d.state === "done" ? "" : d.days_left < 0 ? t.overdue(-d.days_left)
+      : d.days_left === 0 ? t.today : d.days_left === 1 ? t.tomorrow : t.inDays(d.days_left);
+    const start = new Date(d.period_start + "T00:00:00");
+    const monthly = d.period_start.slice(0, 7) === d.period_end.slice(0, 7);
+    const period = monthly ? `${t.periodMonths[start.getMonth()]} ${start.getFullYear()}` : `${start.getFullYear()}`;
+    const check = el("input", { type: "checkbox", "aria-label": t.markDone, title: t.markDone });
+    check.checked = d.state === "done";
+    check.addEventListener("change", () => markDeadline(d, check.checked));
+    return el("div", { class: `deadline ${d.state}`, title: loc(d.description, uiLang) || "" }, check,
+      el("div", { class: "d-text" },
+        el("div", { class: "d-title", text: `${loc(d.title, uiLang)} · ${period}` }),
+        el("div", { class: "d-when", text: `${t.by} ${due.getDate()} ${t.months[due.getMonth()]}${when ? " · " + when : ""}` })));
+  }));
+  if (sorted.length > SIDEBAR_LIMIT) {
+    box.append(el("button", { class: "btn small", type: "button",
+      text: showAllDeadlines ? t.showLess : t.showAll(sorted.length),
+      onclick: () => { showAllDeadlines = !showAllDeadlines; renderDeadlines(); } }));
+  }
+}
+
+async function loadDeadlines() {
+  const company = currentCompany();
+  if (!company) { deadlineItems = []; renderDeadlines(); return; }
+  try {
+    deadlineItems = await api(`/companies/${company.id}/deadlines?as_of=${$("asOf").value}`);
+  } catch { deadlineItems = []; }
+  renderDeadlines();
+}
+
+async function markDeadline(d, done) {
+  try {
+    await api(`/companies/${currentCompany().id}/deadlines/${d.deadline_id}/${d.period_start}?as_of=${$("asOf").value}`,
+      { method: "PUT", body: { done } });
+  } catch (err) {
+    if (!(err instanceof AuthError)) alert(err.message);
+  }
+  loadDeadlines();
+}
+
+/* ---------- edit tax profile ---------- */
+const profileDialog = $("profileDialog");
+const profileForm = $("profileForm");
+
+function openProfileDialog() {
+  const p = currentProfile || { vat_registered: false, has_employees: false, owns_property: false, tax_regime: "standard" };
+  const f = profileForm.elements;
+  f.vat_registered.checked = p.vat_registered;
+  f.vat_registration_date.value = p.vat_registration_date || "";
+  f.has_employees.checked = p.has_employees;
+  f.owns_property.checked = p.owns_property;
+  f.tax_regime.value = p.tax_regime;
+  $("profileVatDate").hidden = !p.vat_registered;
+  $("profileError").textContent = "";
+  $("app").classList.remove("drawer-open");
+  profileDialog.showModal();
+}
+$("profileCancel").addEventListener("click", () => profileDialog.close());
+profileForm.elements.vat_registered.addEventListener("change", (e) => { $("profileVatDate").hidden = !e.target.checked; });
+
+profileForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const f = profileForm.elements;
+  try {
+    await api(`/companies/${currentCompany().id}/tax-profile`, { method: "PUT", body: {
+      vat_registered: f.vat_registered.checked,
+      vat_registration_date: f.vat_registered.checked && f.vat_registration_date.value ? f.vat_registration_date.value : null,
+      has_employees: f.has_employees.checked,
+      owns_property: f.owns_property.checked,
+      tax_regime: f.tax_regime.value,
+      fiscal_year_start_month: currentProfile ? currentProfile.fiscal_year_start_month : 1,
+    } });
+    profileDialog.close();
+    await loadProfile(currentCompany());
+    loadDeadlines();
+  } catch (err) {
+    if (!(err instanceof AuthError)) $("profileError").textContent = err.message;
+  }
+});
 
 async function loadCompanies(selectId) {
   try {
@@ -821,6 +1006,8 @@ async function loadCompanies(selectId) {
   if (!companies.length) {
     $("title").textContent = "Add your first company";
     $("profile").hidden = true;
+    deadlineItems = [];
+    renderDeadlines();
     historyItems = [];
     renderHistory();
     $("thread").replaceChildren(el("div", { class: "empty" },
@@ -835,15 +1022,18 @@ async function loadCompanies(selectId) {
   if (wanted && companies.some((c) => c.id === wanted)) select.value = wanted;
   store.set("companyId", select.value);
   loadProfile(currentCompany());
+  loadDeadlines();
   autosize();
 }
 
 $("company").addEventListener("change", () => {
   store.set("companyId", $("company").value);
   loadProfile(currentCompany());
+  loadDeadlines();
   newChat();
   loadHistory();
 });
+$("asOf").addEventListener("change", loadDeadlines);
 
 async function loadStatus() {
   const pill = $("aiPill");
@@ -896,6 +1086,8 @@ companyForm.addEventListener("submit", async (e) => {
     await api(`/companies/${company.id}/tax-profile`, { method: "PUT", body: {
       vat_registered: f.vat_registered.checked,
       vat_registration_date: f.vat_registered.checked && f.vat_registration_date.value ? f.vat_registration_date.value : null,
+      has_employees: f.has_employees.checked,
+      owns_property: f.owns_property.checked,
     } });
     companyDialog.close();
     await loadCompanies(company.id);

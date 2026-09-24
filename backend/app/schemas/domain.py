@@ -27,6 +27,8 @@ class TaxProfileUpdate(BaseModel):
     vat_registered: bool = False
     vat_registration_date: date | None = None
     fiscal_year_start_month: int = Field(default=1, ge=1, le=12)
+    has_employees: bool = False
+    owns_property: bool = False
 
 
 class TaxProfileRead(ORMModel, TaxProfileUpdate):

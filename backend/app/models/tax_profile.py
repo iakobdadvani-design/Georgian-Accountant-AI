@@ -1,7 +1,7 @@
 import uuid
 from datetime import date, datetime
 
-from sqlalchemy import Boolean, Date, DateTime, Enum, ForeignKey, Integer, Uuid, func
+from sqlalchemy import Boolean, Date, DateTime, Enum, ForeignKey, Integer, Uuid, false, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -19,6 +19,9 @@ class CompanyTaxProfile(Base):
     vat_registered: Mapped[bool] = mapped_column(Boolean, default=False)
     vat_registration_date: Mapped[date | None] = mapped_column(Date)
     fiscal_year_start_month: Mapped[int] = mapped_column(Integer, default=1)
+    # Drive which deadlines apply (payroll withholding returns, property tax).
+    has_employees: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
+    owns_property: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )

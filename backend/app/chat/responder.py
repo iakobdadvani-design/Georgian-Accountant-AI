@@ -362,6 +362,76 @@ def compose_reply(extraction: Extraction, results: list[RuleResult], message: st
     return "\n".join(lines)
 
 
+MONTHS: dict[Language, list[str]] = {
+    "en": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
+           "November", "December"],
+    "ka": ["იანვარი", "თებერვალი", "მარტი", "აპრილი", "მაისი", "ივნისი", "ივლისი", "აგვისტო", "სექტემბერი",
+           "ოქტომბერი", "ნოემბერი", "დეკემბერი"],
+}
+
+DEADLINE_PHRASES: dict[str, L] = {
+    "none": {
+        "en": "Based on the company's profile, no filing deadlines apply right now. If it's VAT-registered, has "
+              "employees or owns property, update the tax profile and I'll add those deadlines.",
+        "ka": "კომპანიის პროფილის მიხედვით, ამჟამად გადასახადების ვადები არ გაქვთ. თუ კომპანია დღგ-ის გადამხდელია, "
+              "ჰყავს თანამშრომლები ან ფლობს ქონებას, განაახლეთ საგადასახადო პროფილი და ამ ვადებს დავამატებ.",
+    },
+    "all_done": {
+        "en": "You're all caught up: everything due in the next few months is marked as done.",
+        "ka": "ყველაფერი შესრულებულია: მომდევნო თვეების ყველა ვადა მონიშნულია, როგორც შესრულებული.",
+    },
+    "intro": {"en": "Here's what's coming up:", "ka": "აი, რა ვადები გელით:"},
+    "item": {"en": "- {title} for {period}: by {date} ({when})", "ka": "- {title} ({period}): {date}-მდე ({when})"},
+    "more": {"en": "…and {n} more in the coming months.", "ka": "…და კიდევ {n} მომდევნო თვეებში."},
+    "today": {"en": "today", "ka": "დღეს"},
+    "tomorrow": {"en": "tomorrow", "ka": "ხვალ"},
+    "in_days": {"en": "in {n} days", "ka": "{n} დღეში"},
+    "overdue": {"en": "{n} days overdue", "ka": "ვადა გადაცილებულია {n} დღით"},
+    "year": {"en": "{y}", "ka": "{y} წელი"},
+    "unverified": {
+        "en": "These dates were taken from the Tax Code but haven't been reviewed by an accountant yet, and weekend or "
+              "holiday shifts aren't applied.",
+        "ka": "ეს ვადები საგადასახადო კოდექსიდანაა აღებული, მაგრამ ბუღალტერს ჯერ არ შეუმოწმებია; შაბათ-კვირისა და "
+              "უქმე დღეების გადატანა არ არის გათვალისწინებული.",
+    },
+}
+
+MAX_LISTED = 5
+
+
+def format_date(d, lang: Language) -> str:
+    return f"{d.day} {MONTHS[lang][d.month - 1]} {d.year}"
+
+
+def deadlines_reply(items: list, lang: Language, today) -> str:
+    """Upcoming deadlines, soonest first; overdue ones lead. Items are app.api.deadlines.DeadlineItem."""
+    if not items:
+        return DEADLINE_PHRASES["none"][lang]
+    open_items = [i for i in items if i.state != "done"]
+    if not open_items:
+        return DEADLINE_PHRASES["all_done"][lang]
+    lines = [DEADLINE_PHRASES["intro"][lang]]
+    for item in open_items[:MAX_LISTED]:
+        if item.days_left < 0:
+            when = DEADLINE_PHRASES["overdue"][lang].format(n=-item.days_left)
+        elif item.days_left == 0:
+            when = DEADLINE_PHRASES["today"][lang]
+        elif item.days_left == 1:
+            when = DEADLINE_PHRASES["tomorrow"][lang]
+        else:
+            when = DEADLINE_PHRASES["in_days"][lang].format(n=item.days_left)
+        if item.period_start.year == item.period_end.year and item.period_start.month == item.period_end.month:
+            period = f"{MONTHS[lang][item.period_start.month - 1]} {item.period_start.year}"
+        else:
+            period = DEADLINE_PHRASES["year"][lang].format(y=item.period_start.year)
+        lines.append(DEADLINE_PHRASES["item"][lang].format(title=localize(item.title, lang), period=period,
+                                                           date=format_date(item.due_date, lang), when=when))
+    if len(open_items) > MAX_LISTED:
+        lines.append(DEADLINE_PHRASES["more"][lang].format(n=len(open_items) - MAX_LISTED))
+    lines += ["", DEADLINE_PHRASES["unverified"][lang]]
+    return "\n".join(lines)
+
+
 class TemplateResponder:
     def compose(self, message: str, extraction: Extraction, results: list[RuleResult]) -> str:
         return compose_reply(extraction, results, message)

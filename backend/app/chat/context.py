@@ -51,7 +51,7 @@ def apply_context(
     intent, prior = base["intent"], base.get("entities", {})
 
     if extraction.intent == intent:
-        own_amount = INTENT_AMOUNT_FACT[intent] in extraction.entities
+        own_amount = INTENT_AMOUNT_FACT.get(intent) in extraction.entities
         if pending is None and own_amount:
             return extraction, False  # a new figure on the same topic is a new question
         merged = {**prior, **extraction.entities}
@@ -66,7 +66,7 @@ def apply_context(
         yes_no_fact = next((f for f in awaiting if f in YES_NO_FACTS), None)
         if answer is not None and yes_no_fact:
             entities = {**prior, yes_no_fact: answer}
-        elif (amount := parse_amount(message)) is not None:
+        elif intent in INTENT_AMOUNT_FACT and (amount := parse_amount(message)) is not None:
             entities = {**prior, INTENT_AMOUNT_FACT[intent]: amount}
         else:
             return extraction, False

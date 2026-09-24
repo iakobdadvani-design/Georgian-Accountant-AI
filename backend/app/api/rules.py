@@ -33,6 +33,8 @@ def company_facts(company: Company, db: Session) -> Facts:
     if company.tax_profile is not None:
         facts["company.vat_registered"] = company.tax_profile.vat_registered
         facts["company.tax_regime"] = company.tax_profile.tax_regime.value
+        facts["company.has_employees"] = company.tax_profile.has_employees or facts["company.employee_count"] > 0
+        facts["company.owns_property"] = company.tax_profile.owns_property
     return facts
 
 

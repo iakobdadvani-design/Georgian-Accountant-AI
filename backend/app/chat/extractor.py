@@ -6,7 +6,10 @@ from typing import Literal, Protocol
 
 from pydantic import BaseModel
 
-Intent = Literal["calculate_payroll_tax", "check_vat_registration", "calculate_vat", "calculate_distribution", "unknown"]
+Intent = Literal[
+    "calculate_payroll_tax", "check_vat_registration", "calculate_vat", "calculate_distribution", "list_deadlines",
+    "unknown",
+]
 Language = Literal["en", "ka"]
 
 # Which input fact each intent's amount becomes; the rules engine decides which rules read that fact.
@@ -35,6 +38,8 @@ class Extractor(Protocol):
 # Checked in order; the first group with a hit wins. Registration words beat VAT-amount words
 # ("register for VAT"), and the bare "vat"/"დღგ" only means registration when nothing more specific matched.
 KEYWORDS: list[tuple[Intent, list[str]]] = [
+    ("list_deadlines", ["deadline", "due", "calendar", "what do i need to file", "ვადა", "ვადებ", "ვადის",
+                        "კალენდარ", "დეკლარაცი", "რა უნდა ჩავაბარო", "როდის უნდა გადავიხადო"]),
     ("calculate_distribution", ["dividend", "distribut", "pay out profit", "profit tax", "დივიდენდ", "განაწილ",
                                 "მოგების გადასახად"]),
     ("calculate_payroll_tax", ["salary", "payroll", "wage", "hired", "hire", "employee", "pension", "ხელფას",
@@ -137,7 +142,7 @@ class KeywordExtractor:
             if hits:
                 entities: dict[str, str | bool] = {}
                 amount = parse_amount(message)
-                if amount is not None:
+                if amount is not None and intent in INTENT_AMOUNT_FACT:
                     entities[INTENT_AMOUNT_FACT[intent]] = amount
                 if intent == "calculate_payroll_tax" and pension_flag(message) is False:
                     entities["pension_participant"] = False

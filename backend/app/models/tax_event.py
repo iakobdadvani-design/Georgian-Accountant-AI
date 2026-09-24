@@ -2,7 +2,7 @@ import uuid
 from datetime import date, datetime
 from decimal import Decimal
 
-from sqlalchemy import Date, DateTime, Enum, ForeignKey, Numeric, String, Uuid, func
+from sqlalchemy import Date, DateTime, Enum, ForeignKey, Numeric, String, UniqueConstraint, Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -10,9 +10,10 @@ from app.models.enums import TaxEventStatus
 
 
 class TaxEvent(Base):
-    """An obligation (filing or payment) for a period. Later produced by the rules engine."""
+    """An obligation (filing or payment) for a period. Calendar deadlines are stored here once marked done."""
 
     __tablename__ = "tax_events"
+    __table_args__ = (UniqueConstraint("company_id", "rule_id", "period_start", name="uq_tax_events_company_rule_period"),)
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     company_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("companies.id", ondelete="CASCADE"), index=True)

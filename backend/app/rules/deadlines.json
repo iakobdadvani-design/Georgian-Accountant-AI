@@ -1,0 +1,105 @@
+[
+  {
+    "deadline_id": "ge.vat.monthly_return",
+    "tax_type": "vat",
+    "title": {"en": "VAT return and payment", "ka": "დღგ-ის დეკლარაცია და გადახდა"},
+    "description": {
+      "en": "File the VAT return for last month and pay the VAT.",
+      "ka": "წარადგინეთ გასული თვის დღგ-ის დეკლარაცია და გადაიხადეთ დღგ."
+    },
+    "applies": {"fact": "company.vat_registered", "op": "eq", "value": true},
+    "schedule": {"type": "monthly", "day": 15},
+    "legal_source": {
+      "citation": {"en": "Tax Code of Georgia, Art. 168(1)", "ka": "საქართველოს საგადასახადო კოდექსი, მუხლი 168(1)"},
+      "url": "https://matsne.gov.ge/en/document/view/1043717",
+      "note": "Art. 168(1): a VAT payer submits the VAT declaration not later than the 15th day of the month following the accounting period and pays the tax within the same period (rad_law snapshot). Weekend/holiday shifts are not applied. Needs accountant review.",
+      "search_query": "VAT declaration not later than 15 day month following accounting period",
+      "document_id": "1043717",
+      "language": "en"
+    },
+    "last_verified_date": null
+  },
+  {
+    "deadline_id": "ge.withholding.monthly_return",
+    "tax_type": "payroll",
+    "title": {"en": "Salary tax withholding return", "ka": "ხელფასიდან დაკავებული გადასახადის დეკლარაცია"},
+    "description": {
+      "en": "Report last month's salaries and the income tax withheld. The tax itself is paid when you pay the salary.",
+      "ka": "წარადგინეთ გასული თვის ხელფასებისა და დაკავებული საშემოსავლო გადასახადის დეკლარაცია. გადასახადი თავად ხელფასის გაცემისას იხდება."
+    },
+    "applies": {"fact": "company.has_employees", "op": "eq", "value": true},
+    "schedule": {"type": "monthly", "day": 15},
+    "legal_source": {
+      "citation": {"en": "Tax Code of Georgia, Art. 154(3) and 154(4)", "ka": "საქართველოს საგადასახადო კოდექსი, მუხლი 154(3) და 154(4)"},
+      "url": "https://matsne.gov.ge/en/document/view/1043717",
+      "note": "Art. 154(3)(a): withheld tax is transferred to the budget upon paying the amount; 154(3)(c.a): notice to the tax authority by the 15th of the month following the month of withholding; 154(4): return on disbursements by the 15th of the month following the reporting period (rad_law snapshot). Dividend withholding is reported the same way. Needs accountant review.",
+      "search_query": "tax agent return performed disbursements 15 day month following",
+      "document_id": "1043717",
+      "language": "en"
+    },
+    "last_verified_date": null
+  },
+  {
+    "deadline_id": "ge.profit.monthly_return",
+    "tax_type": "profit",
+    "title": {"en": "Profit tax return", "ka": "მოგების გადასახადის დეკლარაცია"},
+    "description": {
+      "en": "Monthly profit tax return under the distributed-profit model (dividends and other taxable payments made last month).",
+      "ka": "მოგების გადასახადის ყოველთვიური დეკლარაცია განაწილებული მოგების მოდელით (გასულ თვეში გაცემული დივიდენდი და სხვა დასაბეგრი გადახდები)."
+    },
+    "applies": {"any": [
+      {"fact": "company.legal_form", "op": "eq", "value": "LLC"},
+      {"fact": "company.legal_form", "op": "eq", "value": "JSC"}
+    ]},
+    "schedule": {"type": "monthly", "day": 15},
+    "legal_source": {
+      "citation": {"en": "Tax Code of Georgia, Art. 153(10)", "ka": "საქართველოს საგადასახადო კოდექსი, მუხლი 153(10)"},
+      "url": "https://matsne.gov.ge/en/document/view/1043717",
+      "note": "Art. 153(10): enterprises taxed under Art. 97(1-3) file a profit tax return monthly, not later than the 15th day of the month following the accounting month (rad_law snapshot). Payment timing follows the general rule (Art. 62), not yet encoded. Whether a nil return is needed for months without taxable payments needs accountant confirmation.",
+      "search_query": "monthly basis not later than 15 day month following accounting month tax return profit tax",
+      "document_id": "1043717",
+      "language": "en"
+    },
+    "last_verified_date": null
+  },
+  {
+    "deadline_id": "ge.property.annual_return",
+    "tax_type": "property",
+    "title": {"en": "Property tax return and payment", "ka": "ქონების გადასახადის დეკლარაცია და გადახდა"},
+    "description": {
+      "en": "File the annual property tax return (last year's property) and pay the tax.",
+      "ka": "წარადგინეთ ქონების გადასახადის წლიური დეკლარაცია (გასული წლის ქონებაზე) და გადაიხადეთ გადასახადი."
+    },
+    "applies": {"fact": "company.owns_property", "op": "eq", "value": true},
+    "schedule": {"type": "annual", "month": 4, "day": 1, "period": "previous_year"},
+    "legal_source": {
+      "citation": {"en": "Tax Code of Georgia, Art. 205(2)", "ka": "საქართველოს საგადასახადო კოდექსი, მუხლი 205(2)"},
+      "url": "https://matsne.gov.ge/en/document/view/1043717",
+      "note": "Art. 205(2): an enterprise files the property tax return by 1 April and pays within the same time frame; property data per the past tax year (rad_law snapshot). Needs accountant review.",
+      "search_query": "property tax return not later than 1 April calendar year",
+      "document_id": "1043717",
+      "language": "en"
+    },
+    "last_verified_date": null
+  },
+  {
+    "deadline_id": "ge.property.current_payment",
+    "tax_type": "property",
+    "title": {"en": "Property tax current payment", "ka": "ქონების გადასახადის მიმდინარე გადახდა"},
+    "description": {
+      "en": "Pay this year's property tax in advance, equal to last year's annual tax. It can be reduced if you expect the tax to fall by at least 50% and notify the tax authority by 1 June.",
+      "ka": "გადაიხადეთ მიმდინარე წლის ქონების გადასახადი წინასწარ, გასული წლის წლიური გადასახადის ოდენობით. თუ მოსალოდნელია გადასახადის სულ მცირე 50%-ით შემცირება და 1 ივნისამდე აცნობებთ საგადასახადო ორგანოს, თანხა შეიძლება შემცირდეს."
+    },
+    "applies": {"fact": "company.owns_property", "op": "eq", "value": true},
+    "schedule": {"type": "annual", "month": 6, "day": 15, "period": "current_year"},
+    "legal_source": {
+      "citation": {"en": "Tax Code of Georgia, Art. 205(3)-(4)", "ka": "საქართველოს საგადასახადო კოდექსი, მუხლი 205(3)-(4)"},
+      "url": "https://matsne.gov.ge/en/document/view/1043717",
+      "note": "Art. 205(3): current payment equal to the past year's annual tax by 15 June of the current tax year; 205(4): may be reduced or skipped if expected liability falls by at least 50% and the taxpayer notifies by 1 June (rad_law snapshot). Needs accountant review.",
+      "search_query": "current payment amount annual tax paid past tax year 15 June",
+      "document_id": "1043717",
+      "language": "en"
+    },
+    "last_verified_date": null
+  }
+]
