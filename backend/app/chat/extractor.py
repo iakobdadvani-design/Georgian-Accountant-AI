@@ -6,13 +6,15 @@ from typing import Literal, Protocol
 
 from pydantic import BaseModel
 
-Intent = Literal["calculate_payroll_tax", "check_vat_registration", "unknown"]
+Intent = Literal["calculate_payroll_tax", "check_vat_registration", "calculate_vat", "calculate_distribution", "unknown"]
 Language = Literal["en", "ka"]
 
 # Which input fact each intent's amount becomes; the rules engine decides which rules read that fact.
 INTENT_AMOUNT_FACT: dict[str, str] = {
     "calculate_payroll_tax": "gross_salary",
     "check_vat_registration": "taxable_turnover_12m",
+    "calculate_vat": "sale_amount",
+    "calculate_distribution": "distribution_amount",
 }
 
 
@@ -30,11 +32,19 @@ class Extractor(Protocol):
     def extract(self, message: str) -> Extraction: ...
 
 
-KEYWORDS: dict[str, list[str]] = {
-    "calculate_payroll_tax": ["salary", "payroll", "wage", "hired", "hire", "employee", "pension", "ხელფას",
-                              "დავიქირავე", "თანამშრომ", "საპენსიო", "პენსი"],
-    "check_vat_registration": ["vat", "revenue", "turnover", "sales", "დღგ", "შემოსავ", "ბრუნვ"],
-}
+# Checked in order; the first group with a hit wins. Registration words beat VAT-amount words
+# ("register for VAT"), and the bare "vat"/"დღგ" only means registration when nothing more specific matched.
+KEYWORDS: list[tuple[Intent, list[str]]] = [
+    ("calculate_distribution", ["dividend", "distribut", "pay out profit", "profit tax", "დივიდენდ", "განაწილ",
+                                "მოგების გადასახად"]),
+    ("calculate_payroll_tax", ["salary", "payroll", "wage", "hired", "hire", "employee", "pension", "ხელფას",
+                               "დავიქირავე", "თანამშრომ", "საპენსიო", "პენსი"]),
+    ("check_vat_registration", ["regist", "turnover", "revenue", "რეგისტრ", "ბრუნვ", "შემოსავ"]),
+    ("calculate_vat", ["invoice", "how much vat", "vat on", "vat for", "vat in", "vat amount", "price", "sold",
+                       "sell", "including vat", "incl", "excluding vat", "excl", "plus vat", "ინვოის", "ანგარიშ-ფაქტ",
+                       "ფასი", "გავყიდე", "ვყიდი", "რამდენი დღგ", "დღგ რამდენ", "ჩათვლით", "გარეშე"]),
+    ("check_vat_registration", ["vat", "sales", "დღგ"]),
+]
 
 # "not in the pension scheme", "opted out of pension", "საპენსიოში არ არის", "არ არის საპენსიო სქემაში"
 NO_PENSION = re.compile(
@@ -43,6 +53,44 @@ NO_PENSION = re.compile(
     r"|\bარ\b[^.?!]{0,25}(საპენსიო|პენსი)|(საპენსიო|პენსი)[^.?!]{0,25}\bარ\b",
     re.I,
 )
+
+
+NOT_INCLUDED = re.compile(
+    r"\b(excl|excluding|without|before|plus|net of|not includ|doesn'?t include|does not include)\b[^.?!]{0,15}\bvat\b"
+    r"|\+\s*vat|\bnet\b|\bvat\b[^.?!]{0,15}\b(on top|extra|excluded|not included)"
+    r"|დღგ-?(ის|ს)?\s*(გარეშე|გარდა)|\+\s*დღგ|პლუს\s+დღგ|დღგ-ს\s+არ\s+შეიცავს",
+    re.I,
+)
+INCLUDED = re.compile(
+    r"\b(incl|including|includes|included|inclusive|with)\b[^.?!]{0,15}\bvat\b|\bvat\b[^.?!]{0,10}\b(included|inclusive)"
+    r"|\bgross\b|დღგ-?(ის|ს)?\s*ჩათვლით|დღგ-ით|დღგ-ს\s+შეიცავს",
+    re.I,
+)
+YES = re.compile(r"^\W*(yes|yeah|yep|yup|correct|right|it does|sure|კი|დიახ|ჰო|ხო|კაი)\b", re.I)
+NO = re.compile(r"^\W*(no|nope|not|it doesn'?t|არა|არ)\b", re.I)
+TO_COMPANY = re.compile(r"\b(to|for) (a|an|another|our|the|my)? ?(company|llc|parent|holding|enterprise)\b"
+                        r"|კომპანიას|საწარმოს|შპს-ს|ჰოლდინგ", re.I)
+
+
+def vat_inclusive_flag(message: str) -> bool | None:
+    """Whether a stated price already includes VAT; None if the message doesn't say."""
+    if NOT_INCLUDED.search(message):
+        return False
+    if INCLUDED.search(message):
+        return True
+    return None
+
+
+def yes_no(message: str) -> bool | None:
+    if YES.search(message):
+        return True
+    if NO.search(message):
+        return False
+    return None
+
+
+def dividend_recipient(message: str) -> str | None:
+    return "company" if TO_COMPANY.search(message) else None
 
 
 def pension_flag(message: str) -> bool | None:
@@ -84,7 +132,7 @@ class KeywordExtractor:
     def extract(self, message: str) -> Extraction:
         text = message.lower()
         language = detect_language(message)
-        for intent, words in KEYWORDS.items():
+        for intent, words in KEYWORDS:
             hits = [w for w in words if re.search(r"\b" + re.escape(w), text)]  # word-prefix: "vat" not "private"
             if hits:
                 entities: dict[str, str | bool] = {}
@@ -93,5 +141,9 @@ class KeywordExtractor:
                     entities[INTENT_AMOUNT_FACT[intent]] = amount
                 if intent == "calculate_payroll_tax" and pension_flag(message) is False:
                     entities["pension_participant"] = False
+                if intent == "calculate_vat" and (inclusive := vat_inclusive_flag(message)) is not None:
+                    entities["vat_inclusive"] = inclusive
+                if intent == "calculate_distribution" and (recipient := dividend_recipient(message)):
+                    entities["dividend_recipient"] = recipient
                 return Extraction(intent=intent, entities=entities, language=language, matched_keywords=hits)
         return Extraction(intent="unknown", language=language)

@@ -34,7 +34,7 @@ def test_ollama_extraction_request_and_parse():
     assert seen["url"] == "http://ollama:11434/api/chat"
     body = seen["body"]
     assert body["model"] == "qwen2.5:14b" and body["stream"] is False
-    assert body["format"]["required"] == ["intent", "amount", "pension_participant", "language"]  # constrained
+    assert {"intent", "amount", "language", "vat_inclusive"} <= set(body["format"]["required"])  # constrained
     assert body["options"]["temperature"] == 0
 
 

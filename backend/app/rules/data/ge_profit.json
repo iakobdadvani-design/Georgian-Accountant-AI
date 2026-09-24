@@ -1,0 +1,182 @@
+[
+  {
+    "rule_id": "ge.profit.distribution",
+    "version": 1,
+    "title": {
+      "en": "Profit tax on distributed profit",
+      "ka": "მოგების გადასახადი განაწილებულ მოგებაზე"
+    },
+    "tax_type": "profit",
+    "effective_from": "2017-01-01",
+    "conditions": {
+      "all": [
+        {
+          "fact": "input.distribution_amount",
+          "op": "gt",
+          "value": 0
+        },
+        {
+          "any": [
+            {
+              "fact": "company.legal_form",
+              "op": "eq",
+              "value": "LLC",
+              "if_false": {
+                "en": "This calculation covers companies (LLC, JSC). Individual entrepreneurs don't pay profit tax on distributions.",
+                "ka": "ეს გაანგარიშება ეხება კომპანიებს (შპს, სს). ინდივიდუალური მეწარმე განაწილებულ მოგებაზე მოგების გადასახადს არ იხდის."
+              }
+            },
+            {
+              "fact": "company.legal_form",
+              "op": "eq",
+              "value": "JSC"
+            }
+          ]
+        }
+      ]
+    },
+    "calculation": {
+      "type": "steps",
+      "result": "profit_tax",
+      "steps": [
+        {
+          "name": "taxable_amount",
+          "label": "Distribution / 0.85",
+          "op": "divide",
+          "args": [
+            "input.distribution_amount",
+            "0.85"
+          ],
+          "round": false,
+          "show": false
+        },
+        {
+          "name": "profit_tax",
+          "label": {
+            "en": "Profit tax (15%)",
+            "ka": "მოგების გადასახადი (15%)"
+          },
+          "op": "multiply",
+          "args": [
+            "taxable_amount",
+            "0.15"
+          ]
+        },
+        {
+          "name": "company_cost",
+          "label": {
+            "en": "Total cost to the company",
+            "ka": "კომპანიის ჯამური ხარჯი"
+          },
+          "op": "add",
+          "args": [
+            "input.distribution_amount",
+            "profit_tax"
+          ]
+        }
+      ]
+    },
+    "legal_source": {
+      "citation": {
+        "en": "Tax Code of Georgia, Art. 97(1), 97(10) and 98(1)",
+        "ka": "საქართველოს საგადასახადო კოდექსი, მუხლი 97(1), 97(10) და 98(1)"
+      },
+      "url": "https://matsne.gov.ge/en/document/view/1043717",
+      "note": "Distributed profit is an object of profit taxation (Art. 97(1)(a)); the taxable amount is the disbursement divided by 0.85 (Art. 97(10)); rate 15% (Art. 98(1)); all from the rad_law snapshot. Covers dividends only: other Art. 97 objects (non-business expenses, free supplies, excess representation costs), banks/credit unions (Art. 97(12), 98(4)) and international companies are not covered. effective_from 2017-01-01 is when the distributed-profit model started, not a verified date for this rule. Needs review by a qualified accountant before last_verified_date is set.",
+      "search_query": "amount subject to profit taxation calculated by dividing 0.85",
+      "document_id": "1043717",
+      "language": "en"
+    },
+    "last_verified_date": null,
+    "is_demo": false
+  },
+  {
+    "rule_id": "ge.dividend.withholding",
+    "version": 1,
+    "title": {
+      "en": "Dividend withholding tax",
+      "ka": "დივიდენდის გადასახადი წყაროსთან"
+    },
+    "tax_type": "dividend",
+    "effective_from": "2017-01-01",
+    "conditions": {
+      "all": [
+        {
+          "fact": "input.distribution_amount",
+          "op": "gt",
+          "value": 0
+        },
+        {
+          "any": [
+            {
+              "fact": "company.legal_form",
+              "op": "eq",
+              "value": "LLC",
+              "if_false": {
+                "en": "This calculation covers companies (LLC, JSC). Individual entrepreneurs don't pay profit tax on distributions.",
+                "ka": "ეს გაანგარიშება ეხება კომპანიებს (შპს, სს). ინდივიდუალური მეწარმე განაწილებულ მოგებაზე მოგების გადასახადს არ იხდის."
+              }
+            },
+            {
+              "fact": "company.legal_form",
+              "op": "eq",
+              "value": "JSC"
+            }
+          ]
+        },
+        {
+          "fact": "input.dividend_recipient",
+          "op": "eq",
+          "value": "individual",
+          "if_false": {
+            "en": "Dividends paid to another company are not taxed at source (Tax Code Art. 130(2)).",
+            "ka": "სხვა საწარმოსთვის გადახდილი დივიდენდი წყაროსთან არ იბეგრება (საგადასახადო კოდექსი, მუხლი 130(2))."
+          }
+        }
+      ]
+    },
+    "calculation": {
+      "type": "steps",
+      "result": "withholding",
+      "steps": [
+        {
+          "name": "withholding",
+          "label": {
+            "en": "Dividend tax withheld (5%)",
+            "ka": "დაკავებული დივიდენდის გადასახადი (5%)"
+          },
+          "op": "multiply",
+          "args": [
+            "input.distribution_amount",
+            "0.05"
+          ]
+        },
+        {
+          "name": "net_dividend",
+          "label": {
+            "en": "Owner receives",
+            "ka": "მესაკუთრე მიიღებს"
+          },
+          "op": "subtract",
+          "args": [
+            "input.distribution_amount",
+            "withholding"
+          ]
+        }
+      ]
+    },
+    "legal_source": {
+      "citation": {
+        "en": "Tax Code of Georgia, Art. 130(1)",
+        "ka": "საქართველოს საგადასახადო კოდექსი, მუხლი 130(1)"
+      },
+      "url": "https://matsne.gov.ge/en/document/view/1043717",
+      "note": "Art. 130(1): dividends paid by a resident enterprise to a natural person, a non-commercial legal entity or a non-resident enterprise are taxed at source at 5% of the amount payable; Art. 130(2): dividends received by enterprises are not taxed at source. From the rad_law snapshot. Recipient types other than individual/company, treaty rates for non-residents, and the agricultural cooperative exemption (Art. 130(4.1)) are not covered. Needs review by a qualified accountant before last_verified_date is set.",
+      "search_query": "dividends paid resident enterprise natural person taxed source 5%",
+      "document_id": "1043717",
+      "language": "en"
+    },
+    "last_verified_date": null,
+    "is_demo": false
+  }
+]

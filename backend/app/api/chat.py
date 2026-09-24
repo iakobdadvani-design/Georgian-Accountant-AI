@@ -35,8 +35,10 @@ TITLE_CHARS = 60
 
 # Facts filled in when the user doesn't say, and always disclosed in the reply. Most employees are
 # auto-enrolled in the funded pension scheme (Law on Funded Pension, Art. 3).
-DEFAULT_FACTS: dict[str, dict[str, bool]] = {
+DEFAULT_FACTS: dict[str, dict[str, bool | str]] = {
     "calculate_payroll_tax": {"pension_participant": True},
+    # Small-company dividends usually go to the owner personally (Tax Code Art. 130(1)).
+    "calculate_distribution": {"dividend_recipient": "individual"},
 }
 
 
@@ -179,7 +181,8 @@ def chat(
     record = response.model_dump(mode="json", exclude={"conversation_id"})
     record["as_of"] = payload.as_of.isoformat()
     # A turn the engine couldn't act on ("hi", "thanks") keeps an unanswered question open.
-    record["pending"] = pending_state(extraction, bool(questions)) or (pending if extraction.intent == "unknown" else None)
+    missing = list(dict.fromkeys(f for r in results for f in r.missing_facts))
+    record["pending"] = pending_state(extraction, missing) or (pending if extraction.intent == "unknown" else None)
     record["topic"] = topic_state(extraction) or (previous.get("topic") if extraction.intent == "unknown" else None)
     db.add_all([
         Message(conversation_id=conversation.id, role=MessageRole.user, content=payload.message),

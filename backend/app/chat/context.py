@@ -6,7 +6,10 @@ and entities. A bare follow-up ("2500") then completes that question instead of 
 
 import re
 
-from app.chat.extractor import INTENT_AMOUNT_FACT, Extraction, Language, parse_amount
+from app.chat.extractor import INTENT_AMOUNT_FACT, Extraction, Language, parse_amount, yes_no
+
+# Facts a bare "yes"/"no" can answer when the assistant just asked about them.
+YES_NO_FACTS = {"vat_inclusive", "pension_participant"}
 
 LETTER = re.compile(r"[^\W\d_]")
 
@@ -18,10 +21,11 @@ def inherit_language(extraction: Extraction, message: str, previous: Language | 
     return extraction
 
 
-def pending_state(extraction: Extraction, needs_more: bool) -> dict | None:
-    if extraction.intent == "unknown" or not needs_more:
+def pending_state(extraction: Extraction, missing_facts: list[str]) -> dict | None:
+    if extraction.intent == "unknown" or not missing_facts:
         return None
-    return {"intent": extraction.intent, "entities": extraction.entities}
+    stated = {k: v for k, v in extraction.entities.items() if k not in extraction.assumed}
+    return {"intent": extraction.intent, "entities": stated, "awaiting": missing_facts}
 
 
 def topic_state(extraction: Extraction) -> dict | None:
@@ -57,10 +61,16 @@ def apply_context(
         return extraction, False
 
     if extraction.intent == "unknown":
-        amount = parse_amount(message)
-        if amount is not None:
+        awaiting = [f.removeprefix("input.") for f in pending.get("awaiting", [])]
+        answer = yes_no(message)
+        yes_no_fact = next((f for f in awaiting if f in YES_NO_FACTS), None)
+        if answer is not None and yes_no_fact:
+            entities = {**prior, yes_no_fact: answer}
+        elif (amount := parse_amount(message)) is not None:
             entities = {**prior, INTENT_AMOUNT_FACT[intent]: amount}
-            return Extraction(intent=intent, entities=entities, language=extraction.language,
-                              source=extraction.source), True
+        else:
+            return extraction, False
+        return Extraction(intent=intent, entities=entities, language=extraction.language,
+                          source=extraction.source), True
 
     return extraction, False

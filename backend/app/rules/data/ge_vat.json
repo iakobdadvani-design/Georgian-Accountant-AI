@@ -47,5 +47,120 @@
     },
     "last_verified_date": null,
     "is_demo": false
+  },
+  {
+    "rule_id": "ge.vat.output_vat",
+    "version": 1,
+    "title": {
+      "en": "VAT on a sale",
+      "ka": "დღგ რეალიზაციაზე"
+    },
+    "tax_type": "vat",
+    "effective_from": "2020-07-22",
+    "conditions": {
+      "fact": "company.vat_registered",
+      "op": "eq",
+      "value": true,
+      "if_false": {
+        "en": "The company isn't registered as a VAT payer, so it doesn't charge VAT on its sales.",
+        "ka": "კომპანია დღგ-ის გადამხდელად არ არის რეგისტრირებული, ამიტომ რეალიზაციაზე დღგ-ს არ არიცხავს."
+      }
+    },
+    "calculation": {
+      "type": "steps",
+      "result": "vat",
+      "steps": [
+        {
+          "name": "vat_on_net",
+          "label": "VAT on net price",
+          "op": "multiply",
+          "args": [
+            "input.sale_amount",
+            "0.18"
+          ],
+          "when": {
+            "fact": "input.vat_inclusive",
+            "op": "eq",
+            "value": false
+          },
+          "show": false
+        },
+        {
+          "name": "vat_times_18",
+          "label": "VAT-inclusive price x 18",
+          "op": "multiply",
+          "args": [
+            "input.sale_amount",
+            "18"
+          ],
+          "when": {
+            "fact": "input.vat_inclusive",
+            "op": "eq",
+            "value": true
+          },
+          "round": false,
+          "show": false
+        },
+        {
+          "name": "vat_in_gross",
+          "label": "VAT inside a VAT-inclusive price (18/118)",
+          "op": "divide",
+          "args": [
+            "vat_times_18",
+            "118"
+          ],
+          "show": false
+        },
+        {
+          "name": "vat",
+          "label": {
+            "en": "VAT (18%)",
+            "ka": "დღგ (18%)"
+          },
+          "op": "add",
+          "args": [
+            "vat_on_net",
+            "vat_in_gross"
+          ]
+        },
+        {
+          "name": "net",
+          "label": {
+            "en": "Price without VAT",
+            "ka": "ფასი დღგ-ის გარეშე"
+          },
+          "op": "subtract",
+          "args": [
+            "input.sale_amount",
+            "vat_in_gross"
+          ]
+        },
+        {
+          "name": "gross",
+          "label": {
+            "en": "Total with VAT",
+            "ka": "ჯამი დღგ-ის ჩათვლით"
+          },
+          "op": "add",
+          "args": [
+            "net",
+            "vat"
+          ]
+        }
+      ]
+    },
+    "legal_source": {
+      "citation": {
+        "en": "Tax Code of Georgia, Article 166",
+        "ka": "საქართველოს საგადასახადო კოდექსი, მუხლი 166"
+      },
+      "url": "https://matsne.gov.ge/en/document/view/1043717",
+      "note": "Rate from Tax Code Art. 166 ('The VAT rate shall be 18%') in the rad_law snapshot. The VAT inside a VAT-inclusive price is extracted as price x 18/118, which follows arithmetically from the 18% rate. Not covered: exempt and zero-rated supplies, reverse charge, input VAT credit (Art. 175-176). effective_from mirrors the chapter amendment published 22.7.2020, not a verified date. Needs review by a qualified accountant before last_verified_date is set.",
+      "search_query": "VAT rate shall be 18%",
+      "document_id": "1043717",
+      "language": "en"
+    },
+    "last_verified_date": null,
+    "is_demo": false
   }
 ]

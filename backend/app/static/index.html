@@ -338,7 +338,7 @@
 
     <div class="composer-wrap">
       <form class="composer" id="form">
-        <textarea id="message" rows="1" placeholder="Ask about salary, payroll or VAT… · მკითხეთ ხელფასზე ან დღგ-ზე" aria-label="Message"></textarea>
+        <textarea id="message" rows="1" placeholder="Ask about salaries, VAT or dividends… · მკითხეთ ხელფასზე, დღგ-ზე ან დივიდენდზე" aria-label="Message"></textarea>
         <button class="send" id="send" type="submit" aria-label="Send" disabled>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </button>
@@ -417,10 +417,10 @@ const store = {
 };
 
 const SUGGESTIONS = [
-  { tag: "Payroll", text: "I hired someone for GEL 2,500" },
-  { tag: "VAT", text: "Our turnover for the last 12 months is 150,000" },
-  { tag: "ქართულად", text: "ხელფასი 1800 ლარი" },
-  { tag: "VAT", text: "Do I need to register for VAT?" },
+  { tag: "Salary · ხელფასი", text: "I hired someone for GEL 2,500" },
+  { tag: "VAT · დღგ", text: "How much VAT is in 11,800 GEL including VAT?" },
+  { tag: "Dividends · დივიდენდი", text: "გვინდა 8 500 ლარი გავცეთ დივიდენდად" },
+  { tag: "VAT registration", text: "უნდა დავრეგისტრირდე დღგ-ის გადამხდელად?" },
 ];
 // Interface text in the language the user wrote in (Georgian strings: have a native speaker review).
 const UI = {
@@ -510,7 +510,7 @@ function renderEmpty() {
   $("thread").replaceChildren(el("div", { class: "empty" },
     el("div", { class: "logo", "aria-hidden": "true", text: "₾" }),
     el("h3", { text: "How can I help today?" }),
-    el("p", { text: "Ask about payroll or VAT in English or Georgian. Answers are computed by a rules engine and cite the Tax Code." }),
+    el("p", { text: "Ask about salaries, VAT or dividends in English or Georgian. Answers are computed by a rules engine and cite the Tax Code." }),
     el("div", { class: "empty-grid" }, SUGGESTIONS.map((s) =>
       el("button", { class: "empty-card", type: "button", onclick: () => ask(s.text) },
         el("strong", { text: s.tag }), el("span", { text: s.text }))))));

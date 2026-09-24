@@ -210,3 +210,68 @@ def test_new_salary_on_same_topic_is_a_new_question(client, company):
     # a new figure doesn't silently inherit the earlier "no pension" answer; the default is restated
     assert second["extraction"]["entities"]["gross_salary"] == "3000"
     assert second["extraction"]["assumed"] == ["pension_participant"]
+
+
+# --- VAT on a sale, profit distribution ---
+
+@pytest.mark.parametrize("message, start", [
+    ("How much VAT is in 11,800 GEL including VAT?",
+     "11 800.00 GEL including VAT contains 1 800.00 GEL of VAT, so the price without VAT is 10 000.00 GEL."),
+    ("I sold goods for 10,000 plus VAT", "VAT at 18% on 10 000.00 GEL is 1 800.00 GEL, so the total with VAT is 11 800.00 GEL."),
+    ("ინვოისი 1180 ლარი დღგ-ს ჩათვლით", "1 180.00 ლარი დღგ-ს ჩათვლით შეიცავს 180.00 ლარის დღგ-ს"),
+])
+def test_vat_on_a_sale(client, registered, message, start):
+    assert chat(client, registered, message)["reply"].startswith(start)
+
+
+def test_vat_on_a_sale_when_not_registered(client, company):
+    body = chat(client, company, "invoice for 5000 plus VAT")
+    assert body["reply"].startswith("There's no VAT to add. The company isn't registered as a VAT payer")
+
+
+@pytest.mark.parametrize("answer, expected", [
+    ("yes", "5 000.00 GEL including VAT contains 762.71 GEL of VAT"),
+    ("no", "VAT at 18% on 5 000.00 GEL is 900.00 GEL"),
+    ("კი", "5 000.00 ლარი დღგ-ს ჩათვლით შეიცავს 762.71 ლარის დღგ-ს"),
+])
+def test_vat_asks_whether_price_includes_vat_and_accepts_yes_no(client, registered, answer, expected):
+    message = "ინვოისი 5000 ლარი" if answer == "კი" else "invoice for 5000"
+    first = chat(client, registered, message)
+    assert "include" in first["reply"] or "შეიცავს" in first["reply"]
+    body = {"message": answer, "as_of": "2025-06-01", "conversation_id": first["conversation_id"]}
+    follow_up = client.post(f"/companies/{registered['id']}/chat", json=body).json()
+    assert follow_up["used_context"] is True
+    assert follow_up["reply"].startswith(expected)
+
+
+def test_dividend_distribution(client, company):
+    body = chat(client, company, "We want to pay 8,500 GEL in dividends")
+    assert body["reply"].startswith(
+        "If the company pays out 8 500 GEL in dividends, it owes 1 500.00 GEL profit tax")
+    assert "costs the company 10 000.00 GEL in total" in body["reply"]
+    assert "you withhold 425.00 GEL dividend tax (5%), so the owner receives 8 075.00 GEL" in body["reply"]
+    assert "I've assumed the dividend goes to an individual owner" in body["reply"]
+    assert {r["rule_id"] for r in body["results"]} == {"ge.profit.distribution", "ge.dividend.withholding"}
+
+
+def test_dividend_to_a_company_is_not_withheld(client, company):
+    body = chat(client, company, "dividend of 8500 to our parent company")
+    assert "1 500.00 GEL profit tax" in body["reply"]
+    assert "Dividends paid to another company are not taxed at source" in body["reply"]
+
+
+def test_profit_tax_question_without_amount_explains_the_model(client, company):
+    body = chat(client, company, "მოგების გადასახადი რამდენია?")
+    assert body["reply"].startswith("საქართველოში კომპანია მოგების გადასახადს იხდის მხოლოდ მოგების განაწილებისას")
+
+
+def test_individual_entrepreneur_has_no_distribution_profit_tax(client):
+    ie = client.post("/companies", json={
+        "name": "Nino IE", "tax_id": "01001099999", "legal_form": "IE", "registration_date": "2024-01-01"}).json()
+    body = chat(client, ie, "dividend 5000")
+    assert body["reply"].startswith("This calculation covers companies (LLC, JSC).")
+
+
+def test_intent_specific_question_is_asked_once(client, registered):
+    reply = chat(client, registered, "ინვოისი 5000 ლარი")["reply"]
+    assert reply == "რა თქმა უნდა. 5 000 ლარი უკვე შეიცავს დღგ-ს, თუ დღგ ზემოდან ემატება?"
