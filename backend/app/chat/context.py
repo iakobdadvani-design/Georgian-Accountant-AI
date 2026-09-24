@@ -6,7 +6,8 @@ and entities. A bare follow-up ("2500") then completes that question instead of 
 
 import re
 
-from app.chat.extractor import INTENT_AMOUNT_FACT, Extraction, Language, parse_amount, yes_no
+from app.chat.extractor import INTENT_AMOUNT_FACT, Extraction, parse_amount, yes_no
+from app.i18n import Language
 
 # Facts a bare "yes"/"no" can answer when the assistant just asked about them.
 YES_NO_FACTS = {"vat_inclusive", "pension_participant"}

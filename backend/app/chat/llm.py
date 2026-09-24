@@ -6,13 +6,13 @@ Privacy: only the user's message and the engine's results are sent - no stored c
 
 import json
 import logging
-import re
 from decimal import Decimal, InvalidOperation
 from typing import Literal, Protocol
 
 from pydantic import BaseModel, ValidationError
 
-from app.chat.extractor import INTENT_AMOUNT_FACT, Extraction, Intent, Language, detect_language, normalize_amount
+from app.chat.extractor import AMOUNT, INTENT_AMOUNT_FACT, Extraction, Intent, detect_language, normalize_amount
+from app.i18n import LANGUAGE_NAMES, LANGUAGES, Language
 from app.rules.schema import RuleResult
 
 log = logging.getLogger(__name__)
@@ -45,7 +45,7 @@ def parse_json(text: str | None) -> dict:
 
 # --- extraction ---
 
-EXTRACTION_SYSTEM = """You classify messages sent to a Georgian accounting assistant. Messages may be in Georgian or English.
+EXTRACTION_SYSTEM = """You classify messages sent to a Georgian accounting assistant. Messages may be in Georgian, English, Russian, German or French.
 
 Intents:
 - calculate_payroll_tax: hiring someone, salaries, wages, payroll withholding.
@@ -59,7 +59,7 @@ amount: the single money amount the user states for that intent, copied as writt
 vat_inclusive: for calculate_vat, true if the stated price already includes VAT, false if VAT comes on top; otherwise null.
 dividend_recipient: for calculate_distribution, "company" if the dividend goes to another company, "individual" if to a person; otherwise null.
 pension_participant: false only if the user says the employee is not in (or opted out of) the funded pension scheme; true if they say the employee is in it; otherwise null.
-language: "ka" if the user wrote in Georgian, otherwise "en"."""
+language: the language of the message: "ka", "en", "ru", "de" or "fr"."""
 
 EXTRACTION_SCHEMA = {
     "type": "object",
@@ -70,7 +70,7 @@ EXTRACTION_SCHEMA = {
         "pension_participant": {"anyOf": [{"type": "boolean"}, {"type": "null"}]},
         "vat_inclusive": {"anyOf": [{"type": "boolean"}, {"type": "null"}]},
         "dividend_recipient": {"anyOf": [{"type": "string", "enum": ["individual", "company"]}, {"type": "null"}]},
-        "language": {"type": "string", "enum": ["en", "ka"]},
+        "language": {"type": "string", "enum": list(LANGUAGES)},
     },
     "required": ["intent", "amount", "pension_participant", "vat_inclusive", "dividend_recipient", "language"],
     "additionalProperties": False,
@@ -90,7 +90,7 @@ class LLMExtractor:
     def __init__(self, backend: JSONBackend):
         self.backend = backend
 
-    def extract(self, message: str) -> Extraction:
+    def extract(self, message: str, preferred: Language = "en") -> Extraction:
         data = self.backend.complete_json(EXTRACTION_SYSTEM, message, EXTRACTION_SCHEMA, effort="low")
         try:
             out = _ExtractionOutput.model_validate(data)
@@ -111,7 +111,7 @@ class LLMExtractor:
             else:
                 entities[INTENT_AMOUNT_FACT[out.intent]] = amount
         # Script detection is deterministic; trust it over the model's language field.
-        return Extraction(intent=out.intent, entities=entities, language=detect_language(message),
+        return Extraction(intent=out.intent, entities=entities, language=detect_language(message, preferred),
                           source=self.backend.name)
 
 
@@ -131,7 +131,7 @@ Hard rules:
 - The engine is the source of truth. If a result's status is "insufficient_data", ask the user for exactly the facts listed in missing_facts, in plain words.
 - Base the legal mention only on each rule's legal_source.citation; never cite anything else.
 - verification "demo": say clearly these are demo rules, not real Georgian law. verification "unverified": say the rule was encoded from the Tax Code text but has not yet been reviewed by a qualified accountant.
-- Reply in {language_name}. Plain text, no markdown, at most about 100 words."""
+- Reply in {language_name}. Write amounts the way {language_name} readers expect (for example 1.960,00 in German), never changing a digit. Plain text, no markdown, at most about 100 words."""
 
 REPLY_SCHEMA = {
     "type": "object",
@@ -140,16 +140,16 @@ REPLY_SCHEMA = {
     "additionalProperties": False,
 }
 
-NUMBER = re.compile(r"\d{1,3}(?:[ ,]\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?")
-
-
 def numbers_in(text: str) -> set[Decimal]:
+    """Every number in the text, read in any of the supported locales (1,960.00 / 1.960,00 / 1 960,00)."""
     found = set()
-    for raw in NUMBER.findall(text):
-        try:
-            found.add(Decimal(re.sub(r"[ ,]", "", raw)))
-        except InvalidOperation:
-            continue
+    for match in AMOUNT.finditer(text):
+        value = normalize_amount(match.group(0))
+        if value is not None:
+            try:
+                found.add(Decimal(value))
+            except InvalidOperation:
+                continue
     return found
 
 
@@ -176,7 +176,7 @@ class LLMResponder:
             "results": [r.model_dump(mode="json", exclude={"citations"}) for r in results],
         }, ensure_ascii=False)
         user = f"USER MESSAGE:\n{message}\n\nENGINE RESULTS:\n{payload}"
-        system = REPLY_SYSTEM.format(language_name="Georgian" if extraction.language == "ka" else "English")
+        system = REPLY_SYSTEM.format(language_name=LANGUAGE_NAMES[extraction.language])
 
         data = self.backend.complete_json(system, user, REPLY_SCHEMA, effort="medium")
         reply = data.get("reply")

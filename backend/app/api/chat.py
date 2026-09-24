@@ -20,6 +20,7 @@ from app.chat.llm import AIUnavailable, LLMExtractor, LLMResponder
 from app.chat.ollama import OllamaBackend
 from app.chat.responder import TemplateResponder, compose_reply, deadlines_reply, missing_questions, suggestions_for
 from app.config import settings
+from app.i18n import Language, t
 from app.database import get_db
 from app.legal.index import LegalIndex
 from app.models import Company, Conversation, Message, User
@@ -59,6 +60,7 @@ class ChatRequest(BaseModel):
     message: str = Field(min_length=1, max_length=2000)
     as_of: date = Field(default_factory=date.today)
     conversation_id: uuid.UUID | None = Field(default=None, description="Omit to start a new conversation")
+    language: Language | None = Field(default=None, description="Interface language; used for Latin-script messages")
 
 
 class ChatResponse(BaseModel):
@@ -146,13 +148,14 @@ def chat(
     legal_index: LegalIndex | None = Depends(get_legal_index),
 ):
     conversation = open_conversation(db, user, company, payload)
-    warnings: list[str] = []
+    preferred: Language = payload.language or user.language or "en"
+    failure: str | None = None
     try:
-        extraction = pipeline.extractor.extract(payload.message)
+        extraction = pipeline.extractor.extract(payload.message, preferred)
     except AIUnavailable as e:
         log.warning("%s extraction failed, using keywords: %s", pipeline.extractor_source, e)
-        warnings.append(f"AI extraction unavailable ({e}); used keyword matching.")
-        extraction = KeywordExtractor().extract(payload.message)
+        failure = str(e)
+        extraction = KeywordExtractor().extract(payload.message, preferred)
     previous = last_assistant_payload(conversation)
     pending = previous.get("pending")
     extraction = inherit_language(extraction, payload.message, (previous.get("extraction") or {}).get("language"))
@@ -169,6 +172,7 @@ def chat(
         facts = company_facts(company, db) | {f"input.{k}": v for k, v in extraction.entities.items()}
         results = attach_citations(evaluate(rules, facts, payload.as_of), legal_index)
 
+    warnings = [t("warning.extraction", extraction.language, detail=failure)] if failure else []
     reply_source = pipeline.responder_source
     try:
         if extraction.intent == "list_deadlines":  # dates straight from the calendar; nothing to phrase
@@ -177,7 +181,7 @@ def chat(
             reply = pipeline.responder.compose(payload.message, extraction, results)
     except AIUnavailable as e:
         log.warning("%s reply failed, using template: %s", pipeline.responder_source, e)
-        warnings.append(f"AI reply unavailable ({e}); used template.")
+        warnings.append(t("warning.reply", extraction.language, detail=str(e)))
         reply, reply_source = compose_reply(extraction, results, payload.message), "template"
 
     questions = missing_questions(results, extraction.language)

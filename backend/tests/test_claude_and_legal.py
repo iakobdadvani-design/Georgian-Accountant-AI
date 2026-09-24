@@ -133,7 +133,7 @@ def test_chat_falls_back_to_template_when_reply_invents_numbers(client, company)
     ))
     body = client.post(f"/companies/{company['id']}/chat", json={"message": "salary 2500", "as_of": "2025-06-01"}).json()
     assert body["reply_source"] == "template"
-    assert "1 960.00 GEL" in body["reply"]
+    assert "1,960.00 GEL" in body["reply"]
     assert any("999.99" in w for w in body["warnings"])
 
 

@@ -3,8 +3,11 @@
     "rule_id": "ge.profit.distribution",
     "version": 1,
     "title": {
+      "ka": "მოგების გადასახადი განაწილებულ მოგებაზე",
       "en": "Profit tax on distributed profit",
-      "ka": "მოგების გადასახადი განაწილებულ მოგებაზე"
+      "ru": "Налог на прибыль с распределённой прибыли",
+      "de": "Gewinnsteuer auf ausgeschüttete Gewinne",
+      "fr": "Impôt sur les bénéfices distribués"
     },
     "tax_type": "profit",
     "effective_from": "2017-01-01",
@@ -22,8 +25,11 @@
               "op": "eq",
               "value": "LLC",
               "if_false": {
+                "ka": "ეს გაანგარიშება ეხება კომპანიებს (შპს, სს). ინდივიდუალური მეწარმე განაწილებულ მოგებაზე მოგების გადასახადს არ იხდის.",
                 "en": "This calculation covers companies (LLC, JSC). Individual entrepreneurs don't pay profit tax on distributions.",
-                "ka": "ეს გაანგარიშება ეხება კომპანიებს (შპს, სს). ინდივიდუალური მეწარმე განაწილებულ მოგებაზე მოგების გადასახადს არ იხდის."
+                "ru": "Этот расчёт относится к компаниям (ООО, АО). Индивидуальные предприниматели не платят налог на прибыль с распределения.",
+                "de": "Diese Berechnung gilt für Gesellschaften (GmbH, AG). Einzelunternehmer zahlen keine Gewinnsteuer auf Ausschüttungen.",
+                "fr": "Ce calcul concerne les sociétés (SARL, SA). Les entrepreneurs individuels ne paient pas d’impôt sur les bénéfices distribués."
               }
             },
             {
@@ -53,8 +59,11 @@
         {
           "name": "profit_tax",
           "label": {
+            "ka": "მოგების გადასახადი (15%)",
             "en": "Profit tax (15%)",
-            "ka": "მოგების გადასახადი (15%)"
+            "ru": "Налог на прибыль (15%)",
+            "de": "Gewinnsteuer (15 %)",
+            "fr": "Impôt sur les bénéfices (15 %)"
           },
           "op": "multiply",
           "args": [
@@ -65,8 +74,11 @@
         {
           "name": "company_cost",
           "label": {
+            "ka": "კომპანიის ჯამური ხარჯი",
             "en": "Total cost to the company",
-            "ka": "კომპანიის ჯამური ხარჯი"
+            "ru": "Общие расходы компании",
+            "de": "Gesamtkosten für das Unternehmen",
+            "fr": "Coût total pour l’entreprise"
           },
           "op": "add",
           "args": [
@@ -78,8 +90,11 @@
     },
     "legal_source": {
       "citation": {
+        "ka": "საქართველოს საგადასახადო კოდექსი, მუხლი 97(1), 97(10) და 98(1)",
         "en": "Tax Code of Georgia, Art. 97(1), 97(10) and 98(1)",
-        "ka": "საქართველოს საგადასახადო კოდექსი, მუხლი 97(1), 97(10) და 98(1)"
+        "ru": "Налоговый кодекс Грузии, ст. 97(1), 97(10) и 98(1)",
+        "de": "Steuergesetzbuch Georgiens, Art. 97(1), 97(10) und 98(1)",
+        "fr": "Code des impôts de Géorgie, art. 97(1), 97(10) et 98(1)"
       },
       "url": "https://matsne.gov.ge/en/document/view/1043717",
       "note": "Distributed profit is an object of profit taxation (Art. 97(1)(a)); the taxable amount is the disbursement divided by 0.85 (Art. 97(10)); rate 15% (Art. 98(1)); all from the rad_law snapshot. Covers dividends only: other Art. 97 objects (non-business expenses, free supplies, excess representation costs), banks/credit unions (Art. 97(12), 98(4)) and international companies are not covered. effective_from 2017-01-01 is when the distributed-profit model started, not a verified date for this rule. Needs review by a qualified accountant before last_verified_date is set.",
@@ -94,8 +109,11 @@
     "rule_id": "ge.dividend.withholding",
     "version": 1,
     "title": {
+      "ka": "დივიდენდის გადასახადი წყაროსთან",
       "en": "Dividend withholding tax",
-      "ka": "დივიდენდის გადასახადი წყაროსთან"
+      "ru": "Налог на дивиденды у источника",
+      "de": "Quellensteuer auf Dividenden",
+      "fr": "Retenue à la source sur les dividendes"
     },
     "tax_type": "dividend",
     "effective_from": "2017-01-01",
@@ -113,8 +131,11 @@
               "op": "eq",
               "value": "LLC",
               "if_false": {
+                "ka": "ეს გაანგარიშება ეხება კომპანიებს (შპს, სს). ინდივიდუალური მეწარმე განაწილებულ მოგებაზე მოგების გადასახადს არ იხდის.",
                 "en": "This calculation covers companies (LLC, JSC). Individual entrepreneurs don't pay profit tax on distributions.",
-                "ka": "ეს გაანგარიშება ეხება კომპანიებს (შპს, სს). ინდივიდუალური მეწარმე განაწილებულ მოგებაზე მოგების გადასახადს არ იხდის."
+                "ru": "Этот расчёт относится к компаниям (ООО, АО). Индивидуальные предприниматели не платят налог на прибыль с распределения.",
+                "de": "Diese Berechnung gilt für Gesellschaften (GmbH, AG). Einzelunternehmer zahlen keine Gewinnsteuer auf Ausschüttungen.",
+                "fr": "Ce calcul concerne les sociétés (SARL, SA). Les entrepreneurs individuels ne paient pas d’impôt sur les bénéfices distribués."
               }
             },
             {
@@ -129,8 +150,11 @@
           "op": "eq",
           "value": "individual",
           "if_false": {
+            "ka": "სხვა საწარმოსთვის გადახდილი დივიდენდი წყაროსთან არ იბეგრება (საგადასახადო კოდექსი, მუხლი 130(2)).",
             "en": "Dividends paid to another company are not taxed at source (Tax Code Art. 130(2)).",
-            "ka": "სხვა საწარმოსთვის გადახდილი დივიდენდი წყაროსთან არ იბეგრება (საგადასახადო კოდექსი, მუხლი 130(2))."
+            "ru": "Дивиденды, выплаченные другой компании, у источника не облагаются (Налоговый кодекс, ст. 130(2)).",
+            "de": "Dividenden an ein anderes Unternehmen werden an der Quelle nicht besteuert (Steuergesetzbuch, Art. 130(2)).",
+            "fr": "Les dividendes versés à une autre société ne sont pas imposés à la source (Code des impôts, art. 130(2))."
           }
         }
       ]
@@ -142,8 +166,11 @@
         {
           "name": "withholding",
           "label": {
+            "ka": "დაკავებული დივიდენდის გადასახადი (5%)",
             "en": "Dividend tax withheld (5%)",
-            "ka": "დაკავებული დივიდენდის გადასახადი (5%)"
+            "ru": "Удержанный налог на дивиденды (5%)",
+            "de": "Einbehaltene Dividendensteuer (5 %)",
+            "fr": "Impôt sur les dividendes retenu (5 %)"
           },
           "op": "multiply",
           "args": [
@@ -154,8 +181,11 @@
         {
           "name": "net_dividend",
           "label": {
+            "ka": "მესაკუთრე მიიღებს",
             "en": "Owner receives",
-            "ka": "მესაკუთრე მიიღებს"
+            "ru": "Владелец получит",
+            "de": "Eigentümer erhält",
+            "fr": "Le propriétaire reçoit"
           },
           "op": "subtract",
           "args": [
@@ -167,8 +197,11 @@
     },
     "legal_source": {
       "citation": {
+        "ka": "საქართველოს საგადასახადო კოდექსი, მუხლი 130(1)",
         "en": "Tax Code of Georgia, Art. 130(1)",
-        "ka": "საქართველოს საგადასახადო კოდექსი, მუხლი 130(1)"
+        "ru": "Налоговый кодекс Грузии, ст. 130(1)",
+        "de": "Steuergesetzbuch Georgiens, Art. 130(1)",
+        "fr": "Code des impôts de Géorgie, art. 130(1)"
       },
       "url": "https://matsne.gov.ge/en/document/view/1043717",
       "note": "Art. 130(1): dividends paid by a resident enterprise to a natural person, a non-commercial legal entity or a non-resident enterprise are taxed at source at 5% of the amount payable; Art. 130(2): dividends received by enterprises are not taxed at source. From the rad_law snapshot. Recipient types other than individual/company, treaty rates for non-residents, and the agricultural cooperative exemption (Art. 130(4.1)) are not covered. Needs review by a qualified accountant before last_verified_date is set.",

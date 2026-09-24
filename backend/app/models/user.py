@@ -14,6 +14,8 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(320), unique=True, index=True)
     full_name: Mapped[str] = mapped_column(String(255))
     password_hash: Mapped[str] = mapped_column(String(255))
+    # Interface/reply language chosen by the user (app.i18n.LANGUAGES); None until they pick one.
+    language: Mapped[str | None] = mapped_column(String(5))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     companies: Mapped[list["Company"]] = relationship(back_populates="owner", cascade="all, delete-orphan")

@@ -3,8 +3,11 @@
     "rule_id": "ge.payroll.income_tax",
     "version": 1,
     "title": {
+      "ka": "ხელფასი: საშემოსავლო გადასახადი და საპენსიო შენატანი",
       "en": "Salary: income tax and pension",
-      "ka": "ხელფასი: საშემოსავლო გადასახადი და საპენსიო შენატანი"
+      "ru": "Зарплата: подоходный налог и пенсионный взнос",
+      "de": "Gehalt: Einkommensteuer und Rentenbeitrag",
+      "fr": "Salaire : impôt sur le revenu et cotisation retraite"
     },
     "tax_type": "payroll",
     "effective_from": "2019-01-01",
@@ -13,8 +16,11 @@
       "op": "gt",
       "value": 0,
       "if_false": {
+        "ka": "ნულოვან ხელფასს საშემოსავლო გადასახადი და საპენსიო შენატანი არ ეკისრება.",
         "en": "A salary of zero has no income tax or pension contributions.",
-        "ka": "ნულოვან ხელფასს საშემოსავლო გადასახადი და საპენსიო შენატანი არ ეკისრება."
+        "ru": "С нулевой зарплаты подоходный налог и пенсионные взносы не начисляются.",
+        "de": "Bei einem Gehalt von null fallen weder Einkommensteuer noch Rentenbeiträge an.",
+        "fr": "Un salaire nul n’entraîne ni impôt sur le revenu ni cotisation retraite."
       }
     },
     "calculation": {
@@ -23,49 +29,115 @@
       "steps": [
         {
           "name": "employee_pension",
-          "label": {"en": "Employee pension (2%)", "ka": "დასაქმებულის საპენსიო შენატანი (2%)"},
+          "label": {
+            "ka": "დასაქმებულის საპენსიო შენატანი (2%)",
+            "en": "Employee pension (2%)",
+            "ru": "Пенсионный взнос работника (2%)",
+            "de": "Rentenbeitrag Arbeitnehmer (2 %)",
+            "fr": "Cotisation retraite salarié (2 %)"
+          },
           "op": "multiply",
-          "args": ["input.gross_salary", "0.02"],
-          "when": {"fact": "input.pension_participant", "op": "eq", "value": true}
+          "args": [
+            "input.gross_salary",
+            "0.02"
+          ],
+          "when": {
+            "fact": "input.pension_participant",
+            "op": "eq",
+            "value": true
+          }
         },
         {
           "name": "taxable_income",
-          "label": {"en": "Taxable income", "ka": "დასაბეგრი შემოსავალი"},
+          "label": {
+            "ka": "დასაბეგრი შემოსავალი",
+            "en": "Taxable income",
+            "ru": "Облагаемый доход",
+            "de": "Steuerpflichtiges Einkommen",
+            "fr": "Revenu imposable"
+          },
           "op": "subtract",
-          "args": ["input.gross_salary", "employee_pension"],
+          "args": [
+            "input.gross_salary",
+            "employee_pension"
+          ],
           "show": false
         },
         {
           "name": "income_tax",
-          "label": {"en": "Income tax (20%)", "ka": "საშემოსავლო გადასახადი (20%)"},
+          "label": {
+            "ka": "საშემოსავლო გადასახადი (20%)",
+            "en": "Income tax (20%)",
+            "ru": "Подоходный налог (20%)",
+            "de": "Einkommensteuer (20 %)",
+            "fr": "Impôt sur le revenu (20 %)"
+          },
           "op": "multiply",
-          "args": ["taxable_income", "0.20"]
+          "args": [
+            "taxable_income",
+            "0.20"
+          ]
         },
         {
           "name": "net_salary",
-          "label": {"en": "Take-home pay", "ka": "ხელზე ასაღები თანხა"},
+          "label": {
+            "ka": "ხელზე ასაღები თანხა",
+            "en": "Take-home pay",
+            "ru": "Сумма на руки",
+            "de": "Nettogehalt",
+            "fr": "Salaire net"
+          },
           "op": "subtract",
-          "args": ["input.gross_salary", "employee_pension", "income_tax"]
+          "args": [
+            "input.gross_salary",
+            "employee_pension",
+            "income_tax"
+          ]
         },
         {
           "name": "employer_pension",
-          "label": {"en": "Employer pension (2%, on top of salary)", "ka": "დამსაქმებლის საპენსიო შენატანი (2%, ხელფასის გარდა)"},
+          "label": {
+            "ka": "დამსაქმებლის საპენსიო შენატანი (2%, ხელფასის გარდა)",
+            "en": "Employer pension (2%, on top of salary)",
+            "ru": "Пенсионный взнос работодателя (2%, сверх зарплаты)",
+            "de": "Rentenbeitrag Arbeitgeber (2 %, zusätzlich zum Gehalt)",
+            "fr": "Cotisation retraite employeur (2 %, en plus du salaire)"
+          },
           "op": "multiply",
-          "args": ["input.gross_salary", "0.02"],
-          "when": {"fact": "input.pension_participant", "op": "eq", "value": true}
+          "args": [
+            "input.gross_salary",
+            "0.02"
+          ],
+          "when": {
+            "fact": "input.pension_participant",
+            "op": "eq",
+            "value": true
+          }
         },
         {
           "name": "employer_cost",
-          "label": {"en": "Total cost to employer", "ka": "დამსაქმებლის ჯამური ხარჯი"},
+          "label": {
+            "ka": "დამსაქმებლის ჯამური ხარჯი",
+            "en": "Total cost to employer",
+            "ru": "Общие расходы работодателя",
+            "de": "Gesamtkosten für den Arbeitgeber",
+            "fr": "Coût total pour l’employeur"
+          },
           "op": "add",
-          "args": ["input.gross_salary", "employer_pension"]
+          "args": [
+            "input.gross_salary",
+            "employer_pension"
+          ]
         }
       ]
     },
     "legal_source": {
       "citation": {
+        "ka": "საქართველოს საგადასახადო კოდექსი, მუხლი 81(1) და 82(1)(ბ³); კანონი დაგროვებითი პენსიის შესახებ, მუხლი 3(6)",
         "en": "Tax Code of Georgia, Art. 81(1) and 82(1)(b³); Law on Funded Pension, Art. 3(6)",
-        "ka": "საქართველოს საგადასახადო კოდექსი, მუხლი 81(1) და 82(1)(ბ³); კანონი დაგროვებითი პენსიის შესახებ, მუხლი 3(6)"
+        "ru": "Налоговый кодекс Грузии, ст. 81(1) и 82(1)(б³); Закон о накопительной пенсии, ст. 3(6)",
+        "de": "Steuergesetzbuch Georgiens, Art. 81(1) und 82(1)(b³); Gesetz über die kapitalgedeckte Rente, Art. 3(6)",
+        "fr": "Code des impôts de Géorgie, art. 81(1) et 82(1)(b³) ; loi sur la retraite par capitalisation, art. 3(6)"
       },
       "url": "https://matsne.gov.ge/en/document/view/1043717",
       "note": "Income tax 20% (Tax Code Art. 81(1)) and the income-tax exemption of funded-pension contributions (Art. 82(1)(b3)) are from the rad_law Tax Code snapshot. The 2% employee and 2% employer contributions are Law of Georgia on Funded Pension Art. 3(6)(a)-(b), read on matsne.gov.ge/en/document/view/4280127 on 2026-09-24; that law is not yet in the rad_law corpus. effective_from 2019-01-01 is when the funded pension scheme started, not a verified date for this exact rule. Not covered: the state contribution (paid by the state, not the employer), special rates and exemptions elsewhere in Art. 81-82, non-resident employees. Needs review by a qualified accountant before last_verified_date is set.",

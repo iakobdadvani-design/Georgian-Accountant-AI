@@ -55,8 +55,8 @@ def test_payroll_message_runs_only_payroll_rules(client, company):
     assert {line["name"]: line["amount"] for line in result["breakdown"]} == {
         "employee_pension": "50.00", "income_tax": "490.00", "net_salary": "1960.00",
         "employer_pension": "50.00", "employer_cost": "2550.00"}
-    assert body["reply"].startswith("For a gross salary of 2 500 GEL, the employee takes home 1 960.00 GEL.")
-    assert "costs you 2 550.00 GEL in total" in body["reply"]
+    assert body["reply"].startswith("For a gross salary of 2,500 GEL, the employee takes home 1,960.00 GEL.")
+    assert "costs you 2,550.00 GEL in total" in body["reply"]
     assert "I've assumed the employee is in the funded pension scheme" in body["reply"]
 
 
@@ -108,9 +108,9 @@ def test_hire_is_not_a_greeting(client, company):
 
 
 def test_suggestions_are_understood(client, company):
-    from app.chat.responder import SUGGESTIONS
-    for language, examples in SUGGESTIONS.items():
-        for example in examples:
+    from app.i18n import LANGUAGES, tlist
+    for language in LANGUAGES:
+        for example in tlist("suggestions", language):
             assert chat(client, company, example)["extraction"]["intent"] != "unknown", (language, example)
 
 
@@ -175,7 +175,7 @@ def test_below_threshold_says_no_and_why(client, company):
 
 def test_georgian_payroll_answer(client, company):
     body = chat(client, company, "ხელფასი 1800 ლარი")
-    assert body["reply"].startswith("1 800 ლარიანი ხელფასიდან თანამშრომელს ხელზე დარჩება 1 411.20 ლარი.")
+    assert body["reply"].startswith("1\u00a0800 ლარიანი ხელფასიდან თანამშრომელს ხელზე დარჩება 1\u00a0411,20 ლარი.")
     assert "ვივარაუდე, რომ თანამშრომელი დაგროვებით საპენსიო სქემაშია ჩართული" in body["reply"]
 
 
@@ -190,7 +190,7 @@ def test_bare_number_follow_up_keeps_georgian(client, company):
 def test_not_in_pension_scheme_stated_up_front(client, company):
     body = chat(client, company, "salary 2500, not in the pension scheme")
     assert body["extraction"]["assumed"] == []
-    assert body["reply"].startswith("For a gross salary of 2 500 GEL, the employee takes home 2 000.00 GEL")
+    assert body["reply"].startswith("For a gross salary of 2,500 GEL, the employee takes home 2,000.00 GEL")
     assert "I've assumed" not in body["reply"]
 
 
@@ -200,7 +200,7 @@ def test_pension_correction_recomputes_previous_salary(client, company):
     corrected = client.post(f"/companies/{company['id']}/chat", json=body).json()
     assert corrected["used_context"] is True
     assert corrected["extraction"]["entities"] == {"gross_salary": "2500", "pension_participant": False}
-    assert corrected["reply"].startswith("2 500 ლარიანი ხელფასიდან თანამშრომელს ხელზე დარჩება 2 000.00 ლარი")
+    assert corrected["reply"].startswith("2\u00a0500 ლარიანი ხელფასიდან თანამშრომელს ხელზე დარჩება 2\u00a0000,00 ლარი")
 
 
 def test_new_salary_on_same_topic_is_a_new_question(client, company):
@@ -216,9 +216,9 @@ def test_new_salary_on_same_topic_is_a_new_question(client, company):
 
 @pytest.mark.parametrize("message, start", [
     ("How much VAT is in 11,800 GEL including VAT?",
-     "11 800.00 GEL including VAT contains 1 800.00 GEL of VAT, so the price without VAT is 10 000.00 GEL."),
-    ("I sold goods for 10,000 plus VAT", "VAT at 18% on 10 000.00 GEL is 1 800.00 GEL, so the total with VAT is 11 800.00 GEL."),
-    ("ინვოისი 1180 ლარი დღგ-ს ჩათვლით", "1 180.00 ლარი დღგ-ს ჩათვლით შეიცავს 180.00 ლარის დღგ-ს"),
+     "11,800.00 GEL including VAT contains 1,800.00 GEL of VAT, so the price without VAT is 10,000.00 GEL."),
+    ("I sold goods for 10,000 plus VAT", "VAT at 18% on 10,000.00 GEL is 1,800.00 GEL, so the total with VAT is 11,800.00 GEL."),
+    ("ინვოისი 1180 ლარი დღგ-ს ჩათვლით", "1\u00a0180,00 ლარი დღგ-ს ჩათვლით შეიცავს 180,00 ლარის დღგ-ს"),
 ])
 def test_vat_on_a_sale(client, registered, message, start):
     assert chat(client, registered, message)["reply"].startswith(start)
@@ -230,9 +230,9 @@ def test_vat_on_a_sale_when_not_registered(client, company):
 
 
 @pytest.mark.parametrize("answer, expected", [
-    ("yes", "5 000.00 GEL including VAT contains 762.71 GEL of VAT"),
-    ("no", "VAT at 18% on 5 000.00 GEL is 900.00 GEL"),
-    ("კი", "5 000.00 ლარი დღგ-ს ჩათვლით შეიცავს 762.71 ლარის დღგ-ს"),
+    ("yes", "5,000.00 GEL including VAT contains 762.71 GEL of VAT"),
+    ("no", "VAT at 18% on 5,000.00 GEL is 900.00 GEL"),
+    ("კი", "5\u00a0000,00 ლარი დღგ-ს ჩათვლით შეიცავს 762,71 ლარის დღგ-ს"),
 ])
 def test_vat_asks_whether_price_includes_vat_and_accepts_yes_no(client, registered, answer, expected):
     message = "ინვოისი 5000 ლარი" if answer == "კი" else "invoice for 5000"
@@ -247,16 +247,16 @@ def test_vat_asks_whether_price_includes_vat_and_accepts_yes_no(client, register
 def test_dividend_distribution(client, company):
     body = chat(client, company, "We want to pay 8,500 GEL in dividends")
     assert body["reply"].startswith(
-        "If the company pays out 8 500 GEL in dividends, it owes 1 500.00 GEL profit tax")
-    assert "costs the company 10 000.00 GEL in total" in body["reply"]
-    assert "you withhold 425.00 GEL dividend tax (5%), so the owner receives 8 075.00 GEL" in body["reply"]
+        "If the company pays out 8,500 GEL in dividends, it owes 1,500.00 GEL profit tax")
+    assert "costs the company 10,000.00 GEL in total" in body["reply"]
+    assert "you withhold 425.00 GEL dividend tax (5%), so the owner receives 8,075.00 GEL" in body["reply"]
     assert "I've assumed the dividend goes to an individual owner" in body["reply"]
     assert {r["rule_id"] for r in body["results"]} == {"ge.profit.distribution", "ge.dividend.withholding"}
 
 
 def test_dividend_to_a_company_is_not_withheld(client, company):
     body = chat(client, company, "dividend of 8500 to our parent company")
-    assert "1 500.00 GEL profit tax" in body["reply"]
+    assert "1,500.00 GEL profit tax" in body["reply"]
     assert "Dividends paid to another company are not taxed at source" in body["reply"]
 
 
@@ -274,4 +274,4 @@ def test_individual_entrepreneur_has_no_distribution_profit_tax(client):
 
 def test_intent_specific_question_is_asked_once(client, registered):
     reply = chat(client, registered, "ინვოისი 5000 ლარი")["reply"]
-    assert reply == "რა თქმა უნდა. 5 000 ლარი უკვე შეიცავს დღგ-ს, თუ დღგ ზემოდან ემატება?"
+    assert reply == "რა თქმა უნდა. 5\u00a0000 ლარი უკვე შეიცავს დღგ-ს, თუ დღგ ზემოდან ემატება?"

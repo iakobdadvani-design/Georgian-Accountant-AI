@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.auth import end_session, get_current_user, hash_password, start_session, verify_login
 from app.database import get_db
+from app.i18n import Language
 from app.models import User
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -26,6 +27,7 @@ class RegisterRequest(BaseModel):
     email: str = Field(max_length=320)
     password: str = Field(min_length=8, max_length=128)
     full_name: str = Field(min_length=1, max_length=255)
+    language: Language | None = None
 
     _email = field_validator("email")(normalize_email)
 
@@ -43,13 +45,19 @@ class UserRead(BaseModel):
     id: uuid.UUID
     email: str
     full_name: str
+    language: Language | None = None
+
+
+class UserUpdate(BaseModel):
+    language: Language
 
 
 @router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
 def register(payload: RegisterRequest, response: Response, db: Session = Depends(get_db)):
     if db.scalar(select(User).where(User.email == payload.email)):
         raise HTTPException(status.HTTP_409_CONFLICT, "An account with this email already exists")
-    user = User(email=payload.email, full_name=payload.full_name.strip(), password_hash=hash_password(payload.password))
+    user = User(email=payload.email, full_name=payload.full_name.strip(), password_hash=hash_password(payload.password),
+                language=payload.language)
     db.add(user)
     db.commit()
     start_session(db, user, response)
@@ -72,4 +80,11 @@ def logout(request: Request, response: Response, db: Session = Depends(get_db)):
 
 @router.get("/me", response_model=UserRead)
 def me(user: User = Depends(get_current_user)):
+    return user
+
+
+@router.patch("/me", response_model=UserRead)
+def update_me(payload: UserUpdate, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    user.language = payload.language
+    db.commit()
     return user
