@@ -99,3 +99,16 @@ def test_chat_falls_back_when_ollama_is_down(client):
     assert body["extraction"]["source"] == "keyword"
     assert body["results"][0]["amount"] == "490.00"
     assert any("not reachable" in w for w in body["warnings"])
+
+
+def test_model_guess_about_vat_inclusion_is_not_trusted():
+    """Found by the eval: the model said "excludes VAT" for a price where the user said nothing."""
+    def handler(request: httpx.Request) -> httpx.Response:
+        content = json.dumps({"intent": "calculate_vat", "amount": "3,000", "vat_inclusive": False, "language": "en",
+                              "dividend_recipient": None, "pension_participant": None,
+                              "over_small_business_limit": None, "input_vat": None})
+        return httpx.Response(200, json={"message": {"role": "assistant", "content": content}})
+
+    extractor = LLMExtractor(backend_returning(handler))
+    assert extractor.extract("I sold goods for 3,000, how much VAT?").entities == {"sale_amount": "3000"}
+    assert extractor.extract("Invoice for 3,000 plus VAT").entities == {"sale_amount": "3000", "vat_inclusive": False}

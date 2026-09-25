@@ -13,6 +13,7 @@ from pydantic import BaseModel, ValidationError
 
 from app.chat.extractor import (
     AMOUNT, INTENT_AMOUNT_FACT, SECOND_AMOUNT_FACT, Extraction, Intent, detect_language, normalize_amount,
+    vat_inclusive_flag,
 )
 from app.i18n import LANGUAGE_NAMES, LANGUAGES, Language
 from app.rules.schema import RuleResult
@@ -112,9 +113,12 @@ class LLMExtractor:
         entities: dict[str, str | bool] = {}
         if out.intent == "calculate_payroll_tax" and out.pension_participant is not None:
             entities["pension_participant"] = out.pension_participant
-        if out.intent == "calculate_vat" and out.vat_inclusive is not None:
-            entities["vat_inclusive"] = out.vat_inclusive
-        if out.intent == "calculate_distribution" and out.dividend_recipient is not None:
+        # Whether a price includes VAT changes the amount, and models guess it when the user didn't say
+        # (evals: "I sold goods for 3,000" came back as net). Only the explicit wording counts; otherwise ask.
+        if out.intent == "calculate_vat" and (inclusive := vat_inclusive_flag(message)) is not None:
+            entities["vat_inclusive"] = inclusive
+        # "individual" is the disclosed default anyway; only a stated company recipient is taken from the model.
+        if out.intent == "calculate_distribution" and out.dividend_recipient == "company":
             entities["dividend_recipient"] = out.dividend_recipient
         if out.intent == "calculate_small_business_tax" and out.over_small_business_limit is not None:
             entities["over_small_business_limit"] = out.over_small_business_limit

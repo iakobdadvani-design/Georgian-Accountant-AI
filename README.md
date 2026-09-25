@@ -142,6 +142,9 @@ to correct; `translations/README.md` explains how to review it and apply the cor
 Answer quality: `backend/evals/` holds a set of realistic questions in all five languages with
 the expected answers. `python -m evals.run` scores the offline pipeline (instant);
 `--provider ollama` scores your local model, `--provider claude --model-replies` Claude (paid).
+First run (2026-09-24, qwen2.5:14b on CPU, ~80 s per question): 48/52, the same as keywords on the
+normal cases; it found one real bug (the model guessed "VAT excluded" when the user didn't say, now
+ignored) and timed out on two casual questions. Keywords: 48/52, failing only the 4 casual ones.
 
 Schema changes go through Alembic (`backend/migrations/`); see CLAUDE.md.
 
