@@ -292,6 +292,7 @@
       "day": 31,
       "period": "previous_year"
     },
+    "payment": false,
     "legal_source": {
       "citation": {
         "ka": "საქართველოს საგადასახადო კოდექსი, მუხლები 86, 93(1)",

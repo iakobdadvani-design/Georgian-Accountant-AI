@@ -140,8 +140,8 @@
   "reminders.days": "When",
   "reminders.sameDay": "On the due date",
   "reminders.daysBefore": {
-    "one": "{n} day before",
-    "other": "{n} days before"
+   "one": "{n} day before",
+   "other": "{n} days before"
   },
   "reminders.test": "Send a test",
   "reminders.done": "Done",
@@ -213,8 +213,8 @@
   "books.vatRefund": "VAT refundable",
   "books.sbTax": "Small business tax",
   "books.count": {
-    "one": "{n} record",
-    "other": "{n} records"
+   "one": "{n} record",
+   "other": "{n} records"
   },
   "books.turnover": "VAT-taxable sales, last 12 months",
   "books.turnoverHint": "{start} – {end}, without VAT. Registering for VAT becomes mandatory once this passes {limit}.",
@@ -421,7 +421,30 @@
    "ru": "Russian",
    "de": "German",
    "fr": "French"
-  }
+  },
+  "deadlines.pay": "Pay",
+  "deadlines.paid": "Paid {amount}",
+  "pay.desc": "Pay it from your own internet bank as a treasury transfer. You sign in at your bank; the app never sees your bank login or moves money.",
+  "pay.amount": "Amount (GEL)",
+  "pay.fromBooks": "From your recorded sales and purchases for {month}. Check it against your return before paying.",
+  "pay.enterAmount": "Enter the amount from your return.",
+  "pay.treasuryCode": "Treasury code",
+  "pay.bankCode": "Recipient bank code",
+  "pay.payerId": "Payer's tax ID",
+  "pay.payerName": "Payer",
+  "pay.nameHint": "Write the payer's name in Georgian, exactly as registered with the Revenue Service.",
+  "pay.oneCode": "Every tax is paid to this one code; the Revenue Service assigns the payment to what you owe.",
+  "pay.openBank": "Open your internet bank",
+  "pay.markPaid": "I've paid",
+  "pay.badAmount": "Enter the amount you paid, for example 900 or 900.50.",
+  "bank.tbc": "TBC Bank",
+  "bank.bog": "Bank of Georgia",
+  "bank.liberty": "Liberty Bank",
+  "bank.basis": "Basisbank",
+  "bank.procredit": "ProCredit Bank",
+  "bank.credo": "Credo Bank",
+  "bank.tera": "Tera Bank",
+  "bank.halyk": "Halyk Bank"
  },
  "ka": {
   "meta.locale": "ka-GE",
@@ -564,7 +587,7 @@
   "reminders.days": "როდის",
   "reminders.sameDay": "ვადის დღეს",
   "reminders.daysBefore": {
-    "other": "{n} დღით ადრე"
+   "other": "{n} დღით ადრე"
   },
   "reminders.test": "სატესტო გაგზავნა",
   "reminders.done": "მზადაა",
@@ -636,7 +659,7 @@
   "books.vatRefund": "დასაბრუნებელი დღგ",
   "books.sbTax": "მცირე ბიზნესის გადასახადი",
   "books.count": {
-    "other": "{n} ჩანაწერი"
+   "other": "{n} ჩანაწერი"
   },
   "books.turnover": "დღგ-ით დასაბეგრი გაყიდვები, ბოლო 12 თვე",
   "books.turnoverHint": "{start} – {end}, დღგ-ის გარეშე. როცა ეს თანხა ზღვარს ({limit}) გადააჭარბებს, დღგ-ის გადამხდელად რეგისტრაცია სავალდებულო ხდება.",
@@ -838,7 +861,30 @@
    "ru": "რუსული",
    "de": "გერმანული",
    "fr": "ფრანგული"
-  }
+  },
+  "deadlines.pay": "გადახდა",
+  "deadlines.paid": "გადახდილია {amount}",
+  "pay.desc": "გადაიხადეთ თქვენი ინტერნეტბანკიდან, სახაზინო გადარიცხვით. ბანკში თავად შედიხართ; აპლიკაცია ვერ ხედავს თქვენს საბანკო მონაცემებს და თანხას არ გადარიცხავს.",
+  "pay.amount": "თანხა (ლარი)",
+  "pay.fromBooks": "გამოთვლილია შენახული გაყიდვებითა და შესყიდვებით ({month}). გადახდამდე შეადარეთ დეკლარაციას.",
+  "pay.enterAmount": "შეიყვანეთ თანხა დეკლარაციიდან.",
+  "pay.treasuryCode": "სახაზინო კოდი",
+  "pay.bankCode": "მიმღები ბანკის კოდი",
+  "pay.payerId": "გადამხდელის საიდენტიფიკაციო კოდი",
+  "pay.payerName": "გადამხდელი",
+  "pay.nameHint": "გადამხდელის სახელი ჩაწერეთ ქართულად, ზუსტად ისე, როგორც შემოსავლების სამსახურშია რეგისტრირებული.",
+  "pay.oneCode": "ყველა გადასახადი ამ ერთ კოდზე იხდება; შემოსავლების სამსახური თანხას თქვენს დავალიანებებზე თავად გაანაწილებს.",
+  "pay.openBank": "გახსენით თქვენი ინტერნეტბანკი",
+  "pay.markPaid": "გადავიხადე",
+  "pay.badAmount": "შეიყვანეთ გადახდილი თანხა, მაგალითად 900 ან 900,50.",
+  "bank.tbc": "თიბისი ბანკი",
+  "bank.bog": "საქართველოს ბანკი",
+  "bank.liberty": "ლიბერთი ბანკი",
+  "bank.basis": "ბაზისბანკი",
+  "bank.procredit": "პროკრედიტ ბანკი",
+  "bank.credo": "კრედო ბანკი",
+  "bank.tera": "ტერაბანკი",
+  "bank.halyk": "ხალიკ ბანკი"
  },
  "ru": {
   "meta.locale": "ru-RU",
@@ -981,10 +1027,10 @@
   "reminders.days": "Когда",
   "reminders.sameDay": "В день срока",
   "reminders.daysBefore": {
-    "one": "за {n} день",
-    "few": "за {n} дня",
-    "many": "за {n} дней",
-    "other": "за {n} дня"
+   "one": "за {n} день",
+   "few": "за {n} дня",
+   "many": "за {n} дней",
+   "other": "за {n} дня"
   },
   "reminders.test": "Отправить тест",
   "reminders.done": "Готово",
@@ -1056,10 +1102,10 @@
   "books.vatRefund": "НДС к возврату",
   "books.sbTax": "Налог малого бизнеса",
   "books.count": {
-    "one": "{n} запись",
-    "few": "{n} записи",
-    "many": "{n} записей",
-    "other": "{n} записи"
+   "one": "{n} запись",
+   "few": "{n} записи",
+   "many": "{n} записей",
+   "other": "{n} записи"
   },
   "books.turnover": "Облагаемые НДС продажи за 12 месяцев",
   "books.turnoverHint": "{start} – {end}, без НДС. Когда сумма превысит {limit}, регистрация плательщиком НДС станет обязательной.",
@@ -1276,7 +1322,30 @@
    "ru": "русский",
    "de": "немецкий",
    "fr": "французский"
-  }
+  },
+  "deadlines.pay": "Оплатить",
+  "deadlines.paid": "Оплачено {amount}",
+  "pay.desc": "Оплатите из своего интернет-банка казначейским переводом. Вы входите в банк сами; приложение не видит ваших банковских данных и не переводит деньги.",
+  "pay.amount": "Сумма (GEL)",
+  "pay.fromBooks": "По записанным продажам и покупкам за {month}. Перед оплатой сверьте с декларацией.",
+  "pay.enterAmount": "Введите сумму из декларации.",
+  "pay.treasuryCode": "Казначейский код",
+  "pay.bankCode": "Код банка получателя",
+  "pay.payerId": "Идентификационный код плательщика",
+  "pay.payerName": "Плательщик",
+  "pay.nameHint": "Имя плательщика укажите по-грузински, точно как оно зарегистрировано в Налоговой службе.",
+  "pay.oneCode": "Все налоги платятся на этот единый код; Налоговая служба сама распределит платёж по вашим обязательствам.",
+  "pay.openBank": "Откройте свой интернет-банк",
+  "pay.markPaid": "Я оплатил(а)",
+  "pay.badAmount": "Введите уплаченную сумму, например 900 или 900,50.",
+  "bank.tbc": "TBC Банк",
+  "bank.bog": "Банк Грузии",
+  "bank.liberty": "Либерти Банк",
+  "bank.basis": "Базисбанк",
+  "bank.procredit": "ПроКредит Банк",
+  "bank.credo": "Кредо Банк",
+  "bank.tera": "Тера Банк",
+  "bank.halyk": "Халык Банк"
  },
  "de": {
   "meta.locale": "de-DE",
@@ -1419,8 +1488,8 @@
   "reminders.days": "Wann",
   "reminders.sameDay": "Am Fälligkeitstag",
   "reminders.daysBefore": {
-    "one": "{n} Tag vorher",
-    "other": "{n} Tage vorher"
+   "one": "{n} Tag vorher",
+   "other": "{n} Tage vorher"
   },
   "reminders.test": "Test senden",
   "reminders.done": "Fertig",
@@ -1492,8 +1561,8 @@
   "books.vatRefund": "Erstattungsfähige MwSt.",
   "books.sbTax": "Kleinunternehmersteuer",
   "books.count": {
-    "one": "{n} Eintrag",
-    "other": "{n} Einträge"
+   "one": "{n} Eintrag",
+   "other": "{n} Einträge"
   },
   "books.turnover": "Steuerpflichtige Verkäufe, letzte 12 Monate",
   "books.turnoverHint": "{start} – {end}, ohne MwSt. Sobald der Betrag {limit} übersteigt, wird die Mehrwertsteuer-Registrierung Pflicht.",
@@ -1700,7 +1769,30 @@
    "ru": "Russisch",
    "de": "Deutsch",
    "fr": "Französisch"
-  }
+  },
+  "deadlines.pay": "Bezahlen",
+  "deadlines.paid": "Bezahlt: {amount}",
+  "pay.desc": "Zahlen Sie per Überweisung an die Staatskasse aus Ihrem eigenen Online-Banking. Sie melden sich selbst bei Ihrer Bank an; die App sieht Ihre Bankzugangsdaten nie und bewegt kein Geld.",
+  "pay.amount": "Betrag (GEL)",
+  "pay.fromBooks": "Aus Ihren erfassten Verkäufen und Einkäufen für {month}. Vor dem Zahlen mit Ihrer Erklärung abgleichen.",
+  "pay.enterAmount": "Geben Sie den Betrag aus Ihrer Erklärung ein.",
+  "pay.treasuryCode": "Kassencode (Treasury)",
+  "pay.bankCode": "Bankcode des Empfängers",
+  "pay.payerId": "Steuernummer des Zahlers",
+  "pay.payerName": "Zahler",
+  "pay.nameHint": "Den Namen des Zahlers auf Georgisch angeben, genau wie beim Finanzamt (Revenue Service) registriert.",
+  "pay.oneCode": "Alle Steuern werden an diesen einen Code gezahlt; der Revenue Service ordnet die Zahlung Ihren Schulden zu.",
+  "pay.openBank": "Online-Banking öffnen",
+  "pay.markPaid": "Bezahlt",
+  "pay.badAmount": "Geben Sie den gezahlten Betrag ein, z. B. 900 oder 900,50.",
+  "bank.tbc": "TBC Bank",
+  "bank.bog": "Bank of Georgia",
+  "bank.liberty": "Liberty Bank",
+  "bank.basis": "Basisbank",
+  "bank.procredit": "ProCredit Bank",
+  "bank.credo": "Credo Bank",
+  "bank.tera": "Tera Bank",
+  "bank.halyk": "Halyk Bank"
  },
  "fr": {
   "meta.locale": "fr-FR",
@@ -1843,8 +1935,8 @@
   "reminders.days": "Quand",
   "reminders.sameDay": "Le jour de l’échéance",
   "reminders.daysBefore": {
-    "one": "{n} jour avant",
-    "other": "{n} jours avant"
+   "one": "{n} jour avant",
+   "other": "{n} jours avant"
   },
   "reminders.test": "Envoyer un test",
   "reminders.done": "Terminé",
@@ -1916,8 +2008,8 @@
   "books.vatRefund": "TVA remboursable",
   "books.sbTax": "Impôt de la petite entreprise",
   "books.count": {
-    "one": "{n} écriture",
-    "other": "{n} écritures"
+   "one": "{n} écriture",
+   "other": "{n} écritures"
   },
   "books.turnover": "Ventes imposables, 12 derniers mois",
   "books.turnoverHint": "{start} – {end}, hors TVA. L’enregistrement à la TVA devient obligatoire au-delà de {limit}.",
@@ -2124,6 +2216,29 @@
    "ru": "russe",
    "de": "allemand",
    "fr": "français"
-  }
+  },
+  "deadlines.pay": "Payer",
+  "deadlines.paid": "Payé : {amount}",
+  "pay.desc": "Payez depuis votre propre banque en ligne par un virement au Trésor. Vous vous connectez vous-même à votre banque ; l’application ne voit jamais vos identifiants bancaires et ne déplace pas d’argent.",
+  "pay.amount": "Montant (GEL)",
+  "pay.fromBooks": "D’après vos ventes et achats enregistrés pour {month}. Vérifiez avec votre déclaration avant de payer.",
+  "pay.enterAmount": "Saisissez le montant de votre déclaration.",
+  "pay.treasuryCode": "Code du Trésor",
+  "pay.bankCode": "Code de la banque du bénéficiaire",
+  "pay.payerId": "Numéro fiscal du payeur",
+  "pay.payerName": "Payeur",
+  "pay.nameHint": "Indiquez le nom du payeur en géorgien, exactement comme il est enregistré auprès du Service des recettes.",
+  "pay.oneCode": "Tous les impôts se paient sur ce code unique ; le Service des recettes affecte le paiement à ce que vous devez.",
+  "pay.openBank": "Ouvrir votre banque en ligne",
+  "pay.markPaid": "J’ai payé",
+  "pay.badAmount": "Saisissez le montant payé, par exemple 900 ou 900,50.",
+  "bank.tbc": "TBC Bank",
+  "bank.bog": "Bank of Georgia",
+  "bank.liberty": "Liberty Bank",
+  "bank.basis": "Basisbank",
+  "bank.procredit": "ProCredit Bank",
+  "bank.credo": "Credo Bank",
+  "bank.tera": "Tera Bank",
+  "bank.halyk": "Halyk Bank"
  }
 }

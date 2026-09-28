@@ -157,6 +157,17 @@ without one the endpoint answers 503 "not set up". Never ask for or store a user
 and don't scrape rs.ge pages. RS data only pre-fills facts the user then saves; it never feeds a
 calculation directly. Tests override `get_rs_client` and must never call RS.
 
+## Paying taxes
+
+The app never moves money or connects to a bank. A deadline's "Pay" button (`static/pay.js`) shows what to type
+into the customer's own internet bank as a treasury transfer: the single treasury code for every tax and the
+Treasury's bank code (`app/payments.py`, with sources), the company's tax ID and name, and the amount. The amount
+is pre-filled only where the books give it (`AMOUNT_FROM_BOOKS`: VAT payable, small business tax for that month,
+from the rule results, never computed in the page). "I've paid" stores the amount on the deadline's `TaxEvent`
+(status `paid`), which also stops its reminders. `"payment": false` in `deadlines.json` marks a return with
+nothing to pay. Bank tiles link to each bank's own site; use names and colours, not copied logo files.
+Initiating payments from the app (open banking) needs a National Bank licence or a licensed partner.
+
 ## Going public
 
 - Sign-in, sign-up and reset are rate-limited in memory (`ratelimit.py`, cleared per test in `conftest`).

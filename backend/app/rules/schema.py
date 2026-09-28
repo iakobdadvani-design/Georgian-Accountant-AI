@@ -199,6 +199,7 @@ class Deadline(BaseModel):
     description: LocalizedText | None = None
     applies: Condition
     schedule: Monthly | Annual = Field(discriminator="type")
+    payment: bool = Field(default=True, description="False for a return with nothing to pay (micro business)")
     legal_source: LegalSource
     last_verified_date: date | None = None
 

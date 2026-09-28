@@ -238,6 +238,9 @@
   .deadline .d-title { font-size: 13px; font-weight: 500; line-height: 1.35; }
   .deadline .d-when { font-size: 12px; color: var(--muted); }
   .deadline .d-shift { font-size: 11.5px; color: var(--faint); }
+  .deadline .d-paid { font-size: 11.5px; color: var(--ok); }
+  .deadline .d-pay { margin-top: 6px; }
+  .deadline.done .d-pay { display: none; }
   .deadline.overdue .d-when { color: var(--accent); font-weight: 500; }
   .deadline.due_soon .d-when { color: var(--warn); font-weight: 500; }
   .deadlines-empty { font-size: 12.5px; color: var(--faint); padding: 2px 4px; line-height: 1.45; }
@@ -384,6 +387,17 @@
   .rem-telegram { border: 1px solid var(--border); border-radius: 12px; padding: 12px; display: grid; gap: 8px; background: var(--surface-2); }
   .rem-telegram-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 14px; }
   .dialog-actions.start { justify-content: flex-start; margin: 0; }
+  .pay-dialog { width: min(520px, calc(100vw - 32px)); }
+  .pay-details { display: grid; gap: 8px; padding: 12px; border: 1px solid var(--border); border-radius: 12px;
+    background: var(--surface-2); }
+  .pay-details .return-line strong { overflow-wrap: anywhere; }
+  .pay-banks { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+  .bank-tile { display: flex; align-items: center; gap: 8px; padding: 9px 10px; border: 1px solid var(--border);
+    border-left: 4px solid var(--bank, var(--border)); border-radius: 10px; color: var(--ink); text-decoration: none;
+    font-size: 13px; font-weight: 500; background: var(--surface); }
+  .bank-tile:hover, .bank-tile:focus-visible { border-color: var(--bank); outline: none; }
+  .bank-tile::after { content: "↗"; margin-left: auto; color: var(--faint); font-size: 12px; }
+  #payDialog .hint-text { margin: 0; font-size: 12.5px; color: var(--faint); line-height: 1.4; }
   #remindersDialog .hint-text { margin: 0; font-size: 12.5px; color: var(--faint); }
 
   /* ---------- auth screen ---------- */
@@ -754,6 +768,27 @@
       <button class="btn primary" type="button" id="remClose" data-i18n="reminders.done"></button>
     </div>
   </div>
+</dialog>
+
+<dialog id="payDialog" class="pay-dialog">
+  <form class="form-grid" id="payForm" novalidate>
+    <h3 id="payTitle"></h3>
+    <p data-i18n="pay.desc"></p>
+    <label><span data-i18n="pay.amount"></span>
+      <input class="field" id="payAmount" inputmode="decimal" autocomplete="off">
+    </label>
+    <p class="hint-text" id="payAmountHint"></p>
+    <div class="pay-details" id="payDetails"></div>
+    <p class="hint-text" data-i18n="pay.nameHint"></p>
+    <p class="hint-text" data-i18n="pay.oneCode"></p>
+    <strong data-i18n="pay.openBank"></strong>
+    <div class="pay-banks" id="payBanks"></div>
+    <p class="rs-note err" id="payError" role="alert"></p>
+    <div class="dialog-actions">
+      <button class="btn" type="button" id="payCancel" data-i18n="common.cancel"></button>
+      <button class="btn primary" type="submit" data-i18n="pay.markPaid"></button>
+    </div>
+  </form>
 </dialog>
 
 <dialog id="profileDialog">
@@ -1434,7 +1469,10 @@ function renderDeadlines() {
       el("div", { class: "d-text" },
         el("div", { class: "d-title", text: `${loc(d.title)} · ${period}` }),
         el("div", { class: "d-when", text: t("deadlines.by", { date: shortDate(d.due_date) }) + (when ? " · " + when : "") }),
-        d.shifted_from ? el("div", { class: "d-shift", text: t("deadlines.shifted", { date: shortDate(d.shifted_from) }) }) : null));
+        d.shifted_from ? el("div", { class: "d-shift", text: t("deadlines.shifted", { date: shortDate(d.shifted_from) }) }) : null,
+        d.paid_amount != null ? el("div", { class: "d-paid", text: t("deadlines.paid", { amount: `${formatAmount(d.paid_amount)} ${t("card.currency")}` }) }) : null,
+        d.payment && d.state !== "done" ? el("button", { class: "btn small d-pay", type: "button", text: t("deadlines.pay"),
+          onclick: () => window.Pay?.open(d, period) }) : null));
   }));
   if (sorted.length > SIDEBAR_LIMIT) {
     box.append(el("button", { class: "btn small", type: "button",
@@ -1973,5 +2011,6 @@ async function startApp(me) {
 <div id="printArea" aria-hidden="true"></div>
 <script src="/static/books.js"></script>
 <script src="/static/reviews.js"></script>
+<script src="/static/pay.js"></script>
 </body>
 </html>
