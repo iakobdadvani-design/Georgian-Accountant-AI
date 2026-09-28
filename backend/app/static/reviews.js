@@ -12,6 +12,7 @@
 
   function show() {
     window.Books?.hide();
+    window.Pay?.hide();
     open = true;
     document.body.classList.add("reviews-open");
     $("reviews").hidden = false;

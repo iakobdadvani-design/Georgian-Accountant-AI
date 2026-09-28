@@ -1,4 +1,5 @@
 from app.models.company import Company
+from app.models.company_bank import CompanyBank
 from app.models.conversation import Conversation, Message
 from app.models.employee import Employee
 from app.models.reminder import ReminderLog
@@ -11,6 +12,7 @@ from app.models.user import AuthSession, PasswordReset, User
 __all__ = [
     "AuthSession",
     "Company",
+    "CompanyBank",
     "CompanyTaxProfile",
     "Conversation",
     "Employee",

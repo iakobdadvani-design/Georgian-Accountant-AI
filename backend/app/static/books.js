@@ -25,6 +25,7 @@
   function show() {
     if (!currentCompany()) return;
     window.Reviews?.hide();
+    window.Pay?.hide();
     open = true;
     document.body.classList.add("books-open");
     $("books").hidden = false;

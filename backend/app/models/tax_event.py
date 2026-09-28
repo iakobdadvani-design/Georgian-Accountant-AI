@@ -22,6 +22,7 @@ class TaxEvent(Base):
     period_end: Mapped[date] = mapped_column(Date)
     due_date: Mapped[date] = mapped_column(Date, index=True)
     amount: Mapped[Decimal | None] = mapped_column(Numeric(14, 2))
+    paid_on: Mapped[date | None] = mapped_column(Date)  # with status paid: when the customer paid
     status: Mapped[TaxEventStatus] = mapped_column(
         Enum(TaxEventStatus, native_enum=False), default=TaxEventStatus.pending
     )

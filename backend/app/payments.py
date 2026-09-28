@@ -5,6 +5,8 @@ Every tax is paid to one treasury code; the Revenue Service assigns the money to
 signs in themselves.
 """
 
+import re
+
 from pydantic import BaseModel, HttpUrl
 
 TREASURY_BANK_CODE = "TRESGE22"
@@ -44,3 +46,15 @@ class PaymentDetails(BaseModel):
     bank_code: str = TREASURY_BANK_CODE
     banks: list[Bank] = BANKS
     sources: list[str] = SOURCES
+
+
+GEORGIAN_IBAN = re.compile(r"^GE\d{2}[A-Z]{2}\d{16}$")
+
+
+def normalize_iban(text: str) -> str | None:
+    """A Georgian IBAN without spaces, upper-case, if its format and ISO 13616 check digits are right."""
+    iban = re.sub(r"\s+", "", text).upper()
+    if not GEORGIAN_IBAN.match(iban):
+        return None
+    digits = "".join(str(int(c, 36)) for c in iban[4:] + iban[:4])
+    return iban if int(digits) % 97 == 1 else None

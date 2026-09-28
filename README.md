@@ -83,10 +83,11 @@ tax data (income, declarations, debts) is behind the RS login and isn't accessed
 PDF: every answer with a calculation has "Save as PDF" (under the reply), and the Sales & expenses
 screen has "Print / PDF" for the month. Both open the browser's print dialog; choose "Save as PDF".
 
-Paying: each open deadline has "Pay", which shows the treasury transfer details to enter in your own
-internet bank (one treasury code, 101001000, for every tax; your tax ID and name; the amount, filled in
-from Sales & expenses for VAT and small business tax) and links to the main banks. "I've paid" records the
-amount and marks the deadline done. The app never connects to a bank or moves money.
+Tax payments (sidebar, under Sales & expenses): save the bank you pay from (and optionally its IBAN),
+see what's due with amounts, grouped by date, and what you've paid. "Pay", there or next to any deadline,
+shows the treasury transfer details to copy (one treasury code, 101001000, for every tax; your tax ID and
+name; the amount, filled in from Sales & expenses for VAT and small business tax) and opens your bank's
+internet banking. "I've paid" records the amount and date. The app never signs in to a bank or moves money.
 
 Deadline reminders (bell icon next to your account) go by email and/or Telegram, a chosen number of
 days before each deadline. Set `SMTP_*` and/or `TELEGRAM_BOT_TOKEN` in `.env` (see `.env.example`),

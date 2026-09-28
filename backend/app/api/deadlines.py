@@ -47,6 +47,7 @@ class DoneUpdate(BaseModel):
     done: bool
     paid_amount: Decimal | None = Field(default=None, ge=0, max_digits=14, decimal_places=2,
                                         description="With done: record the deadline as paid, with this amount")
+    paid_on: date | None = Field(default=None, description="When it was paid; default: as_of")
 
 
 def amount_due(company: Company, db: Session, deadline_id: str, period_start: date) -> Decimal | None:
@@ -140,6 +141,7 @@ def mark_done(
     paid = payload.done and payload.paid_amount is not None
     event.status = TaxEventStatus.paid if paid else TaxEventStatus.filed if payload.done else TaxEventStatus.pending
     event.amount = payload.paid_amount if paid else None
+    event.paid_on = (payload.paid_on or as_of) if paid else None
     db.commit()
     return next(i for i in deadline_items(company, db, as_of, 12, include_past_done=True, with_amounts=True)
                 if i.key == occurrence.key)

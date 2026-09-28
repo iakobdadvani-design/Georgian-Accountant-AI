@@ -62,3 +62,41 @@ def test_micro_business_return_has_nothing_to_pay(client):
     assert (item["deadline_id"], item["payment"]) == ("ge.micro_business.annual_return", False)
     url = f"/companies/{ie['id']}/deadlines/ge.micro_business.annual_return/2026-01-01"
     assert client.put(url, params={"as_of": "2027-03-01"}, json={"done": True, "paid_amount": "5"}).status_code == 422
+
+
+IBAN = "GE74TB1234567890123456"  # valid check digits (ISO 13616), made up
+
+
+def test_save_change_and_remove_the_bank(client, company):
+    url = f"/companies/{company['id']}/bank"
+    assert client.get(url).json() is None
+    saved = client.put(url, json={"bank_id": "tbc", "iban": " ge74 tb12 3456 7890 1234 56 "})
+    assert saved.status_code == 200 and saved.json() == {"bank_id": "tbc", "iban": IBAN}
+    assert client.put(url, json={"bank_id": "bog", "iban": ""}).json() == {"bank_id": "bog", "iban": None}
+    assert client.get(url).json()["bank_id"] == "bog"
+    assert client.delete(url).status_code == 204
+    assert client.get(url).json() is None and client.delete(url).status_code == 404
+
+
+@pytest.mark.parametrize("body", [{"bank_id": "nope"}, {"bank_id": "tbc", "iban": "GE72TB1234567890123456"},
+                                  {"bank_id": "tbc", "iban": "DE89370400440532013000"}])
+def test_bad_bank_choices_are_refused(client, company, body):
+    assert client.put(f"/companies/{company['id']}/bank", json=body).status_code == 422
+
+
+def test_bank_is_private(client, company, make_client):
+    client.put(f"/companies/{company['id']}/bank", json={"bank_id": "tbc"})
+    assert make_client("pay-intruder@example.com").get(f"/companies/{company['id']}/bank").status_code == 404
+
+
+def test_history_lists_paid_taxes_newest_first(client, company):
+    base = f"/companies/{company['id']}/deadlines"
+    client.put(f"{base}/ge.vat.monthly_return/2026-08-01", params={"as_of": TODAY},
+               json={"done": True, "paid_amount": "900", "paid_on": "2026-09-14"})
+    client.put(f"{base}/ge.withholding.monthly_return/2026-08-01", params={"as_of": TODAY},
+               json={"done": True, "paid_amount": "400"})
+    client.put(f"{base}/ge.profit.monthly_return/2026-08-01", params={"as_of": TODAY}, json={"done": True})  # filed only
+    history = client.get(f"/companies/{company['id']}/payments/history").json()
+    assert [(h["deadline_id"], h["amount"], h["paid_on"]) for h in history] == [
+        ("ge.withholding.monthly_return", "400.00", TODAY), ("ge.vat.monthly_return", "900.00", "2026-09-14")]
+    assert history[0]["title"]["en"]
