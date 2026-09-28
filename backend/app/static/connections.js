@@ -7,7 +7,8 @@
   const formatIban = (iban) => iban.replace(/(.{4})/g, "$1 ").trim();
   const yes = (b) => t(b ? "common.yes" : "common.no");
   const note = (cls = "") => el("p", { class: "rs-note " + cls, role: "status" });
-  const SHORT = { tbc: "TBC", bog: "BoG", liberty: "LB", basis: "BB", procredit: "PCB", credo: "CB", tera: "TB", halyk: "HB" };
+  const TINTS = ["indigo", "teal", "violet", "blue", "amber", "green", "wine"];
+  const tint = (name) => TINTS[[...name].reduce((h, ch) => (h * 31 + ch.codePointAt(0)) % 9973, 7) % TINTS.length];
 
   /* ---------- companies & RS.ge ---------- */
   let coOpen = false;
@@ -100,7 +101,7 @@
 
     return el("section", { class: "panel entity" + (connected ? "" : " todo") },
       el("div", { class: "entity-head" },
-        el("span", { class: "entity-mark", "aria-hidden": "true", text: initialsOf(company.name) }),
+        el("span", { class: "entity-mark", "aria-hidden": "true", style: `--c:var(--c-${tint(company.name)})`, text: initialsOf(company.name) }),
         el("div", { class: "entity-name" }, el("b", { text: company.name }),
           el("span", { text: `${company.tax_id} · ${t("legal." + company.legal_form)}` })),
         rsState(rs),
@@ -241,7 +242,7 @@
   }
 
   function bankCard(account) {
-    const b = info(account.bank_id) || { id: account.bank_id, color: "#5b6270", url: null };
+    const b = info(account.bank_id) || { id: account.bank_id, color: "#5b6270", url: null, logo: null };
     const company = currentCompany();
     const url = `/companies/${company.id}/banks/${account.id}`;
     const body = editing === account.id
@@ -270,7 +271,7 @@
         ];
     return el("section", { class: "panel entity" },
       el("div", { class: "entity-head" },
-        el("span", { class: "bank-mark", style: `--bank:${b.color}`, "aria-hidden": "true", text: SHORT[b.id] || "" }),
+        b.logo ? el("img", { class: "bank-mark", src: b.logo, alt: "", width: "48", height: "48" }) : null,
         el("div", { class: "entity-name" }, el("b", { text: t(`bank.${b.id}`) }),
           el("span", { text: [account.iban ? formatIban(account.iban) : null, account.currency].filter(Boolean).join(" · ") })),
         account.is_primary ? el("span", { class: "state bad", text: t("bk.primary") }) : null),
@@ -281,7 +282,8 @@
     const company = currentCompany();
     const pick = el("div", { class: "bank-pick", role: "group", "aria-label": t("bk.add") }, catalog.banks.map((b) =>
       el("button", { type: "button", style: `--bank:${b.color}`, "aria-pressed": String(adding && adding.bank_id === b.id),
-        text: t(`bank.${b.id}`), onclick: () => { adding = { bank_id: b.id }; renderBanks(); } })));
+        onclick: () => { adding = { bank_id: b.id }; renderBanks(); } },
+        el("img", { class: "bank-logo", src: b.logo, alt: "", width: "26", height: "26" }), el("span", { text: t(`bank.${b.id}`) }))));
     const parts = [el("h2", { text: t("bk.add") }), pick];
     if (adding) {
       parts.push(accountForm({ is_primary: !banks.length }, async (v) => {

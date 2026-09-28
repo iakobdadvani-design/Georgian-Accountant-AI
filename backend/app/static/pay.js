@@ -55,8 +55,9 @@
   }
 
   function openBankLink(info, cls = "btn") {
-    return el("a", { class: `${cls} bank-open`, href: info.url, target: "_blank", rel: "noopener noreferrer",
-      style: `--bank:${info.color}`, text: t("pay.openIn", { bank: t(`bank.${info.id}`) }) });
+    return el("a", { class: `${cls} bank-open`, href: info.url, target: "_blank", rel: "noopener noreferrer", style: `--bank:${info.color}` },
+      el("img", { class: "bank-logo", src: info.logo, alt: "", width: "26", height: "26" }),
+      el("span", { text: t("pay.openIn", { bank: t(`bank.${info.id}`) }) }));
   }
 
   /* ---------- screen ---------- */

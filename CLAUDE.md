@@ -175,8 +175,9 @@ the Treasury's bank code in `app/payments.py`, with sources; the company's tax I
 the primary bank's internet banking. Amounts are pre-filled only where the books give them (`AMOUNT_FROM_BOOKS`:
 VAT payable, small business tax for that month, from rule results, never computed in the page). "I've paid"
 stores the amount and date on the deadline's `TaxEvent` (status `paid`, `paid_on`), which also stops its
-reminders. `"payment": false` in `deadlines.json` marks a return with nothing to pay. Banks are shown by name and
-colour, not copied logo files. Linking a bank for real or paying from the app (open banking) needs a National
+reminders. `"payment": false` in `deadlines.json` marks a return with nothing to pay. Bank logos are each bank's own
+app icon (App Store listing) in `static/banks/<id>.png`, used only to name the bank; they're trademarks, so
+confirm with the banks before a public launch. Linking a bank for real or paying from the app (open banking) needs a National
 Bank licence or a licensed partner; don't imitate it.
 
 ## Going public

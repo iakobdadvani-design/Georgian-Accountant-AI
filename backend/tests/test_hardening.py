@@ -125,3 +125,11 @@ def test_delete_account_needs_the_password_and_removes_everything(make_client):
 def test_privacy_page(make_client):
     body = make_client().get("/privacy").text
     assert "კონფიდენციალურობის პოლიტიკა" in body and "Privacy policy" in body and "Draft." in body
+
+
+def test_page_and_scripts_are_revalidated(make_client):
+    client = make_client()
+    for path in ("/", "/static/i18n.json", "/static/banks/tbc.png"):
+        response = client.get(path)
+        assert response.status_code == 200 and response.headers["cache-control"] == "no-cache", path
+    assert "cache-control" not in client.get("/health").headers

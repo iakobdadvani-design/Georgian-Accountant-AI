@@ -32,7 +32,7 @@
 
   function dateBadge(d) {
     const [, m, day] = d.due_date.split("-").map(Number);
-    return el("div", { class: "date-badge" + (d.state === "overdue" ? " overdue" : "") },
+    return el("div", { class: `date-badge ${d.tax_type}` + (d.state === "overdue" ? " overdue" : "") },
       el("b", { text: String(day) }), el("span", { text: lookup("date.monthsShort")[m - 1] }));
   }
 
@@ -103,8 +103,11 @@
     return card;
   }
 
-  function stat(label, value, hint, hintClass = "") {
-    return el("div", { class: "stat" }, el("span", { class: "stat-label", text: label }),
+  const UP = "M7 17L17 7M9 7h8v8", DOWN = "M7 7l10 10M17 9v8H9", PERCENT = "M19 5L5 19M6.5 9a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM17.5 20a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z";
+
+  function stat(label, value, hint, hintClass = "", tone = "", path = PERCENT) {
+    return el("div", { class: "stat " + tone },
+      el("div", { class: "stat-top" }, el("span", { class: "stat-ico" }, icon(path, 16)), el("span", { class: "stat-label", text: label })),
       el("span", { class: "stat-value", text: value }),
       hint ? el("span", { class: "stat-hint " + hintClass, text: hint }) : null);
   }
@@ -116,14 +119,14 @@
     const pct = before > 0 ? Math.round(((income - before) / before) * 100) : null;
     const change = pct === null || pct === 0 ? null : t("ov.change", { pct: `${pct > 0 ? "+" : ""}${pct}%` });
     const third = summary.vat_payable && summary.vat_payable.status === "applies"
-      ? stat(t("ov.vatDue", { month }), gel(summary.vat_payable.amount))
+      ? stat(t("ov.vatDue", { month }), gel(summary.vat_payable.amount), null, "", "wine")
       : summary.small_business_tax && summary.small_business_tax.status === "applies"
-        ? stat(t("ov.sbDue", { month }), gel(summary.small_business_tax.amount))
+        ? stat(t("ov.sbDue", { month }), gel(summary.small_business_tax.amount), null, "", "wine")
         : stat(t("books.turnover"), gel(summary.turnover_12m.amount),
-            summary.turnover_12m.limit ? `/ ${gel(summary.turnover_12m.limit)}` : null);
+            summary.turnover_12m.limit ? `/ ${gel(summary.turnover_12m.limit)}` : null, "", "blue");
     return el("div", { class: "stats" },
-      stat(t("ov.sales", { month }), gel(summary.totals.income), change, pct > 0 ? "up" : ""),
-      stat(t("ov.expenses", { month }), gel(summary.totals.expense), tp("books.count", summary.totals.count)),
+      stat(t("ov.sales", { month }), gel(summary.totals.income), change, pct > 0 ? "up" : "", "green", UP),
+      stat(t("ov.expenses", { month }), gel(summary.totals.expense), tp("books.count", summary.totals.count), "", "amber", DOWN),
       third);
   }
 
@@ -169,11 +172,12 @@
   }
 
   function quickCard() {
-    const quick = (d, text, action) => el("button", { class: "quick", type: "button", onclick: action }, icon(d), el("span", { text }));
+    const quick = (d, text, action, colour) => el("button", { class: "quick", type: "button", onclick: action },
+      el("span", { class: "quick-ico", style: `--c:var(--c-${colour})` }, icon(d)), el("span", { text }));
     return el("section", { class: "panel" }, el("h2", { text: t("ov.quick") }),
-      quick("M12 5v14M5 12h14", t("ov.addRecord"), () => { window.Books?.startAdd(); go("books"); }),
-      quick("M12 15V3M7 8l5-5 5 5M4 17v3h16v-3", t("ov.setup.statement"), () => window.Books?.openImport()),
-      quick("M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z", t("ov.ask"), () => { go("assistant"); $("message").focus(); }));
+      quick("M12 5v14M5 12h14", t("ov.addRecord"), () => { window.Books?.startAdd(); go("books"); }, "teal"),
+      quick("M12 15V3M7 8l5-5 5 5M4 17v3h16v-3", t("ov.setup.statement"), () => window.Books?.openImport(), "green"),
+      quick("M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z", t("ov.ask"), () => { go("assistant"); $("message").focus(); }, "violet"));
   }
 
   function render() {
@@ -187,7 +191,7 @@
     if (!company) {
       const first = user ? user.full_name.split(" ")[0] : "";
       $("overviewInner").replaceChildren(head, el("div", { class: "ov-grid" },
-        el("section", { class: "panel hero" },
+        el("section", { class: "panel hero welcome" },
           el("h2", { text: first ? t("welcome.title", { name: first }) : t("welcome.titleNoName") }),
           el("p", { class: "muted", text: t("welcome.desc") }),
           el("div", { class: "hero-actions" }, el("button", { class: "btn primary", type: "button", text: t("welcome.add"), onclick: openCompanyDialog }))),

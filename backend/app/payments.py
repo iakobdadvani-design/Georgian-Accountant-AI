@@ -7,7 +7,7 @@ signs in themselves.
 
 import re
 
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel, HttpUrl, computed_field
 
 TREASURY_BANK_CODE = "TRESGE22"
 TREASURY_CODE = "101001000"
@@ -22,16 +22,22 @@ class Bank(BaseModel):
     url: HttpUrl
     color: str
 
+    @computed_field
+    @property
+    def logo(self) -> str:
+        """The bank's own app icon (from its App Store listing), served by this app."""
+        return f"/static/banks/{self.id}.png"
+
 
 BANKS = [
     Bank(id="tbc", url="https://tbconline.ge/tbcrd/", color="#00A3E0"),
     Bank(id="bog", url="https://bonline.bog.ge/", color="#FF6000"),
-    Bank(id="liberty", url="https://www.libertybank.ge/", color="#D2232A"),
+    Bank(id="liberty", url="https://www.libertybank.ge/", color="#DF3025"),
     Bank(id="basis", url="https://bb.ge/", color="#1B3F8B"),
     Bank(id="procredit", url="https://www.procreditbank.ge/", color="#D8232A"),
     Bank(id="credo", url="https://credobank.ge/", color="#00843D"),
-    Bank(id="tera", url="https://terabank.ge/", color="#5B2C83"),
-    Bank(id="halyk", url="https://halykbank.ge/", color="#00805F"),
+    Bank(id="tera", url="https://terabank.ge/", color="#A0226D"),
+    Bank(id="halyk", url="https://halykbank.ge/", color="#008566"),
 ]
 
 # Deadline -> the books summary field whose rule result is the amount due for that deadline's month.

@@ -24,6 +24,8 @@ def test_payment_details_are_one_treasury_code():
     assert (details["treasury_code"], details["bank_code"]) == ("101001000", "TRESGE22")
     assert {"tbc", "bog"} <= {b["id"] for b in details["banks"]}
     assert all(b["url"].startswith("https://") for b in details["banks"])
+    from app.main import STATIC_DIR
+    assert all((STATIC_DIR / b["logo"].removeprefix("/static/")).is_file() for b in details["banks"])
 
 
 def test_vat_amount_due_comes_from_the_recorded_month(client, company):
