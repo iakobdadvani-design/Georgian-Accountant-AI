@@ -57,6 +57,7 @@ Intents:
 - calculate_distribution: paying out profit / dividends to owners, or profit tax on a distribution.
 - calculate_small_business_tax: tax of an individual entrepreneur with small business status (1% / 3% on income).
 - calculate_vat_payable: how much VAT a VAT payer owes for a period after deducting input VAT on purchases.
+- calculate_late_penalty: what paying a tax or filing a return late costs (penalty interest, fines).
 - list_deadlines: what is due, filing or payment deadlines, the tax calendar.
 - unknown: anything else.
 
@@ -65,6 +66,9 @@ vat_inclusive: for calculate_vat, true if the stated price already includes VAT,
 dividend_recipient: for calculate_distribution, "company" if the dividend goes to another company, "individual" if to a person; otherwise null.
 input_vat: for calculate_vat_payable, the deductible VAT on purchases the user states, copied as written; the VAT on sales goes in amount. null if not stated.
 over_small_business_limit: for calculate_small_business_tax, true if the user says gross income this calendar year has exceeded GEL 500 000, false if they say it hasn't; otherwise null.
+days_late: for calculate_late_penalty, the number of days late the user states, digits only; otherwise null.
+months_late: for calculate_late_penalty, the number of months late the user states, only if they give months and not days; otherwise null.
+For calculate_late_penalty, amount is the tax that was paid or is due late.
 pension_participant: false only if the user says the employee is not in (or opted out of) the funded pension scheme; true if they say the employee is in it; otherwise null.
 language: the language of the message: "ka", "en", "ru", "de" or "fr"."""
 
@@ -73,17 +77,20 @@ EXTRACTION_SCHEMA = {
     "properties": {
         "intent": {"type": "string", "enum": ["calculate_payroll_tax", "check_vat_registration", "calculate_vat",
                                               "calculate_distribution", "calculate_small_business_tax",
-                                              "calculate_vat_payable", "list_deadlines", "unknown"]},
+                                              "calculate_vat_payable", "calculate_late_penalty", "list_deadlines",
+                                              "unknown"]},
         "amount": {"anyOf": [{"type": "string"}, {"type": "null"}]},
         "pension_participant": {"anyOf": [{"type": "boolean"}, {"type": "null"}]},
         "vat_inclusive": {"anyOf": [{"type": "boolean"}, {"type": "null"}]},
         "dividend_recipient": {"anyOf": [{"type": "string", "enum": ["individual", "company"]}, {"type": "null"}]},
         "over_small_business_limit": {"anyOf": [{"type": "boolean"}, {"type": "null"}]},
         "input_vat": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+        "days_late": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+        "months_late": {"anyOf": [{"type": "string"}, {"type": "null"}]},
         "language": {"type": "string", "enum": list(LANGUAGES)},
     },
     "required": ["intent", "amount", "pension_participant", "vat_inclusive", "dividend_recipient",
-                 "over_small_business_limit", "input_vat", "language"],
+                 "over_small_business_limit", "input_vat", "days_late", "months_late", "language"],
     "additionalProperties": False,
 }
 
@@ -96,6 +103,8 @@ class _ExtractionOutput(BaseModel):
     dividend_recipient: Literal["individual", "company"] | None = None
     over_small_business_limit: bool | None = None
     input_vat: str | None = None
+    days_late: str | None = None
+    months_late: str | None = None
     language: Language
 
 
@@ -123,8 +132,12 @@ class LLMExtractor:
         if out.intent == "calculate_small_business_tax" and out.over_small_business_limit is not None:
             entities["over_small_business_limit"] = out.over_small_business_limit
         amounts = {INTENT_AMOUNT_FACT.get(out.intent): out.amount}
-        if out.intent in SECOND_AMOUNT_FACT:
+        if out.intent == "calculate_vat_payable":
             amounts[SECOND_AMOUNT_FACT[out.intent]] = out.input_vat
+        if out.intent == "calculate_late_penalty":
+            for name, raw in (("days_late", out.days_late), ("months_late", out.months_late)):
+                if raw and raw.strip().isdigit():
+                    entities[name] = raw.strip()
         for fact, raw in amounts.items():
             if fact is None or raw is None:
                 continue

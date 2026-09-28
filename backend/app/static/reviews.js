@@ -62,7 +62,7 @@
     if (calculation.type === "fixed") return el("p", {}, el("code", { text: String(calculation.amount) }));
     return el("ol", { class: "step-list" }, calculation.steps.map((s) => el("li", {},
       el("strong", { text: loc(s.label) }), " ",
-      el("code", { text: `${s.name} = ${s.op === "max" ? `max(${s.args.join(", ")})` : s.args.join(` ${STEP_OPS[s.op]} `)}${s.round === false ? "" : " → 0.01"}` }),
+      el("code", { text: `${s.name} = ${s.op === "max" || s.op === "min" ? `${s.op}(${s.args.join(", ")})` : s.args.join(` ${STEP_OPS[s.op]} `)}${s.round === false ? "" : " → 0.01"}` }),
       s.when ? el("div", { class: "cond-why" }, t("review.onlyWhen") + " ", el("code", {
         text: `${s.when.fact} ${OPS[s.when.op]} ${JSON.stringify(s.when.value)}` })) : null,
       s.name === calculation.result ? el("span", { class: "tag income", text: t("review.result") }) : null)));

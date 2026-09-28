@@ -55,7 +55,7 @@ class Step(BaseModel):
 
     name: str = Field(pattern=r"^[a-z_][a-z0-9_]*$")
     label: LocalizedText
-    op: Literal["multiply", "divide", "subtract", "add", "max"]  # max: e.g. payable = max(balance, 0)
+    op: Literal["multiply", "divide", "subtract", "add", "max", "min"]  # max: payable = max(balance, 0); min: a cap
     args: list[str] = Field(min_length=2)
     when: "Condition | None" = None  # if false, the step is 0 (e.g. not in the pension scheme)
     round: bool = True  # money steps round half-up to 0.01; intermediate bases may stay exact

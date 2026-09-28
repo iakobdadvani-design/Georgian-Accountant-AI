@@ -14,7 +14,7 @@ from app.i18n import Language
 
 Intent = Literal[
     "calculate_payroll_tax", "check_vat_registration", "calculate_vat", "calculate_distribution",
-    "calculate_small_business_tax", "calculate_vat_payable", "list_deadlines", "unknown",
+    "calculate_small_business_tax", "calculate_vat_payable", "calculate_late_penalty", "list_deadlines", "unknown",
 ]
 
 # Which input fact each intent's amount becomes; the rules engine decides which rules read that fact.
@@ -25,9 +25,10 @@ INTENT_AMOUNT_FACT: dict[str, str] = {
     "calculate_distribution": "distribution_amount",
     "calculate_small_business_tax": "small_business_income",
     "calculate_vat_payable": "output_vat",
+    "calculate_late_penalty": "tax_due",
 }
 # Intents that take a second amount; context.py fills whichever one the engine is still waiting for.
-SECOND_AMOUNT_FACT: dict[str, str] = {"calculate_vat_payable": "input_vat"}
+SECOND_AMOUNT_FACT: dict[str, str] = {"calculate_vat_payable": "input_vat", "calculate_late_penalty": "days_late"}
 
 
 class Extraction(BaseModel):
@@ -49,6 +50,15 @@ class Extractor(Protocol):
 # Checked in order; the first group with a hit wins. Registration words beat VAT-amount words
 # ("register for VAT"), and a bare "VAT" only means registration when nothing more specific matched.
 KEYWORDS: list[tuple[Intent, list[str]]] = [
+    # Before deadlines: "I missed the deadline by 10 days" asks what being late costs.
+    ("calculate_late_penalty", [
+        "penalt", "paid late", "pay late", "paying late", "filed late", "file late", "late payment", "late filing",
+        "fined", "fine for", "late fee", "overdue tax", "missed the deadline", "days late", "months late",
+        "საურავ", "ჯარიმ", "დაგვიანებ", "ვადაგადაცილ", "გადავაცილე", "დღით გვიან", "გვიან გადავიხადე",
+        "пеня", "пени$", "пеню", "штраф", "просроч", "опоздал", "с опозданием",
+        "säumnis", "verspät", "bußgeld", "zu spät", "verzugszins",
+        "pénalit", "penalit", "amende", "en retard", "de retard", "intérêts de retard", "interets de retard",
+    ]),
     ("list_deadlines", [
         "deadline", "due", "calendar", "what do i need to file",
         "ვადა", "ვადებ", "ვადის", "კალენდარ", "დეკლარაცი", "რა უნდა ჩავაბარო", "როდის უნდა გადავიხადო",
@@ -212,6 +222,25 @@ def vat_amounts(message: str) -> dict[str, str]:
     return found
 
 
+# "20 days", "20 დღით", "на 20 дней", "20 Tage", "20 jours"; "2 months", "2 თვით", "2 месяца", "2 Monate", "2 mois"
+DAYS = re.compile(r"(\d{1,4})\s*-?\s*(days?\b|დღ|дн|день|дня|дней|tage?n?\b|jours?\b)", re.I)
+MONTHS = re.compile(r"(\d{1,3})\s*-?\s*(months?\b|თვ|месяц|monat|monate\b|mois\b)", re.I)
+
+
+def lateness_entities(message: str) -> dict[str, str]:
+    """How late the user says the payment or return is, and the tax amount (the largest other number)."""
+    found: dict[str, str] = {}
+    spans = []
+    if m := DAYS.search(message):
+        found["days_late"], spans = m.group(1), [m.span(1)]
+    elif m := MONTHS.search(message):
+        found["months_late"], spans = m.group(1), [m.span(1)]
+    amounts = [a for m in AMOUNT.finditer(message) if m.span(1) not in spans and (a := normalize_amount(m.group(0)))]
+    if amounts:
+        found["tax_due"] = max(amounts, key=Decimal)
+    return found
+
+
 def vat_inclusive_flag(message: str) -> bool | None:
     """Whether a stated price already includes VAT; None if the message doesn't say."""
     if NOT_INCLUDED.search(message):
@@ -328,6 +357,9 @@ class KeywordExtractor:
                 if intent == "calculate_vat_payable":
                     entities.pop("output_vat", None)
                     entities.update(vat_amounts(message))
+                if intent == "calculate_late_penalty":
+                    entities.pop("tax_due", None)
+                    entities.update(lateness_entities(message))
                 if intent == "calculate_small_business_tax" and over_limit_flag(message):
                     entities["over_small_business_limit"] = True
                     # The largest number is then usually the limit itself, not this month's income.

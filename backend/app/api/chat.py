@@ -1,7 +1,7 @@
 import logging
 import uuid
 from dataclasses import dataclass
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from typing import Literal, Protocol
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -29,6 +29,7 @@ from app.models import Company, Conversation, Message, Transaction, User
 from app.models.enums import MessageRole
 from app.reviews import apply_to_results
 from app.rules.engine import evaluate, referenced_facts
+from app.rules.lateness import lateness
 from app.rules.loader import get_rules
 from app.rules.schema import RuleResult
 
@@ -71,6 +72,17 @@ def with_books(extraction: Extraction, company: Company, db: Session, as_of: dat
     return extraction.model_copy(update={"entities": {**entities, wanted: value},
                                          "assumed": [*extraction.assumed, wanted],
                                          "from_books": {**extraction.from_books, wanted: shown}})
+
+
+def with_lateness(extraction: Extraction, as_of: date) -> Extraction:
+    """"20 days late" also gives the started months the late-filing fine counts (Art. 274), taking the delay as
+    ending on as_of. Date arithmetic only; the penalties are rules."""
+    entities = extraction.entities
+    if extraction.intent != "calculate_late_penalty" or "days_late" not in entities or "months_late" in entities:
+        return extraction
+    days = int(str(entities["days_late"]))
+    late = lateness(as_of - timedelta(days=days), as_of)
+    return extraction.model_copy(update={"entities": {**entities, "months_late": str(late.months)}})
 
 
 def with_defaults(extraction: Extraction) -> Extraction:
@@ -189,7 +201,7 @@ def chat(
     pending = previous.get("pending")
     extraction = inherit_language(extraction, payload.message, (previous.get("extraction") or {}).get("language"))
     extraction, used_context = apply_context(extraction, payload.message, pending, previous.get("topic"))
-    extraction = with_defaults(with_books(extraction, company, db, payload.as_of))
+    extraction = with_lateness(with_defaults(with_books(extraction, company, db, payload.as_of)), payload.as_of)
 
     results: list[RuleResult] = []
     deadlines: list[DeadlineItem] = []

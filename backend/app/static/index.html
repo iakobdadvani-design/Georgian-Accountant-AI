@@ -177,6 +177,8 @@
   .hero-amount.none { font-size: 22px; letter-spacing: -.01em; color: var(--muted); font-weight: 600; }
   .hero-title { font-size: 16px; font-weight: 600; margin-top: 8px; }
   .hero-sub { font-size: 13.5px; color: var(--muted); margin-top: 2px; }
+  .hero-penalty { font-size: 13.5px; font-weight: 600; margin-top: 6px; color: #ffb4c2; }
+  .dl-penalty { font-size: 12.5px; font-weight: 600; color: var(--accent); }
   .hero-actions { display: flex; gap: 10px; flex-wrap: wrap; }
   .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
   .stat { --c: var(--c-slate); background: color-mix(in srgb, var(--c) 7%, var(--surface)); border: 1px solid color-mix(in srgb, var(--c) 22%, var(--border));
@@ -1718,6 +1720,14 @@ const initialsOf = (name) => name.replace(/[„“"'«»()]/g, "").replace(/^(�
 
 /* ---------- deadlines ---------- */
 let deadlineItems = [];
+
+// "If paid and filed today: penalty interest 4,05 ₾ · late filing fine 45,00 ₾" (amounts from the penalty rules).
+function penaltyText(d) {
+  if (!d.penalties || !d.penalties.length) return null;
+  const money = (v) => `${formatAmount(v)} ${t("card.currency")}`;
+  const items = d.penalties.map((p) => t(p.rule_id === "ge.penalty.late_payment" ? "pen.interest" : "pen.fine", { amount: money(p.amount) }));
+  return t("pen.ifToday", { items: items.join(" · ") });
+}
 
 // The sidebar shows how many open deadlines need attention; the calendar and overview show the dates.
 function renderDeadlines() {

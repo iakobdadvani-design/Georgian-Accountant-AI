@@ -15,7 +15,7 @@ from app.rules.schema import RuleResult, localize
 KNOWN_FACTS = {
     "input.gross_salary", "input.taxable_turnover_12m", "company.vat_registered", "input.sale_amount",
     "input.vat_inclusive", "input.distribution_amount", "company.tax_regime", "input.small_business_income",
-    "input.output_vat", "input.input_vat",
+    "input.output_vat", "input.input_vat", "input.tax_due", "input.days_late", "input.months_late",
 }
 KNOWN_ASSUMPTIONS = {"pension_participant", "dividend_recipient", "over_small_business_limit"}
 
@@ -177,6 +177,31 @@ def _vat_payable(results: list[RuleResult], extraction: Extraction, lang: Langua
     return None
 
 
+def _penalty(results: list[RuleResult], extraction: Extraction, lang: Language) -> list[str] | None:
+    interest = next((r for r in results if r.rule_id == "ge.penalty.late_payment"), None)
+    fine = next((r for r in results if r.rule_id == "ge.penalty.late_filing"), None)
+    if interest is None or fine is None:
+        return None
+    tax = _entity(extraction, "tax_due", lang)
+    if "input.tax_due" in interest.missing_facts:
+        return [t("phrase.penalty_ask", lang)]
+    fine_amount = format_amount(fine.amount, lang) if fine.status == "applies" else None
+    if interest.status == "applies":
+        v = _values(interest, lang)
+        late = tplural("deadline.overdue", int(str(extraction.entities["days_late"])), lang)
+        lines = [t("phrase.penalty_interest", lang, interest=v["interest"], tax=tax, late=late, total=v["total"])]
+        if fine_amount:
+            lines.append(t("phrase.penalty_fine", lang, fine=fine_amount))
+        return [" ".join(lines)]
+    if fine_amount and interest.missing_facts == ["input.days_late"]:
+        return [t("phrase.penalty_fine_only", lang, fine=fine_amount, tax=tax)]
+    if interest.missing_facts == ["input.days_late"]:
+        return [t("phrase.penalty_ask_days", lang, tax=tax)]
+    if interest.status == "not_applicable":
+        return [localize(interest.reasons[0], lang)]
+    return None
+
+
 def _generic(result: RuleResult, lang: Language) -> str | None:
     title = localize(result.title, lang)
     if result.status == "applies":
@@ -205,6 +230,7 @@ def compose_reply(extraction: Extraction, results: list[RuleResult], message: st
         "calculate_distribution": lambda: _distribution(results, extraction, lang),
         "calculate_small_business_tax": lambda: _small_business(results, extraction, lang),
         "calculate_vat_payable": lambda: _vat_payable(results, extraction, lang),
+        "calculate_late_penalty": lambda: _penalty(results, extraction, lang),
     }.get(extraction.intent, lambda: None)()
     lines = specific if specific is not None else [text for r in results if (text := _generic(r, lang))]
 

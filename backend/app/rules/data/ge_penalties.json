@@ -1,0 +1,205 @@
+[
+  {
+    "rule_id": "ge.penalty.late_payment",
+    "version": 1,
+    "title": {
+      "ka": "საურავი გადასახადის დაგვიანებით გადახდისთვის",
+      "en": "Penalty interest for late payment",
+      "ru": "Пеня за просрочку уплаты налога",
+      "de": "Säumniszuschlag für verspätete Zahlung",
+      "fr": "Intérêts de retard de paiement"
+    },
+    "tax_type": "penalty",
+    "effective_from": "2024-03-14",
+    "conditions": {
+      "all": [
+        {
+          "fact": "input.tax_due",
+          "op": "gt",
+          "value": 0,
+          "if_false": {
+            "ka": "გადასახდელი გადასახადი არ არის, ამიტომ საურავი არ ერიცხება (მუხლი 272(2)).",
+            "en": "There is no unpaid tax, so no penalty interest is charged (Art. 272(2)).",
+            "ru": "Неуплаченного налога нет, поэтому пеня не начисляется (ст. 272(2)).",
+            "de": "Es gibt keine unbezahlte Steuer, daher fällt kein Säumniszuschlag an (Art. 272(2)).",
+            "fr": "Il n’y a pas d’impôt impayé, donc aucun intérêt de retard n’est dû (art. 272(2))."
+          }
+        },
+        {
+          "fact": "input.days_late",
+          "op": "gt",
+          "value": 0,
+          "if_false": {
+            "ka": "გადასახადი ვადაში იყო გადახდილი, ამიტომ საურავი არ ერიცხება: ის ვადის გასვლის მომდევნო დღიდან ირიცხება (მუხლი 272(2)).",
+            "en": "The tax was paid on time, so there is no penalty interest: it only starts the day after the due date (Art. 272(2)).",
+            "ru": "Налог уплачен в срок, поэтому пени нет: она начисляется со дня, следующего за сроком уплаты (ст. 272(2)).",
+            "de": "Die Steuer wurde fristgerecht gezahlt, daher fällt kein Säumniszuschlag an: Er beginnt erst am Tag nach dem Fälligkeitstermin (Art. 272(2)).",
+            "fr": "L’impôt a été payé à temps, donc pas d’intérêts de retard : ils ne courent qu’à partir du lendemain de l’échéance (art. 272(2))."
+          }
+        }
+      ]
+    },
+    "calculation": {
+      "type": "steps",
+      "result": "interest",
+      "steps": [
+        {
+          "name": "days_counted",
+          "label": {
+            "ka": "ვადაგადაცილებული დღეები (მაქსიმუმ 3 წელი)",
+            "en": "Overdue days counted (at most 3 years)",
+            "ru": "Учтённые дни просрочки (не более 3 лет)",
+            "de": "Berücksichtigte Verzugstage (höchstens 3 Jahre)",
+            "fr": "Jours de retard comptés (3 ans au plus)"
+          },
+          "op": "min",
+          "args": ["input.days_late", "1095"],
+          "round": false
+        },
+        {
+          "name": "interest",
+          "label": {
+            "ka": "საურავი (0,05% დღეში)",
+            "en": "Penalty interest (0.05% a day)",
+            "ru": "Пеня (0,05% в день)",
+            "de": "Säumniszuschlag (0,05 % pro Tag)",
+            "fr": "Intérêts de retard (0,05 % par jour)"
+          },
+          "op": "multiply",
+          "args": ["input.tax_due", "days_counted", "0.0005"]
+        },
+        {
+          "name": "total",
+          "label": {
+            "ka": "სულ გადასახდელი საურავით",
+            "en": "Total to pay with interest",
+            "ru": "Итого к уплате с пеней",
+            "de": "Insgesamt zu zahlen mit Zuschlag",
+            "fr": "Total à payer avec intérêts"
+          },
+          "op": "add",
+          "args": ["input.tax_due", "interest"]
+        }
+      ]
+    },
+    "legal_source": {
+      "citation": {
+        "ka": "საქართველოს საგადასახადო კოდექსი, მუხლი 272(2), (2¹), (4)",
+        "en": "Tax Code of Georgia, Article 272(2), (2¹), (4)",
+        "ru": "Налоговый кодекс Грузии, статья 272(2), (2¹), (4)",
+        "de": "Steuergesetzbuch Georgiens, Artikel 272(2), (2¹), (4)",
+        "fr": "Code des impôts de Géorgie, article 272(2), (2¹), (4)"
+      },
+      "url": "https://matsne.gov.ge/en/document/view/1043717",
+      "note": "Art. 272(4): 0.05% of the outstanding tax liability for each overdue day; the day of payment counts as overdue. 272(2): assessed for each overdue day from the day after the due date, on the outstanding liability net of overpaid taxes (overpayments not encoded: input.tax_due is the net unpaid amount). 272(2¹): not assessed once 3 years have passed since the obligation to assess it arose; encoded as at most 1 095 days (leap days ignored). Not encoded: 272(3)-(3¹) insolvency/rehabilitation, 272(6) interest from the 30th day after a Tax Notice, 272(7) exempt budget suppliers and projects. days_late = payment date minus due date. effective_from is the publication date of Law No 4056 (14.3.2024), the latest amendment to Art. 272 in the rad_law snapshot, not a verified entry-into-force date. Needs review by a qualified accountant before last_verified_date is set.",
+      "search_query": "penalty interest 0.05% outstanding tax liability each overdue day",
+      "document_id": "1043717",
+      "language": "en"
+    },
+    "last_verified_date": null,
+    "is_demo": false
+  },
+  {
+    "rule_id": "ge.penalty.late_filing",
+    "version": 1,
+    "title": {
+      "ka": "ჯარიმა დეკლარაციის დაგვიანებით წარდგენისთვის",
+      "en": "Fine for filing a tax return late",
+      "ru": "Штраф за несвоевременную подачу декларации",
+      "de": "Bußgeld für verspätete Abgabe der Steuererklärung",
+      "fr": "Amende pour dépôt tardif de la déclaration"
+    },
+    "tax_type": "penalty",
+    "effective_from": "2018-12-31",
+    "conditions": {
+      "all": [
+        {
+          "fact": "input.tax_due",
+          "op": "gt",
+          "value": 0,
+          "if_false": {
+            "ka": "დეკლარაციით გადასახდელი გადასახადი ნულია, ამიტომ დაგვიანებისთვის ჯარიმა არ ეკისრება (მუხლი 274(3)).",
+            "en": "The tax due on the return is zero, so there is no fine for filing it late (Art. 274(3)).",
+            "ru": "Налог к уплате по декларации равен нулю, поэтому штрафа за просрочку нет (ст. 274(3)).",
+            "de": "Die Steuer laut Erklärung ist null, daher gibt es kein Bußgeld für die verspätete Abgabe (Art. 274(3)).",
+            "fr": "L’impôt dû selon la déclaration est nul, donc pas d’amende pour dépôt tardif (art. 274(3))."
+          }
+        },
+        {
+          "fact": "input.months_late",
+          "op": "gt",
+          "value": 0,
+          "if_false": {
+            "ka": "დეკლარაცია ვადაში იყო წარდგენილი, ამიტომ ჯარიმა არ ეკისრება (მუხლი 274).",
+            "en": "The return was filed on time, so there is no fine (Art. 274).",
+            "ru": "Декларация подана в срок, поэтому штрафа нет (ст. 274).",
+            "de": "Die Erklärung wurde fristgerecht abgegeben, daher gibt es kein Bußgeld (Art. 274).",
+            "fr": "La déclaration a été déposée à temps, donc pas d’amende (art. 274)."
+          }
+        }
+      ]
+    },
+    "calculation": {
+      "type": "steps",
+      "result": "fine",
+      "steps": [
+        {
+          "name": "fine_monthly",
+          "label": {
+            "ka": "5% ყოველ დაწყებულ თვეზე (დაგვიანება 2 თვემდე)",
+            "en": "5% for each started month (up to 2 months late)",
+            "ru": "5% за каждый начатый месяц (просрочка до 2 месяцев)",
+            "de": "5 % je angefangenen Monat (bis 2 Monate Verspätung)",
+            "fr": "5 % par mois entamé (jusqu’à 2 mois de retard)"
+          },
+          "op": "multiply",
+          "args": ["input.tax_due", "input.months_late", "0.05"],
+          "when": {"fact": "input.months_late", "op": "lte", "value": 2},
+          "show": false
+        },
+        {
+          "name": "fine_flat",
+          "label": {
+            "ka": "10% (დაგვიანება 2 თვეზე მეტი)",
+            "en": "10% (more than 2 months late)",
+            "ru": "10% (просрочка более 2 месяцев)",
+            "de": "10 % (mehr als 2 Monate Verspätung)",
+            "fr": "10 % (plus de 2 mois de retard)"
+          },
+          "op": "multiply",
+          "args": ["input.tax_due", "0.10"],
+          "when": {"fact": "input.months_late", "op": "gt", "value": 2},
+          "show": false
+        },
+        {
+          "name": "fine",
+          "label": {
+            "ka": "ჯარიმა",
+            "en": "Fine",
+            "ru": "Штраф",
+            "de": "Bußgeld",
+            "fr": "Amende"
+          },
+          "op": "add",
+          "args": ["fine_monthly", "fine_flat"]
+        }
+      ]
+    },
+    "legal_source": {
+      "citation": {
+        "ka": "საქართველოს საგადასახადო კოდექსი, მუხლი 274",
+        "en": "Tax Code of Georgia, Article 274",
+        "ru": "Налоговый кодекс Грузии, статья 274",
+        "de": "Steuergesetzbuch Georgiens, Artikel 274",
+        "fr": "Code des impôts de Géorgie, article 274"
+      },
+      "url": "https://matsne.gov.ge/en/document/view/1043717",
+      "note": "Art. 274(1): filing late by no more than 2 months: 5% of the tax to be assessed on the return for each overdue complete/incomplete month (incomplete months count as one), at most 30% in total (never reached within 2 months). 274(2): more than 2 months late: 10% of that tax. 274(3): no fine if the tax on the return is zero. months_late = the number of started months from the due date to the filing date. effective_from is the publication date of Law No 4225 (31.12.2018), the latest amendment to Art. 274 in the rad_law snapshot, not a verified entry-into-force date. Needs review by a qualified accountant before last_verified_date is set.",
+      "search_query": "violation of the time limit for filing tax return fine 5% each overdue month",
+      "document_id": "1043717",
+      "language": "en"
+    },
+    "last_verified_date": null,
+    "is_demo": false
+  }
+]

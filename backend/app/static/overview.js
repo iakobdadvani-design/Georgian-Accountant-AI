@@ -96,7 +96,8 @@
         el("div", {},
           el("div", { class: "hero-amount" + (fromBooks ? "" : " none"), text: fromBooks ? gel(next.amount_due) : t("payments.noAmount") }),
           el("div", { class: "hero-title", text: `${loc(next.title)} · ${periodLabel(next)}` }),
-          el("div", { class: "hero-sub", text: whenText(next) })),
+          el("div", { class: "hero-sub", text: whenText(next) }),
+          penaltyText(next) ? el("div", { class: "hero-penalty", text: penaltyText(next) }) : null),
         el("div", { class: "hero-actions" },
           fromBooks ? el("button", { class: "btn", type: "button", text: t("ov.howCalculated"), onclick: () => go("books") }) : null,
           payButton(next, true))));
@@ -134,7 +135,8 @@
     const rows = open.slice(0, 5).map((d) => el("div", { class: `dl-row ${d.state}` },
       dateBadge(d),
       el("div", { class: "dl-text" }, el("span", { class: "dl-title", text: `${loc(d.title)} · ${periodLabel(d)}` }),
-        el("span", { class: "dl-when", text: whenText(d) })),
+        el("span", { class: "dl-when", text: whenText(d) }),
+        penaltyText(d) ? el("span", { class: "dl-penalty", text: penaltyText(d) }) : null),
       d.amount_due != null ? el("span", { class: "dl-amount", text: gel(d.amount_due) })
         : el("span", { class: "dl-amount none", text: d.payment ? t("payments.noAmount") : "" }),
       payButton(d) || el("span")));
@@ -274,7 +276,8 @@
             dateBadge(d),
             el("div", { class: "dl-text", title: loc(d.description) || "" },
               el("span", { class: "dl-title", text: `${loc(d.title)} · ${periodLabel(d)}` }),
-              el("span", { class: "dl-when", text: whenText(d) + (d.shifted_from ? ` · ${t("deadlines.shifted", { date: shortDate(d.shifted_from) })}` : "") })),
+              el("span", { class: "dl-when", text: whenText(d) + (d.shifted_from ? ` · ${t("deadlines.shifted", { date: shortDate(d.shifted_from) })}` : "") }),
+              penaltyText(d) ? el("span", { class: "dl-penalty", text: penaltyText(d) }) : null),
             el("span", { class: "dl-amount" + (amount ? "" : " none"), text: amount || "" }),
             el("label", { class: "cal-check" }, check, el("span", { text: t("deadlines.markDone") })),
             payButton(d) || el("span"));

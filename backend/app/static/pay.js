@@ -196,8 +196,9 @@
     $("payDue").textContent = whenText(item);
     $("payDue").className = `pay-due ${item.state}`;
     $("payAmount").value = item.amount_due != null ? formatAmount(item.amount_due) : "";
-    $("payAmountHint").textContent = item.amount_due != null
-      ? t("pay.fromBooks", { month: monthYear(item.period_start) }) : t("pay.enterAmount");
+    $("payAmountHint").textContent = (item.amount_due != null
+      ? t("pay.fromBooks", { month: monthYear(item.period_start) }) : t("pay.enterAmount"))
+      + (penaltyText(item) ? ` ${penaltyText(item)}.` : "");
     $("payError").textContent = "";
     renderDialog();
     $("payDialog").showModal();

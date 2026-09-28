@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.api.books import summary
+from app.api.books import run, summary
 from app.api.companies import get_company
 from app.facts import company_facts
 from app.database import get_db
@@ -16,7 +16,8 @@ from app.models.enums import TaxEventStatus
 from app.payments import AMOUNT_FROM_BOOKS
 from app.reviews import deadline_standing
 from app.rules.calendar import get_deadlines, upcoming
-from app.rules.schema import LegalSource, LocalizedText, Verification
+from app.rules.lateness import lateness
+from app.rules.schema import LegalSource, LocalizedText, RuleResult, Verification
 
 router = APIRouter(prefix="/companies/{company_id}/deadlines", tags=["deadlines"])
 
@@ -38,6 +39,7 @@ class DeadlineItem(BaseModel):
     payment: bool  # False: a return with nothing to pay
     amount_due: Decimal | None = None  # from the rule run on the period's recorded sales, when there are any
     paid_amount: Decimal | None = None
+    penalties: list[RuleResult] = []  # overdue with a known amount: interest and fine if paid and filed on as_of
     legal_source: LegalSource
     verification: Verification
     reviewed_by: str | None = None
@@ -60,6 +62,15 @@ def amount_due(company: Company, db: Session, deadline_id: str, period_start: da
     if not figures.totals.count or result is None or result.status != "applies":
         return None
     return result.amount
+
+
+def penalties(company: Company, db: Session, due: date, tax: Decimal, today: date) -> list[RuleResult]:
+    """Late payment interest and the late filing fine on `tax` if it's paid and filed `today` (rules, with sign-offs)."""
+    late = lateness(due, today)
+    facts = {**company_facts(company, db), "input.tax_due": str(tax), "input.days_late": late.days,
+             "input.months_late": late.months}
+    results = [run(rule_id, facts, today, db) for rule_id in ("ge.penalty.late_payment", "ge.penalty.late_filing")]
+    return [r for r in results if r is not None and r.status == "applies"]
 
 
 def deadline_items(
@@ -86,13 +97,16 @@ def deadline_items(
             state = "due_soon"
         else:
             state = "upcoming"
+        due_amount = (amount_due(company, db, o.deadline.deadline_id, o.period_start)
+                      if with_amounts and not is_done and o.deadline.payment else None)
         items.append(DeadlineItem(key=o.key, deadline_id=o.deadline.deadline_id, tax_type=o.deadline.tax_type,
                                   title=o.deadline.title, description=o.deadline.description,
                                   period_start=o.period_start, period_end=o.period_end, due_date=o.due_date,
                                   shifted_from=o.statutory_date if o.shifted else None, days_left=days_left, state=state,
                                   payment=o.deadline.payment,
-                                  amount_due=amount_due(company, db, o.deadline.deadline_id, o.period_start)
-                                  if with_amounts and not is_done and o.deadline.payment else None,
+                                  amount_due=due_amount,
+                                  penalties=penalties(company, db, o.due_date, due_amount, today)
+                                  if state == "overdue" and due_amount else [],
                                   paid_amount=event.amount if event is not None and event.status == TaxEventStatus.paid else None,
                                   legal_source=o.deadline.legal_source,
                                   verification="verified" if signed[o.deadline.deadline_id].status == "verified"

@@ -111,5 +111,13 @@
   "date.format": "{day} {month} {year}",
   "date.month_year": "{month} {year}",
   "warning.extraction": "AI extraction unavailable ({detail}); used keyword matching.",
-  "warning.reply": "AI reply unavailable ({detail}); used a template."
+  "warning.reply": "AI reply unavailable ({detail}); used a template.",
+  "fact.input.tax_due": "How much tax was (or is) paid late?",
+  "fact.input.days_late": "How many days after the due date was (or will be) it paid?",
+  "fact.input.months_late": "How many months late was the return filed?",
+  "phrase.penalty_interest": "Penalty interest is {interest} GEL: 0.05% of {tax} GEL for each overdue day ({late}), so {total} GEL in all.",
+  "phrase.penalty_fine": "If the return is filed that late too, add a fine of {fine} GEL: 5% of the tax for each started month, 10% once it's more than 2 months.",
+  "phrase.penalty_fine_only": "The fine for filing the return late is {fine} GEL: 5% of {tax} GEL for each started month, 10% once it's more than 2 months. If the tax was paid late as well, tell me how many days late and I'll add the penalty interest.",
+  "phrase.penalty_ask": "Paying late costs 0.05% of the unpaid tax for each day, and filing the return late adds a fine of 5% per started month (10% after 2 months). How much tax is it, and how many days late?",
+  "phrase.penalty_ask_days": "How many days late is the payment of {tax} GEL?"
 }

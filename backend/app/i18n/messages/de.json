@@ -111,5 +111,13 @@
   "date.format": "{day}. {month} {year}",
   "date.month_year": "{month} {year}",
   "warning.extraction": "KI-Auswertung nicht verfügbar ({detail}); Stichwortsuche verwendet.",
-  "warning.reply": "KI-Antwort nicht verfügbar ({detail}); Vorlage verwendet."
+  "warning.reply": "KI-Antwort nicht verfügbar ({detail}); Vorlage verwendet.",
+  "fact.input.tax_due": "Wie hoch ist die verspätet gezahlte (oder noch zu zahlende) Steuer?",
+  "fact.input.days_late": "Wie viele Tage nach dem Fälligkeitstermin wurde (oder wird) gezahlt?",
+  "fact.input.months_late": "Wie viele Monate zu spät wurde die Erklärung abgegeben?",
+  "phrase.penalty_interest": "Der Säumniszuschlag beträgt {interest} GEL: 0,05 % von {tax} GEL je Verzugstag ({late}), insgesamt also {total} GEL.",
+  "phrase.penalty_fine": "Wird auch die Erklärung so spät abgegeben, kommt ein Bußgeld von {fine} GEL hinzu: 5 % der Steuer je angefangenen Monat, 10 % bei mehr als 2 Monaten.",
+  "phrase.penalty_fine_only": "Das Bußgeld für die verspätete Erklärung beträgt {fine} GEL: 5 % von {tax} GEL je angefangenen Monat, 10 % bei mehr als 2 Monaten. Wurde auch die Steuer zu spät gezahlt, nennen Sie mir die Tage, dann rechne ich den Säumniszuschlag dazu.",
+  "phrase.penalty_ask": "Verspätetes Zahlen kostet 0,05 % der unbezahlten Steuer pro Tag, eine verspätete Erklärung zusätzlich 5 % je angefangenen Monat (nach 2 Monaten 10 %). Um welchen Steuerbetrag geht es und wie viele Tage zu spät?",
+  "phrase.penalty_ask_days": "Wie viele Tage zu spät ist die Zahlung von {tax} GEL?"
 }

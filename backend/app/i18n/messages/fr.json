@@ -111,5 +111,13 @@
   "date.format": "{day} {month} {year}",
   "date.month_year": "{month} {year}",
   "warning.extraction": "Analyse par l’IA indisponible ({detail}) ; recherche par mots-clés utilisée.",
-  "warning.reply": "Réponse de l’IA indisponible ({detail}) ; modèle de réponse utilisé."
+  "warning.reply": "Réponse de l’IA indisponible ({detail}) ; modèle de réponse utilisé.",
+  "fact.input.tax_due": "Quel montant d’impôt a été (ou sera) payé en retard ?",
+  "fact.input.days_late": "Combien de jours après l’échéance le paiement a-t-il (ou aura-t-il) lieu ?",
+  "fact.input.months_late": "Avec combien de mois de retard la déclaration a-t-elle été déposée ?",
+  "phrase.penalty_interest": "Les intérêts de retard s’élèvent à {interest} GEL : 0,05 % de {tax} GEL par jour de retard ({late}), soit {total} GEL au total.",
+  "phrase.penalty_fine": "Si la déclaration est déposée avec le même retard, une amende de {fine} GEL s’ajoute : 5 % de l’impôt par mois entamé, 10 % au-delà de 2 mois.",
+  "phrase.penalty_fine_only": "L’amende pour dépôt tardif de la déclaration est de {fine} GEL : 5 % de {tax} GEL par mois entamé, 10 % au-delà de 2 mois. Si l’impôt a aussi été payé en retard, dites-moi de combien de jours et j’ajouterai les intérêts de retard.",
+  "phrase.penalty_ask": "Payer en retard coûte 0,05 % de l’impôt impayé par jour, et une déclaration tardive ajoute une amende de 5 % par mois entamé (10 % après 2 mois). De quel montant d’impôt s’agit-il, et avec combien de jours de retard ?",
+  "phrase.penalty_ask_days": "Avec combien de jours de retard le paiement de {tax} GEL a-t-il lieu ?"
 }

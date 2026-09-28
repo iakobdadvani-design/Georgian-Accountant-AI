@@ -57,5 +57,12 @@
 
   {"id": "offtopic-greeting-ka", "message": "გამარჯობა", "intent": "unknown", "entities": {}, "language": "ka"},
   {"id": "offtopic-clinic-en", "message": "I run a private clinic", "intent": "unknown", "entities": {}, "language": "en"},
-  {"id": "offtopic-weather-de", "message": "Wie wird das Wetter morgen in Tiflis?", "intent": "unknown", "entities": {}, "language": "de"}
+  {"id": "offtopic-weather-de", "message": "Wie wird das Wetter morgen in Tiflis?", "intent": "unknown", "entities": {}, "language": "de"},
+
+  {"id": "penalty-en", "message": "I paid 2,000 GEL of VAT 20 days late, what is the penalty?", "intent": "calculate_late_penalty", "entities": {"tax_due": "2000", "days_late": "20"}, "rule": "ge.penalty.late_payment", "amount": "20.00", "language": "en"},
+  {"id": "penalty-ka", "message": "დღგ 3000 ლარი 10 დღით გვიან გადავიხადე, რამდენია საურავი?", "intent": "calculate_late_penalty", "entities": {"tax_due": "3000", "days_late": "10"}, "rule": "ge.penalty.late_payment", "amount": "15.00", "language": "ka"},
+  {"id": "penalty-ru", "message": "Заплатил налог 5 000 лари с опозданием на 30 дней, какая пеня?", "intent": "calculate_late_penalty", "entities": {"tax_due": "5000", "days_late": "30"}, "rule": "ge.penalty.late_payment", "amount": "75.00", "language": "ru"},
+  {"id": "penalty-de", "message": "Ich habe 1.000 GEL Steuer 45 Tage zu spät gezahlt, wie hoch ist der Säumniszuschlag?", "intent": "calculate_late_penalty", "entities": {"tax_due": "1000", "days_late": "45"}, "rule": "ge.penalty.late_payment", "amount": "22.50", "language": "de"},
+  {"id": "penalty-fr", "message": "J'ai payé 4 000 GEL d'impôt avec 12 jours de retard, quelles pénalités ?", "intent": "calculate_late_penalty", "entities": {"tax_due": "4000", "days_late": "12"}, "rule": "ge.penalty.late_payment", "amount": "24.00", "language": "fr"},
+  {"id": "penalty-months-en", "message": "We filed the VAT return 3 months late, tax was 1,000 GEL. What fine?", "intent": "calculate_late_penalty", "entities": {"tax_due": "1000", "months_late": "3"}, "rule": "ge.penalty.late_filing", "amount": "100.00", "language": "en"}
 ]

@@ -107,7 +107,7 @@ def referenced_facts(rule: TaxRule) -> set[str]:
     return found
 
 
-STEP_SYMBOLS = {"multiply": " x ", "divide": " / ", "subtract": " - ", "add": " + ", "max": ", "}
+STEP_SYMBOLS = {"multiply": " x ", "divide": " / ", "subtract": " - ", "add": " + ", "max": ", ", "min": ", "}
 
 
 def run_steps(calculation: Steps, facts: Facts, trace: list[str]) -> tuple[dict[str, Decimal], list[str]]:
@@ -156,13 +156,16 @@ def run_steps(calculation: Steps, facts: Facts, trace: list[str]) -> tuple[dict[
             result = first - sum(rest)
         elif step.op == "max":
             result = max(operands)
+        elif step.op == "min":
+            result = min(operands)
         else:
             result = first + sum(rest)
         if step.round:
             result = result.quantize(CENT, rounding=ROUND_HALF_UP)
         values[step.name] = result
         expression = STEP_SYMBOLS[step.op].join(shown)
-        trace.append(f"{step.name} = {f'max({expression})' if step.op == 'max' else expression} = {result}")
+        shown_expression = f"{step.op}({expression})" if step.op in ("max", "min") else expression
+        trace.append(f"{step.name} = {shown_expression} = {result}")
     return values, []
 
 

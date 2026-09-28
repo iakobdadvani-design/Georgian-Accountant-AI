@@ -53,11 +53,17 @@ Schema changes go through Alembic (see "Database" below).
 | `ge.profit.distribution` — payout / 0.85 x 15% | 97(1), 97(10), 98(1) |
 | `ge.dividend.withholding` — 5% to individuals, none to companies | 130(1)-(2) |
 | `ge.small_business.tax` — individual entrepreneur with small business status: 1%, or 3% once the year's gross income passes GEL 500 000 | 88(1), 90(1)-(2) |
+| `ge.penalty.late_payment` — penalty interest 0.05% of the unpaid tax per overdue day (from the day after the due date through the day of payment), at most 3 years (1 095 days, `min` step) | 272(2), (2¹), (4) |
+| `ge.penalty.late_filing` — return filed late: 5% of its tax per started month up to 2 months, 10% beyond; none if the tax is zero | 274 |
 | Deadlines: VAT (15th), salary withholding (15th), profit tax return (15th), property tax (1 Apr, 15 Jun), small business return (15th), micro business return (31 Mar) | 168(1), 154(3)-(4), 153(10), 205(2)-(4), 93(1¹), 93(1) |
 | Deadline on a weekend or Labour Code holiday → next working day (`rules/workdays.py`, Orthodox Easter computed) | 3(2), 3(6); Labour Code 30(1) |
 
 Chat intents (`chat/extractor.py`): `calculate_payroll_tax`, `check_vat_registration`, `calculate_vat`,
-`calculate_distribution`, `calculate_small_business_tax`, `calculate_vat_payable` (two amounts: `SECOND_AMOUNT_FACT`), `list_deadlines`, `unknown`. Each has an amount fact in `INTENT_AMOUNT_FACT`
+`calculate_distribution`, `calculate_small_business_tax`, `calculate_vat_payable` (two amounts: `SECOND_AMOUNT_FACT`),
+`calculate_late_penalty` (tax + days late; `with_lateness` in `api/chat.py` derives the started months from the days,
+taking the delay as ending on as_of), `list_deadlines`, `unknown`. Overdue deadlines with a known amount carry both
+penalty results for paying and filing on as_of (`penalties` in `api/deadlines.py`); days and months come from
+`rules/lateness.py` (date arithmetic only). Each has an amount fact in `INTENT_AMOUNT_FACT`
 (except deadlines), keyword group(s) in priority order, answer phrasing in `responder.py`, and a field
 in the LLM extraction schema. Defaults the chat assumes (and says it assumed) live in `DEFAULT_FACTS`
 in `api/chat.py`: pension participation, dividend to an individual, small business under the GEL 500 000 limit.
