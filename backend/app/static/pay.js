@@ -8,10 +8,8 @@
 
   let open = false;
   let details = null;   // treasury code, bank code, banks
-  let bank = null;      // this company's saved bank, or null
+  let bank = null;      // the account taxes are paid from (Banks page), or null
   let history = [];
-  let editing = false;  // choosing a bank
-  let picked = null;    // bank id chosen in the form
   let current = null;   // deadline being paid
   let loadToken = 0;
 
@@ -77,7 +75,6 @@
   function hide() {
     if (!open) return;
     open = false;
-    editing = false;
     document.body.classList.remove("payments-open");
     $("payments").hidden = true;
     const company = currentCompany();
@@ -89,10 +86,10 @@
     if (!company) return;
     const token = ++loadToken;
     try {
-      const [, saved, paid] = await Promise.all([getDetails(), api(`/companies/${company.id}/bank`),
+      const [, banks, paid] = await Promise.all([getDetails(), api(`/companies/${company.id}/banks`),
         api(`/companies/${company.id}/payments/history`)]);
       if (token !== loadToken) return;
-      bank = saved;
+      bank = primaryOf(banks);
       history = paid;
     } catch (err) {
       if (err instanceof AuthError) return;
@@ -102,73 +99,26 @@
     render();
   }
 
+  const primaryOf = (banks) => banks.find((b) => b.is_primary) || banks[0] || null;
+
   function render() {
     if (!open || !details) return;
-    $("paymentsInner").replaceChildren(bankCard(), dueCard(), historyCard());
+    $("paymentsInner").replaceChildren(
+      el("div", { class: "page-head" }, el("div", {}, el("h1", { text: t("payments.nav") }))),
+      bankLine(), dueCard(), historyCard());
   }
 
-  function bankCard() {
-    const card = el("section", { class: "pay-card" }, el("h3", { text: t("payments.bank") }));
+  // Where taxes are paid from; the accounts themselves are managed on the Banks page.
+  function bankLine() {
     const info = bank && bankInfo(bank.bank_id);
-    if (info && !editing) {
-      card.append(
-        el("div", { class: "bank-linked", style: `--bank:${info.color}` },
-          el("div", { class: "bank-text" },
-            el("span", { class: "bank-name", text: t(`bank.${info.id}`) }),
-            bank.iban ? el("span", { class: "bank-iban", text: formatIban(bank.iban) }) : null),
-          el("div", { class: "books-actions" },
-            openBankLink(info, "btn primary"),
-            el("button", { class: "btn", type: "button", text: t("payments.change"),
-              onclick: () => { editing = true; picked = bank.bank_id; render(); } }),
-            el("button", { class: "btn", type: "button", text: t("payments.remove"), onclick: removeBank }))),
-        el("p", { class: "hint-text", text: t("payments.linkedNote") }));
-      return card;
+    const manage = el("button", { class: "btn small", type: "button", text: t("payments.manageBanks"), onclick: () => go("banks") });
+    if (!info) {
+      return el("div", { class: "notice todo" }, el("span", { text: t("payments.noBankYet") }),
+        el("button", { class: "btn small primary", type: "button", text: t("pay.linkBank"), onclick: () => go("banks") }));
     }
-    const error = el("p", { class: "rs-note err", role: "alert" });
-    const iban = el("input", { class: "field", id: "bankIban", autocomplete: "off", spellcheck: "false",
-      placeholder: "GE00 TB00 0000 0000 0000 00" });
-    if (editing && bank && bank.bank_id === picked && bank.iban) iban.value = formatIban(bank.iban);
-    const tiles = el("div", { class: "pay-banks", role: "group", "aria-label": t("payments.bank") },
-      ...details.banks.map((b) => el("button", { class: "bank-tile", type: "button", style: `--bank:${b.color}`,
-        "aria-pressed": String(picked === b.id), text: t(`bank.${b.id}`),
-        onclick: (e) => { picked = b.id; for (const x of tiles.children) x.setAttribute("aria-pressed", String(x === e.currentTarget)); } })));
-    const form = el("form", { class: "bank-form", novalidate: "" },
-      el("p", { class: "hint-text", text: t("payments.bankDesc") }),
-      tiles,
-      el("label", {}, el("span", { text: t("payments.iban") }), iban),
-      error,
-      el("div", { class: "books-actions" },
-        el("button", { class: "btn primary", type: "submit", text: t("payments.save") }),
-        bank ? el("button", { class: "btn", type: "button", text: t("common.cancel"),
-          onclick: () => { editing = false; render(); } }) : null));
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      if (!picked) { error.textContent = t("payments.chooseBank"); return; }
-      try {
-        bank = await api(`/companies/${currentCompany().id}/bank`, { method: "PUT",
-          body: { bank_id: picked, iban: iban.value.trim() || null } });
-        editing = false;
-        render();
-      } catch (err) {
-        if (err instanceof AuthError) return;
-        error.textContent = /iban/i.test(err.message) ? t("payments.ibanBad") : err.message;
-      }
-    });
-    card.append(form);
-    return card;
-  }
-
-  async function removeBank() {
-    if (!confirm(t("payments.removeConfirm"))) return;
-    try {
-      await api(`/companies/${currentCompany().id}/bank`, { method: "DELETE" });
-    } catch (err) {
-      if (!(err instanceof AuthError)) alert(err.message);
-      return;
-    }
-    bank = null;
-    picked = null;
-    render();
+    return el("div", { class: "notice" },
+      el("span", { text: t("payments.payingFrom", { bank: t(`bank.${info.id}`) + (bank.iban ? ` · ${formatIban(bank.iban)}` : "") }) }),
+      openBankLink(info, "btn small"), manage);
   }
 
   function dueCard() {
@@ -223,7 +173,7 @@
       ? [openBankLink(info, "btn primary"), bank.iban ? el("p", { class: "hint-text", text: formatIban(bank.iban) }) : null]
       : [el("p", { class: "hint-text", text: t("pay.noBank") }),
          el("button", { class: "btn", type: "button", text: t("pay.linkBank"),
-           onclick: () => { $("payDialog").close(); editing = true; picked = null; show(); } })]).filter(Boolean));
+           onclick: () => { $("payDialog").close(); go("banks"); } })]).filter(Boolean));
   }
 
   function echo() {
@@ -235,7 +185,7 @@
     const company = currentCompany();
     try {
       await getDetails();
-      if (!open) bank = await api(`/companies/${company.id}/bank`);
+      if (!open) bank = primaryOf(await api(`/companies/${company.id}/banks`));
     } catch (err) {
       if (!(err instanceof AuthError)) alert(err.message);
       return;
@@ -275,12 +225,12 @@
   $("payAmount").addEventListener("input", echo);
   $("payForm").addEventListener("submit", markPaid);
   $("payCancel").addEventListener("click", () => $("payDialog").close());
-  $("paymentsBtn").addEventListener("click", () => (open ? hide() : show()));
 
   window.Pay = {
     open: openDialog, show, hide,
     get isOpen() { return open; },
-    onCompanyChange() { bank = null; history = []; editing = false; picked = null; if (open) load(); },
+    onCompanyChange() { bank = null; history = []; if (open) load(); },
+    onBanksChange() { if (open) load(); else bank = null; },
     onDeadlines() { render(); },
     onLanguageChange() {
       if (open) { $("title").textContent = t("payments.nav") + " · " + (currentCompany() || {}).name; render(); }

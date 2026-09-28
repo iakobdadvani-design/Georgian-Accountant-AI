@@ -161,7 +161,6 @@
     $("reviewsInner").replaceChildren(...parts);
   }
 
-  $("reviewsBtn").addEventListener("click", () => (open ? hide() : show()));
   window.Reviews = {
     show, hide,
     get open() { return open; },

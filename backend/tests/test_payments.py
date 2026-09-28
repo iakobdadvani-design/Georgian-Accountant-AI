@@ -67,26 +67,51 @@ def test_micro_business_return_has_nothing_to_pay(client):
 IBAN = "GE74TB1234567890123456"  # valid check digits (ISO 13616), made up
 
 
-def test_save_change_and_remove_the_bank(client, company):
-    url = f"/companies/{company['id']}/bank"
-    assert client.get(url).json() is None
-    saved = client.put(url, json={"bank_id": "tbc", "iban": " ge74 tb12 3456 7890 1234 56 "})
-    assert saved.status_code == 200 and saved.json() == {"bank_id": "tbc", "iban": IBAN}
-    assert client.put(url, json={"bank_id": "bog", "iban": ""}).json() == {"bank_id": "bog", "iban": None}
-    assert client.get(url).json()["bank_id"] == "bog"
-    assert client.delete(url).status_code == 204
-    assert client.get(url).json() is None and client.delete(url).status_code == 404
+def test_add_several_banks_first_is_primary(client, company):
+    url = f"/companies/{company['id']}/banks"
+    assert client.get(url).json() == []
+    tbc = client.post(url, json={"bank_id": "tbc", "iban": " ge74 tb12 3456 7890 1234 56 "})
+    assert tbc.status_code == 201
+    assert (tbc.json()["iban"], tbc.json()["currency"], tbc.json()["is_primary"]) == (IBAN, "GEL", True)
+    bog = client.post(url, json={"bank_id": "bog", "currency": "usd"}).json()
+    assert (bog["currency"], bog["is_primary"]) == ("USD", False)
+    assert [b["bank_id"] for b in client.get(url).json()] == ["tbc", "bog"]
+
+    # taxes from BoG now: exactly one primary, listed first
+    moved = client.put(f"{url}/{bog['id']}", json={"bank_id": "bog", "currency": "USD", "is_primary": True}).json()
+    assert moved["is_primary"] is True
+    assert [(b["bank_id"], b["is_primary"]) for b in client.get(url).json()] == [("bog", True), ("tbc", False)]
+
+    # removing the primary hands it to the next account
+    assert client.delete(f"{url}/{bog['id']}").status_code == 204
+    assert [(b["bank_id"], b["is_primary"]) for b in client.get(url).json()] == [("tbc", True)]
+    assert client.delete(f"{url}/{bog['id']}").status_code == 404
 
 
 @pytest.mark.parametrize("body", [{"bank_id": "nope"}, {"bank_id": "tbc", "iban": "GE72TB1234567890123456"},
-                                  {"bank_id": "tbc", "iban": "DE89370400440532013000"}])
-def test_bad_bank_choices_are_refused(client, company, body):
-    assert client.put(f"/companies/{company['id']}/bank", json=body).status_code == 422
+                                  {"bank_id": "tbc", "iban": "DE89370400440532013000"},
+                                  {"bank_id": "tbc", "currency": "BTC"}])
+def test_bad_bank_accounts_are_refused(client, company, body):
+    assert client.post(f"/companies/{company['id']}/banks", json=body).status_code == 422
 
 
-def test_bank_is_private(client, company, make_client):
-    client.put(f"/companies/{company['id']}/bank", json={"bank_id": "tbc"})
-    assert make_client("pay-intruder@example.com").get(f"/companies/{company['id']}/bank").status_code == 404
+def test_banks_are_private(client, company, make_client):
+    bank = client.post(f"/companies/{company['id']}/banks", json={"bank_id": "tbc"}).json()
+    intruder = make_client("pay-intruder@example.com")
+    assert intruder.get(f"/companies/{company['id']}/banks").status_code == 404
+    assert intruder.delete(f"/companies/{company['id']}/banks/{bank['id']}").status_code == 404
+
+
+def test_statement_import_is_recorded_on_the_bank(client, company):
+    import base64
+    bank = client.post(f"/companies/{company['id']}/banks", json={"bank_id": "tbc"}).json()
+    csv = "Date,Description,Amount\n2026-09-01,Sale,1180\n2026-09-02,Rent,-590\n".encode()
+    body = {"filename": "s.csv", "content": base64.b64encode(csv).decode(), "bank_account_id": bank["id"]}
+    assert client.post(f"/companies/{company['id']}/books/import", json=body).json()["imported"] == 2
+    [saved] = client.get(f"/companies/{company['id']}/banks").json()
+    assert saved["last_import_count"] == 2 and saved["last_import_at"]
+    other = {**body, "bank_account_id": "00000000-0000-0000-0000-000000000000"}
+    assert client.post(f"/companies/{company['id']}/books/import", json=other).status_code == 404
 
 
 def test_history_lists_paid_taxes_newest_first(client, company):

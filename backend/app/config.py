@@ -50,5 +50,9 @@ class Settings(BaseSettings):
     rs_service_password: str = ""
     rs_url: str = "https://services.rs.ge/WayBillService/WayBillService.asmx"
 
+    # Fernet key that encrypts stored credentials (each company's RS.ge service user). Empty -> connecting is off.
+    # Generate: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+    credentials_key: str = ""
+
 
 settings = Settings()

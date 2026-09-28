@@ -18,6 +18,7 @@ from app.api.legal import router as legal_router
 from app.api.payments import router as payments_router
 from app.api.reminders import router as reminders_router
 from app.api.reviews import router as reviews_router
+from app.api.rsge import company_router as rs_company_router
 from app.api.rsge import router as rs_router
 from app.api.rules import router as rules_router
 from app import reminders
@@ -76,6 +77,7 @@ app.include_router(conversations_router)
 app.include_router(deadlines_router)
 app.include_router(legal_router)
 app.include_router(rs_router)
+app.include_router(rs_company_router)
 app.include_router(books_router)
 app.include_router(reviews_router)
 app.include_router(reminders_router)

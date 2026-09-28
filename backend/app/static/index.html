@@ -4,38 +4,39 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Georgian AI Accountant</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%239f1d35'/><text x='16' y='23' font-size='20' text-anchor='middle' fill='white' font-family='sans-serif'>₾</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%238c1d33'/><text x='16' y='23' font-size='20' text-anchor='middle' fill='white' font-family='sans-serif'>₾</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Georgian:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+Georgian:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f6f4f1; --surface: #ffffff; --surface-2: #faf8f6; --ink: #1c1917; --muted: #78716c; --faint: #a8a29e;
-    --border: #e7e2dc; --accent: #9f1d35; --accent-ink: #ffffff; --accent-soft: #f8e9ec;
-    --ok: #15803d; --ok-soft: #e7f5ec; --warn: #b45309; --warn-soft: #fdf1e0; --info: #57534e; --info-soft: #f1efec;
+    --bg: #f7f7f5; --surface: #ffffff; --surface-2: #f2f2ef; --ink: #111418; --muted: #5b6270; --faint: #7c828d;
+    --border: #e8e6e1; --border-strong: #d9d7d0; --accent: #8c1d33; --accent-ink: #ffffff; --accent-soft: #fbeff1;
+    --ok: #1e7a4c; --ok-soft: #e8f5ee; --warn: #a15c00; --warn-soft: #fff4e0; --info: #2b5c95; --info-soft: #eaf1fa;
     --demo: #6d28d9; --demo-soft: #efe9fb;
-    --shadow: 0 1px 2px rgb(28 25 23 / .04), 0 4px 16px rgb(28 25 23 / .06);
-    --radius: 14px;
-    --font: "Inter", "Noto Sans Georgian", system-ui, -apple-system, "Segoe UI", sans-serif;
-    --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+    --shadow: 0 1px 2px rgb(17 20 24 / .04);
+    --shadow-lg: 0 12px 32px rgb(17 20 24 / .12), 0 2px 6px rgb(17 20 24 / .06);
+    --radius: 18px;
+    --font: "IBM Plex Sans", "Noto Sans Georgian", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
     color-scheme: light;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #131110; --surface: #1c1a18; --surface-2: #211e1c; --ink: #f3efeb; --muted: #a8a29e; --faint: #78716c;
-      --border: #2f2b28; --accent: #e0677f; --accent-ink: #1c1917; --accent-soft: #3a1f26;
-      --ok: #4ade80; --ok-soft: #173222; --warn: #fbbf24; --warn-soft: #3a2c12; --info: #d6d3d1; --info-soft: #292524;
+      --bg: #111317; --surface: #181b20; --surface-2: #1f2329; --ink: #eef0f3; --muted: #a3a9b4; --faint: #858c98;
+      --border: #2a2f37; --border-strong: #3a404a; --accent: #e5738a; --accent-ink: #16181c; --accent-soft: #3a1e27;
+      --ok: #4ade80; --ok-soft: #16301f; --warn: #fbbf24; --warn-soft: #3a2c12; --info: #8fb8ea; --info-soft: #1b2a3d;
       --demo: #b79cf5; --demo-soft: #2a2140;
-      --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 6px 20px rgb(0 0 0 / .25);
+      --shadow: 0 1px 2px rgb(0 0 0 / .3); --shadow-lg: 0 12px 32px rgb(0 0 0 / .45);
       color-scheme: dark;
     }
   }
   :root[data-theme="dark"] {
-    --bg: #131110; --surface: #1c1a18; --surface-2: #211e1c; --ink: #f3efeb; --muted: #a8a29e; --faint: #78716c;
-    --border: #2f2b28; --accent: #e0677f; --accent-ink: #1c1917; --accent-soft: #3a1f26;
-    --ok: #4ade80; --ok-soft: #173222; --warn: #fbbf24; --warn-soft: #3a2c12; --info: #d6d3d1; --info-soft: #292524;
+    --bg: #111317; --surface: #181b20; --surface-2: #1f2329; --ink: #eef0f3; --muted: #a3a9b4; --faint: #858c98;
+    --border: #2a2f37; --border-strong: #3a404a; --accent: #e5738a; --accent-ink: #16181c; --accent-soft: #3a1e27;
+    --ok: #4ade80; --ok-soft: #16301f; --warn: #fbbf24; --warn-soft: #3a2c12; --info: #8fb8ea; --info-soft: #1b2a3d;
     --demo: #b79cf5; --demo-soft: #2a2140;
-    --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 6px 20px rgb(0 0 0 / .25);
+    --shadow: 0 1px 2px rgb(0 0 0 / .3); --shadow-lg: 0 12px 32px rgb(0 0 0 / .45);
     color-scheme: dark;
   }
 
@@ -45,46 +46,226 @@
   body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.55 var(--font); -webkit-font-smoothing: antialiased; }
   button, input, select, textarea { font: inherit; color: inherit; }
   a { color: var(--accent); }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-  .app { display: grid; grid-template-columns: 300px 1fr; grid-template-rows: 100%; height: 100vh; height: 100dvh; overflow: hidden; }
+  .app { display: grid; grid-template-columns: 252px minmax(0, 1fr); grid-template-rows: 100%; height: 100vh; height: 100dvh;
+    overflow: hidden; }
 
   /* ---------- sidebar ---------- */
-  .sidebar { background: var(--surface); border-right: 1px solid var(--border); padding: 20px 18px; display: flex;
-    flex-direction: column; gap: 22px; overflow-y: auto; }
-  .brand { display: flex; align-items: center; gap: 12px; }
-  .logo { width: 40px; height: 40px; border-radius: 11px; background: var(--accent); color: var(--accent-ink);
-    display: grid; place-items: center; font-size: 22px; font-weight: 600; flex: none; }
-  .brand h1 { font-size: 15px; line-height: 1.25; margin: 0; font-weight: 650; letter-spacing: -.01em; }
-  .brand p { margin: 1px 0 0; font-size: 12.5px; color: var(--muted); }
+  .sidebar { background: var(--surface); border-right: 1px solid var(--border); padding: 20px 14px 16px; display: flex;
+    flex-direction: column; gap: 4px; overflow-y: auto; }
+  .brand { display: flex; align-items: center; gap: 10px; padding: 2px 10px 18px; }
+  .logo { width: 36px; height: 36px; border-radius: 10px; background: var(--accent); color: var(--accent-ink);
+    display: grid; place-items: center; font-size: 19px; font-weight: 700; flex: none; }
+  .brand h1 { font-size: 15px; line-height: 1.25; margin: 0; font-weight: 700; letter-spacing: -.01em; }
+  .brand p { margin: 1px 0 0; font-size: 12px; color: var(--muted); line-height: 1.3; }
+  .nav { display: flex; flex-direction: column; gap: 2px; }
+  .nav-item { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 8px 12px; border-radius: 12px;
+    color: var(--ink); text-decoration: none; font-size: 14.5px; font-weight: 500; line-height: 1.3; opacity: .92;
+    transition: background .12s; }
+  .nav-item svg { flex: none; color: var(--muted); }
+  .nav-item:hover { background: var(--surface-2); opacity: 1; }
+  .nav-item[aria-current="page"] { background: var(--accent-soft); color: var(--accent); font-weight: 600; opacity: 1; }
+  .nav-item[aria-current="page"] svg { color: var(--accent); }
+  .nav-item .nav-text { flex: 1; min-width: 0; }
+  .nav-badge { min-width: 22px; height: 22px; padding: 0 7px; border-radius: 999px; background: var(--accent); color: var(--accent-ink);
+    font-size: 12px; font-weight: 700; display: grid; place-items: center; }
+  .nav-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--warn); flex: none; }
+  .nav-label { font-size: 11.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted);
+    margin: 18px 12px 6px; }
+  .side-foot { margin-top: auto; padding-top: 16px; display: grid; gap: 8px; }
+  .help-card { display: grid; gap: 6px; padding: 14px; border-radius: 14px; background: var(--surface-2); text-align: left;
+    border: none; cursor: pointer; }
+  .help-card strong { font-size: 13px; }
+  .help-card span { font-size: 12.5px; line-height: 1.45; color: var(--muted); }
+  .nav-item.subtle { font-size: 13.5px; color: var(--muted); min-height: 40px; }
   .section-label { font-size: 11.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
-    color: var(--faint); margin: 0 0 8px; }
-  .field { width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px;
-    padding: 9px 11px; outline: none; transition: border-color .15s; }
-  .field:focus { border-color: var(--accent); }
-  .profile { margin-top: 10px; border: 1px solid var(--border); border-radius: 12px; padding: 12px; background: var(--surface-2);
-    display: grid; gap: 8px; font-size: 13px; }
-  .profile-row { display: flex; justify-content: space-between; gap: 8px; }
-  .profile-row span:first-child { color: var(--muted); }
-  .profile-row span:last-child { font-weight: 500; text-align: right; }
-  .suggestions { display: grid; gap: 6px; }
-  .suggestion { text-align: left; background: transparent; border: 1px solid var(--border); border-radius: 10px;
-    padding: 9px 11px; font-size: 13.5px; cursor: pointer; transition: background .15s, border-color .15s; }
-  .suggestion:hover { background: var(--accent-soft); border-color: var(--accent); }
-  .sidebar-foot { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 8px;
-    font-size: 12.5px; color: var(--muted); }
-  .icon-btn { background: transparent; border: 1px solid var(--border); border-radius: 9px; width: 34px; height: 34px;
-    display: grid; place-items: center; cursor: pointer; color: var(--muted); }
-  .icon-btn:hover { color: var(--ink); border-color: var(--faint); }
+    color: var(--muted); margin: 0 0 8px; }
+  .field { width: 100%; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 12px;
+    padding: 10px 12px; outline: none; transition: border-color .15s, box-shadow .15s; }
+  .field:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent); }
+  .icon-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; width: 44px; height: 44px;
+    display: grid; place-items: center; cursor: pointer; color: var(--ink); flex: none; }
+  .icon-btn:hover { border-color: var(--border-strong); background: var(--surface-2); }
   .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; background: var(--faint); margin-right: 6px; }
   .dot.on { background: var(--ok); }
 
-  /* ---------- chat ---------- */
-  .chat { display: flex; flex-direction: column; min-width: 0; min-height: 0; height: 100%; }
-  .topbar { display: flex; align-items: center; gap: 12px; padding: 14px 24px; border-bottom: 1px solid var(--border);
-    background: color-mix(in srgb, var(--bg) 85%, transparent); backdrop-filter: blur(8px); }
-  .topbar h2 { font-size: 15px; font-weight: 600; margin: 0; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis;
-    white-space: nowrap; }
+  /* ---------- top bar ---------- */
+  .main { display: flex; flex-direction: column; min-width: 0; min-height: 0; height: 100%; }
+  .topbar { display: flex; align-items: center; gap: 10px; height: 68px; flex: none; padding: 0 24px;
+    border-bottom: 1px solid var(--border); background: var(--surface); }
   .menu-btn { display: none; }
+  .company-switch { position: relative; display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 10px;
+    border: 1px solid var(--border); border-radius: 12px; background: var(--surface); max-width: 320px; min-width: 0; }
+  .company-switch:focus-within { border-color: var(--accent); }
+  .company-badge { width: 28px; height: 28px; border-radius: 8px; background: var(--info-soft); color: var(--info);
+    display: grid; place-items: center; font-size: 12px; font-weight: 700; flex: none; }
+  .company-select { appearance: none; border: none; background: transparent; outline: none; font-weight: 600; font-size: 14px;
+    padding-right: 20px; min-width: 0; max-width: 250px; text-overflow: ellipsis; cursor: pointer; }
+  .company-switch::after { content: ""; position: absolute; right: 13px; top: 50%; width: 7px; height: 7px;
+    border-right: 1.8px solid var(--muted); border-bottom: 1.8px solid var(--muted); transform: translateY(-70%) rotate(45deg);
+    pointer-events: none; }
+  .askbar { flex: 1; max-width: 560px; margin: 0 auto; display: flex; align-items: center; gap: 10px; height: 44px;
+    padding: 0 10px 0 14px; border-radius: 12px; background: var(--surface-2); border: 1px solid transparent; }
+  .askbar:focus-within { border-color: var(--accent); background: var(--surface); }
+  .askbar svg { color: var(--muted); flex: none; }
+  .askbar input { flex: 1; min-width: 0; border: none; outline: none; background: transparent; font-size: 14.5px; }
+  .askbar kbd { font: 500 11.5px var(--font); color: var(--muted); border: 1px solid var(--border-strong); border-radius: 6px;
+    padding: 1px 6px; background: var(--surface); }
+  .account-menu { position: relative; flex: none; }
+  .avatar-btn { width: 44px; height: 44px; border-radius: 50%; border: none; background: var(--ink); color: var(--surface);
+    font-weight: 700; font-size: 14px; cursor: pointer; }
+  .menu-list { position: absolute; right: 0; top: calc(100% + 8px); z-index: 60; min-width: 250px; padding: 6px; display: grid; gap: 2px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-lg); }
+  .menu-who { display: grid; gap: 1px; padding: 10px 12px 12px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+  .menu-who strong { font-size: 14px; }
+  .menu-who span { font-size: 12.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
+  .menu-item { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 40px; padding: 8px 12px; border: none;
+    border-radius: 10px; background: none; color: var(--ink); text-align: left; text-decoration: none; cursor: pointer; font-size: 14px; }
+  .menu-item:hover, .menu-item:focus-visible { background: var(--surface-2); outline: none; }
+  .menu-date { display: grid; gap: 4px; padding: 8px 12px; font-size: 12.5px; color: var(--muted); }
+  .menu-sep { height: 1px; background: var(--border); margin: 4px 0; }
+
+  /* ---------- views ---------- */
+  .views { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  .view { flex: 1; min-height: 0; overflow-y: auto; }
+  .page { max-width: 1160px; margin: 0 auto; padding: 28px 32px 40px; display: grid; gap: 20px; }
+  .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .page-head h1 { margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -.02em; line-height: 1.2; }
+  .page-head p { margin: 4px 0 0; color: var(--muted); font-size: 15px; max-width: 720px; }
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px 24px;
+    display: grid; gap: 14px; align-content: start; }
+  .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 8px 12px; flex-wrap: wrap; }
+  .panel h2 { margin: 0; font-size: 16px; font-weight: 650; }
+  .link-btn { background: none; border: none; padding: 0; color: var(--accent); font-weight: 600; font-size: 14px; cursor: pointer;
+    text-decoration: none; }
+  .link-btn:hover { text-decoration: underline; }
+  .muted { color: var(--muted); }
+  .state { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: 12.5px;
+    font-weight: 600; white-space: nowrap; background: var(--surface-2); color: var(--muted); }
+  .state.bad { background: var(--accent-soft); color: var(--accent); }
+  .state.todo { background: var(--warn-soft); color: var(--warn); }
+  .state.good { background: var(--ok-soft); color: var(--ok); }
+  .state.info { background: var(--info-soft); color: var(--info); }
+  .state .state-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+  /* overview */
+  .ov-grid { display: grid; grid-template-columns: minmax(0, 1fr) 356px; gap: 20px; align-items: start; }
+  .ov-main, .ov-side { display: grid; gap: 20px; min-width: 0; }
+  .hero { padding: 26px 28px; gap: 18px; }
+  .hero-body { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+  .hero-amount { font-size: 44px; font-weight: 700; letter-spacing: -.03em; font-variant-numeric: tabular-nums; line-height: 1; }
+  .hero-amount.none { font-size: 22px; letter-spacing: -.01em; color: var(--muted); font-weight: 600; }
+  .hero-title { font-size: 16px; font-weight: 600; margin-top: 8px; }
+  .hero-sub { font-size: 13.5px; color: var(--muted); margin-top: 2px; }
+  .hero-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 18px 20px; display: grid; gap: 6px; }
+  .stat-label { font-size: 13.5px; color: var(--muted); }
+  .stat-value { font-size: 24px; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .stat-hint { font-size: 12.5px; color: var(--muted); }
+  .stat-hint.up { color: var(--ok); font-weight: 600; }
+  .dl-row { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto auto; gap: 16px; align-items: center; padding: 12px 0;
+    border-top: 1px solid var(--border); }
+  .dl-row:first-of-type { border-top: 0; }
+  .date-badge { display: grid; justify-items: center; padding: 5px 0; border-radius: 12px; background: var(--surface-2); line-height: 1.15; }
+  .date-badge b { font-size: 18px; }
+  .date-badge span { font-size: 11.5px; font-weight: 600; color: var(--muted); }
+  .date-badge.overdue { background: var(--accent-soft); color: var(--accent); }
+  .date-badge.overdue span { color: inherit; }
+  .dl-text { display: grid; gap: 2px; min-width: 0; }
+  .dl-title { font-size: 15px; font-weight: 600; }
+  .dl-when { font-size: 13px; color: var(--muted); }
+  .dl-row.overdue .dl-when { color: var(--accent); font-weight: 500; }
+  .dl-row.due_soon .dl-when { color: var(--warn); font-weight: 500; }
+  .dl-amount { font-size: 15px; font-weight: 650; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  .dl-amount.none { font-size: 13px; font-weight: 400; color: var(--muted); }
+  .progress { height: 8px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+  .progress span { display: block; height: 100%; border-radius: inherit; background: var(--ok); }
+  .steps { display: grid; gap: 4px; }
+  .step { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px; border: none; background: none;
+    text-align: left; color: var(--ink); width: 100%; }
+  button.step { cursor: pointer; }
+  button.step:hover { background: var(--surface-2); }
+  .step.next { background: var(--warn-soft); }
+  .step-mark { width: 24px; height: 24px; flex: none; border-radius: 50%; border: 2px solid var(--border-strong); display: grid;
+    place-items: center; color: #fff; }
+  .step.done .step-mark { background: var(--ok); border-color: var(--ok); }
+  .step.next .step-mark { border-color: var(--warn); }
+  .step-text { flex: 1; display: grid; gap: 2px; }
+  .step-text b { font-size: 14.5px; font-weight: 600; }
+  .step.done .step-text b { font-weight: 500; color: var(--muted); text-decoration: line-through; }
+  .step-text span { font-size: 12.5px; color: var(--muted); }
+  .quick { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 14px; border: 1px solid var(--border);
+    border-radius: 12px; background: var(--surface); cursor: pointer; text-align: left; font-weight: 500; }
+  .quick:hover { border-color: var(--border-strong); background: var(--surface-2); }
+  .quick svg { color: var(--accent); flex: none; }
+
+  /* calendar */
+  .cal-month h3 { margin: 6px 0 2px; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+  .cal-row { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto auto auto; gap: 16px; align-items: center; padding: 12px 0;
+    border-top: 1px solid var(--border); }
+  .cal-row.done .dl-title { color: var(--muted); text-decoration: line-through; }
+  .cal-check { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); cursor: pointer; white-space: nowrap; }
+  .cal-check input { width: 18px; height: 18px; accent-color: var(--accent); }
+
+  /* companies & banks */
+  .two-col { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 24px; align-items: start; }
+  .entity { display: grid; gap: 16px; }
+  .entity.todo { border-color: color-mix(in srgb, var(--warn) 45%, var(--border)); }
+  .entity-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .entity-mark { width: 44px; height: 44px; flex: none; border-radius: 12px; background: var(--info-soft); color: var(--info);
+    display: grid; place-items: center; font-size: 14px; font-weight: 700; }
+  .entity-name { flex: 1; min-width: 160px; display: grid; gap: 2px; }
+  .entity-name b { font-size: 17px; font-weight: 650; }
+  .entity-name span { font-size: 13.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  .fact { display: grid; gap: 4px; padding: 12px 14px; border-radius: 14px; background: var(--surface-2); }
+  .fact span { font-size: 12.5px; color: var(--muted); }
+  .fact b { font-size: 14.5px; font-weight: 600; }
+  .actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .actions .grow { flex: 1; font-size: 13px; color: var(--muted); }
+  .notice { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 12px 14px; border-radius: 14px; font-size: 13.5px;
+    background: var(--surface-2); }
+  .notice.todo { background: var(--warn-soft); }
+  .notice.good { background: var(--ok-soft); }
+  .notice > span { flex: 1; min-width: 180px; }
+  .steps-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+  .steps-list li { display: flex; gap: 12px; font-size: 14px; line-height: 1.45; }
+  .steps-list .n { width: 24px; height: 24px; flex: none; border-radius: 50%; background: var(--accent-soft); color: var(--accent);
+    display: grid; place-items: center; font-size: 12.5px; font-weight: 700; }
+  .stack { display: grid; gap: 14px; }
+  .stack label { display: grid; gap: 6px; font-size: 13.5px; font-weight: 600; }
+  .bank-mark { width: 44px; height: 44px; flex: none; border-radius: 12px; background: var(--bank, var(--info)); color: #fff;
+    display: grid; place-items: center; font-size: 12px; font-weight: 700; letter-spacing: .02em; }
+  .bank-pick { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .bank-pick button { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 12px; border: 1px solid var(--border);
+    border-radius: 12px; background: var(--surface); cursor: pointer; font-weight: 500; text-align: left; }
+  .bank-pick button::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: var(--bank); flex: none; }
+  .bank-pick button[aria-pressed="true"] { border-color: var(--bank); box-shadow: 0 0 0 1px var(--bank); }
+  .dropzone { display: grid; justify-items: center; align-content: center; gap: 8px; min-height: 160px; padding: 18px;
+    border: 2px dashed var(--border-strong); border-radius: 16px; background: var(--surface-2); text-align: center; cursor: pointer;
+    font: inherit; color: var(--ink); width: 100%; }
+  .dropzone:hover { border-color: var(--accent); }
+  .dropzone svg { color: var(--accent); }
+  .dropzone b { font-size: 14.5px; }
+  .dropzone span { font-size: 12.5px; color: var(--muted); }
+
+  /* assistant */
+  .assistant { display: grid; grid-template-columns: 272px minmax(0, 1fr); overflow: hidden; }
+  .assistant[hidden] { display: none !important; }
+  .chats { border-right: 1px solid var(--border); background: var(--surface); padding: 18px 14px; overflow-y: auto; display: grid;
+    align-content: start; gap: 12px; }
+  .chat-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 16px 24px 0; max-width: 828px; width: 100%;
+    margin: 0 auto; }
+  .chat-head h1 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -.01em; flex: 1; }
+  .index-status { font-size: 12.5px; color: var(--muted); }
+
+  /* mobile tab bar */
+  .tabbar { display: none; }
+
+  /* ---------- chat ---------- */  /* ---------- chat ---------- */
+  .chat { display: flex; flex-direction: column; min-width: 0; min-height: 0; height: 100%; }
   .pill { display: inline-flex; align-items: center; gap: 7px; padding: 5px 11px; border-radius: 999px; font-size: 12.5px;
     font-weight: 500; border: 1px solid var(--border); background: var(--surface); white-space: nowrap; }
   .pill .dot { margin: 0; }
@@ -111,7 +292,7 @@
   @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
   .avatar { width: 32px; height: 32px; border-radius: 10px; background: var(--accent); color: var(--accent-ink);
     display: grid; place-items: center; font-size: 17px; font-weight: 600; flex: none; }
-  .bubble-user { background: var(--accent); color: var(--accent-ink); padding: 10px 15px; border-radius: 16px 16px 4px 16px;
+  .bubble-user { background: var(--ink); color: var(--surface); padding: 11px 16px; border-radius: 18px 18px 6px 18px;
     max-width: min(560px, 85%); white-space: pre-wrap; overflow-wrap: anywhere; }
   .bot-body { flex: 1; min-width: 0; display: grid; gap: 12px; }
   .reply { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 15.5px; line-height: 1.6; }
@@ -189,14 +370,15 @@
   .scrim { display: none; }
 
   /* ---------- sidebar: new chat, history, account ---------- */
-  .btn { border: 1px solid var(--border); background: var(--surface); border-radius: 10px; padding: 9px 12px; cursor: pointer;
-    font-weight: 500; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: background .15s, border-color .15s; }
-  .btn:hover { border-color: var(--faint); }
-  .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-  .btn.primary:hover { filter: brightness(1.06); }
+  .btn { border: 1px solid var(--border-strong); background: var(--surface); border-radius: 12px; min-height: 44px; padding: 0 16px;
+    cursor: pointer; font-weight: 500; font-size: 14.5px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    text-decoration: none; color: var(--ink); transition: background .15s, border-color .15s; white-space: nowrap; }
+  .btn:hover { border-color: var(--faint); background: var(--surface-2); }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+  .btn.primary:hover { filter: brightness(1.08); background: var(--accent); }
   .btn.primary:disabled { opacity: .6; cursor: default; }
   .btn.block { width: 100%; }
-  .btn.small { padding: 4px 9px; font-size: 12.5px; border-radius: 8px; }
+  .btn.small { min-height: 36px; padding: 0 12px; font-size: 13.5px; border-radius: 10px; }
   .label-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
   .label-row .section-label { margin: 0; }
   .history { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; margin: 0 -6px; }
@@ -225,33 +407,9 @@
     font-size: 13.5px; cursor: pointer; box-shadow: var(--shadow); transition: border-color .15s, background .15s; text-align: left; }
   .chip:hover { border-color: var(--accent); background: var(--accent-soft); }
 
-  /* ---------- deadlines ---------- */
-  .deadlines { display: grid; gap: 6px; }
-  .deadline { display: flex; gap: 9px; align-items: flex-start; padding: 8px 10px; border-radius: 10px;
-    border: 1px solid var(--border); background: var(--surface-2); border-left: 3px solid var(--faint); }
-  .deadline.overdue { border-left-color: var(--accent); }
-  .deadline.due_soon { border-left-color: var(--warn); }
-  .deadline.done { opacity: .6; }
-  .deadline.done .d-title { text-decoration: line-through; }
-  .deadline input { margin-top: 3px; accent-color: var(--accent); cursor: pointer; }
-  .deadline .d-text { flex: 1; min-width: 0; }
-  .deadline .d-title { font-size: 13px; font-weight: 500; line-height: 1.35; }
-  .deadline .d-when { font-size: 12px; color: var(--muted); }
-  .deadline .d-shift { font-size: 11.5px; color: var(--faint); }
-  .deadline .d-paid { font-size: 11.5px; color: var(--ok); }
-  .deadline .d-pay { margin-top: 6px; }
-  .deadline.done .d-pay { display: none; }
-  .deadline.overdue .d-when { color: var(--accent); font-weight: 500; }
-  .deadline.due_soon .d-when { color: var(--warn); font-weight: 500; }
-  .deadlines-empty { font-size: 12.5px; color: var(--faint); padding: 2px 4px; line-height: 1.45; }
-  .profile .profile-actions { display: flex; justify-content: flex-end; }
-
   /* ---------- sales & expenses ---------- */
-  .books-btn { margin-top: 10px; justify-content: flex-start; gap: 8px; }
-  body.books-open .books-btn { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
-  body.books-open #log, body.books-open .composer-wrap, body.books-open #booksAlert { display: none; }
-  .books { flex: 1; min-height: 0; overflow-y: auto; padding: 24px; }
-  .books-inner { max-width: 960px; margin: 0 auto; display: grid; gap: 16px; }
+  .books { flex: 1; min-height: 0; overflow-y: auto; padding: 28px 32px 40px; }
+  .books-inner { max-width: 1160px; margin: 0 auto; display: grid; gap: 18px; }
   .books-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
   .month-nav { display: flex; align-items: center; gap: 10px; }
   .month-nav .icon-btn { font-size: 18px; line-height: 1; }
@@ -282,7 +440,6 @@
   .books-limit.exceeded .books-bar span { background: var(--accent); }
   .books-limit-hint { margin: 0; font-size: 12.5px; color: var(--faint); }
   .books-alerts { display: grid; gap: 8px; }
-  .books-alerts.side { margin-top: 10px; }
   .books-alert { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 11px; font-size: 13px;
     line-height: 1.45; border: 1px solid; }
   .books-alert.approaching { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 40%, transparent); }
@@ -339,8 +496,6 @@
   }
 
   /* ---------- rule review ---------- */
-  body.reviews-open #log, body.reviews-open .composer-wrap, body.reviews-open #booksAlert { display: none; }
-  body.reviews-open #reviewsBtn { color: var(--accent); border-color: var(--accent); }
   .review-heading { margin: 0 0 4px; font-size: 18px; letter-spacing: -.01em; }
   .review-list { display: grid; gap: 10px; }
   .review-item { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--faint);
@@ -406,9 +561,6 @@
   .bank-open::after { content: "↗"; color: var(--faint); }
 
   /* ---------- tax payments ---------- */
-  body.payments-open #paymentsBtn { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
-  body.payments-open #log, body.payments-open .composer-wrap, body.payments-open #booksAlert { display: none; }
-  #paymentsBtn { margin-top: 8px; }
   .pay-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px;
     display: grid; gap: 12px; }
   .pay-card h3 { margin: 0; font-size: 16px; font-weight: 650; }
@@ -491,26 +643,53 @@
   dialog .form-grid > p { margin: -6px 0 6px; color: var(--muted); font-size: 13.5px; }
   .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
 
+  @media (max-width: 1100px) {
+    .ov-grid, .two-col { grid-template-columns: minmax(0, 1fr); }
+    .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .askbar kbd { display: none; }
+  }
   @media (max-width: 860px) {
     .app { grid-template-columns: 1fr; }
-    .sidebar { position: fixed; inset: 0 auto 0 0; width: min(310px, 86vw); z-index: 20; transform: translateX(-100%);
-      transition: transform .25s ease; box-shadow: var(--shadow); }
+    .sidebar { position: fixed; inset: 0 auto 0 0; width: min(300px, 86vw); z-index: 30; transform: translateX(-100%);
+      transition: transform .25s ease; box-shadow: var(--shadow-lg); }
     .app.drawer-open .sidebar { transform: none; }
-    .app.drawer-open .scrim { display: block; position: fixed; inset: 0; background: rgb(0 0 0 / .35); z-index: 10; }
+    .app.drawer-open .scrim { display: block; position: fixed; inset: 0; background: rgb(0 0 0 / .35); z-index: 25; }
     .menu-btn { display: grid; }
-    .topbar, #log, .composer-wrap { padding-left: 16px; padding-right: 16px; }
+    .topbar { padding: 0 12px; gap: 8px; height: 60px; }
+    .askbar, #remindersBtn { display: none; }
+    .company-switch { flex: 1; max-width: none; }
+    .company-select { max-width: none; width: 100%; }
+    .main { padding-bottom: 68px; }
+    .page, .books { padding: 18px 16px 28px; }
+    .page-head h1 { font-size: 24px; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .hero { padding: 20px; }
+    .hero-amount { font-size: 36px; }
+    .hero-actions, .hero-actions .btn { width: 100%; }
+    .state { white-space: normal; }
+    .dl-row, .cal-row { grid-template-columns: 48px minmax(0, 1fr) auto; }
+    .dl-row .btn, .cal-row .btn, .cal-row .cal-check { grid-column: 2 / -1; justify-self: start; }
+    .assistant { grid-template-columns: 1fr; }
+    .chats { display: none; }
+    #log, .composer-wrap { padding-left: 16px; padding-right: 16px; }
     .empty-grid { grid-template-columns: 1fr; }
     .pill .label-long { display: none; }
+    .tabbar { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+      height: 68px; background: var(--surface); border-top: 1px solid var(--border); }
+    .tab { display: grid; justify-items: center; align-content: center; gap: 3px; border: none; background: none; color: var(--muted);
+      font-size: 11px; font-weight: 500; text-decoration: none; cursor: pointer; padding: 0 2px; }
+    .tab[aria-current="page"] { color: var(--accent); font-weight: 600; }
+  }
+  @media (max-width: 520px) {
+    .stats { grid-template-columns: 1fr; }
+    .facts { grid-template-columns: 1fr 1fr; }
+    .lang-current { display: none; }
   }
 
   /* ---------- language picker ---------- */
-  /* Status on its own line: long Georgian/Russian labels would otherwise squeeze the buttons out. */
-  .sidebar-foot { flex-direction: column; align-items: stretch; gap: 10px; }
-  .foot-actions { display: flex; align-items: center; gap: 6px; }
-  .foot-actions { justify-content: flex-end; }
   .lang-menu { position: relative; flex: none; }
-  .lang-trigger { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 10px 0 9px;
-    border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--ink); cursor: pointer;
+  .lang-trigger { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px 0 11px;
+    border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--ink); cursor: pointer;
     font-size: 13px; font-weight: 500; transition: border-color .15s, box-shadow .15s; }
   .lang-trigger:hover { border-color: var(--faint); }
   .lang-trigger:focus-visible, .lang-menu.open .lang-trigger { outline: none; border-color: var(--accent);
@@ -535,7 +714,6 @@
   .lang-native { font-size: 14px; font-weight: 600; }
   .lang-local { font-size: 12px; color: var(--muted); }
   .lang-check { width: 16px; color: var(--accent); font-weight: 700; text-align: center; }
-  @media (max-width: 860px) { .topbar .lang-current { display: none; } .topbar .lang-trigger { padding: 0 9px; } }
   .auth-top { display: flex; justify-content: flex-end; margin: -12px -8px 4px 0; }
   .auth-links { display: flex; justify-content: space-between; gap: 12px; margin-top: 16px; font-size: 13px; }
   .auth-links a, .linklike { color: var(--muted); background: none; border: none; padding: 0; font: inherit; cursor: pointer;
@@ -590,106 +768,104 @@
         <p data-i18n="app.tagline"></p>
       </div>
     </div>
-
-    <button class="btn primary block" id="newChatBtn" type="button">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-      <span data-i18n="nav.newChat"></span>
-    </button>
-
-    <div>
-      <div class="label-row">
-        <p class="section-label" data-i18n="company.label"></p>
-        <button class="btn small" id="addCompanyBtn" type="button" data-i18n="company.add"></button>
-      </div>
-      <select id="company" class="field" data-i18n-aria="company.label"></select>
-      <div class="profile" id="profile" hidden></div>
-      <button class="btn block books-btn" id="booksBtn" type="button" hidden>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2zM4 19a2 2 0 0 1 2-2h12M9 7h6M9 11h6"/></svg>
-        <span data-i18n="books.nav"></span>
-      </button>
-      <button class="btn block books-btn" id="paymentsBtn" type="button" hidden>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10h18M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 21h18M12 3l9 5H3z"/></svg>
-        <span data-i18n="payments.nav"></span>
-      </button>
-      <div class="books-alerts side" id="booksAlert" hidden></div>
-    </div>
-
-    <div id="deadlinesSection" hidden>
-      <p class="section-label" data-i18n="deadlines.label"></p>
-      <div class="deadlines" id="deadlines"></div>
-    </div>
-
-    <div>
-      <p class="section-label" data-i18n="history.label"></p>
-      <div class="history" id="history"></div>
-    </div>
-
-    <div>
-      <p class="section-label" data-i18n="asOf.label"></p>
-      <input id="asOf" type="date" class="field" data-i18n-aria="asOf.aria">
-    </div>
-
-    <div class="sidebar-foot">
-      <span id="indexStatus"><span class="dot"></span></span>
-      <span class="foot-actions">
-        <a class="icon-btn" href="/docs" target="_blank" rel="noopener" data-i18n-title="docs.title" style="display:inline-grid">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>
-        </a>
-        <button class="icon-btn" id="reviewsBtn" type="button" data-i18n-title="review.nav" style="display:inline-grid">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>
-        </button>
-        <button class="icon-btn" id="themeBtn" data-i18n-title="theme.title" style="display:inline-grid">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
-        </button>
-      </span>
-    </div>
-    <div class="account">
-      <div class="initials" id="initials" aria-hidden="true"></div>
-      <button class="who who-btn" id="accountBtn" type="button" data-i18n-title="account.title"><div id="userName"></div><div id="userEmail"></div></button>
-      <button class="icon-btn" id="remindersBtn" type="button" data-i18n-title="reminders.nav">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>
-      </button>
-      <button class="icon-btn" id="logoutBtn" data-i18n-title="logout.title">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-      </button>
+    <nav class="nav" data-i18n-aria="nav.aria">
+      <a class="nav-item" href="#overview" data-view="overview"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span class="nav-text" data-i18n="nav.overview"></span></a>
+      <a class="nav-item" href="#assistant" data-view="assistant"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><span class="nav-text" data-i18n="nav.assistant"></span></a>
+      <a class="nav-item" href="#books" data-view="books"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2zM4 19a2 2 0 0 1 2-2h12M9 7h6M9 11h6"/></svg><span class="nav-text" data-i18n="books.nav"></span></a>
+      <a class="nav-item" href="#calendar" data-view="calendar"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM3 10h18M8 3v4M16 3v4"/></svg><span class="nav-text" data-i18n="nav.calendar"></span><span class="nav-badge" id="calendarBadge" hidden></span></a>
+      <a class="nav-item" href="#payments" data-view="payments"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg><span class="nav-text" data-i18n="payments.nav"></span></a>
+      <p class="nav-label" data-i18n="nav.connections"></p>
+      <a class="nav-item" href="#companies" data-view="companies"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16M16 9h2a2 2 0 0 1 2 2v10M2 21h20M8 7h4M8 11h4M8 15h4"/></svg><span class="nav-text" data-i18n="nav.companies"></span><span class="nav-dot" id="companiesDot" hidden></span></a>
+      <a class="nav-item" href="#banks" data-view="banks"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zM2 10h20M6 15h4"/></svg><span class="nav-text" data-i18n="nav.banks"></span></a>
+    </nav>
+    <div class="side-foot">
+      <a class="nav-item subtle" href="#reviews" data-view="reviews" id="reviewsBtn"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6zM8.5 12l2.5 2.5 4.5-5"/></svg><span class="nav-text" data-i18n="review.nav"></span></a>
+      <button class="help-card" type="button" id="helpCard"><strong data-i18n="nav.helpTitle"></strong><span data-i18n="nav.helpText"></span></button>
     </div>
   </aside>
   <div class="scrim" id="scrim"></div>
 
-  <main class="chat">
+  <main class="main">
     <header class="topbar">
-      <button class="icon-btn menu-btn" id="menuBtn" data-i18n-title="menu.open">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-      </button>
-      <h2 id="title"></h2>
-      <span class="pill" id="aiPill"><span class="dot"></span><span data-i18n="status.checking"></span></span>
+      <button class="icon-btn menu-btn" id="menuBtn" type="button" data-i18n-title="menu.open"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      <label class="company-switch">
+        <span class="company-badge" id="companyBadge" aria-hidden="true"></span>
+        <select id="company" class="company-select" data-i18n-aria="company.label"></select>
+      </label>
+      <form class="askbar" id="askForm" role="search">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM21 21l-4.3-4.3"/></svg>
+        <input id="askInput" autocomplete="off" data-i18n-placeholder="ask.placeholder" data-i18n-aria="ask.placeholder">
+        <kbd data-i18n="ask.shortcut"></kbd>
+      </form>
       <div class="lang-menu" id="langMenu"></div>
+      <button class="icon-btn" id="remindersBtn" type="button" data-i18n-title="reminders.nav">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+      </button>
+      <div class="account-menu" id="accountMenu">
+        <button class="avatar-btn" id="accountMenuBtn" type="button" aria-haspopup="menu" aria-expanded="false" data-i18n-title="menu.account"><span id="initials"></span></button>
+        <div class="menu-list" id="accountMenuList" role="menu" hidden>
+          <div class="menu-who"><strong id="userName"></strong><span id="userEmail"></span></div>
+          <button class="menu-item" type="button" role="menuitem" id="accountBtn" data-i18n="menu.settings"></button>
+          <button class="menu-item" type="button" role="menuitem" id="remindersMenuBtn" data-i18n="reminders.nav"></button>
+          <button class="menu-item" type="button" role="menuitem" id="themeBtn" data-i18n="theme.title"></button>
+          <label class="menu-date"><span data-i18n="asOf.label"></span><input id="asOf" type="date" class="field" data-i18n-aria="asOf.aria"></label>
+          <div class="menu-sep"></div>
+          <a class="menu-item" role="menuitem" href="/privacy" target="_blank" rel="noopener" data-i18n="auth.privacy"></a>
+          <a class="menu-item" role="menuitem" href="/docs" target="_blank" rel="noopener" data-i18n="menu.apiDocs"></a>
+          <button class="menu-item" type="button" role="menuitem" id="logoutBtn" data-i18n="menu.signOut"></button>
+        </div>
+      </div>
+      <h2 id="title" class="sr-only"></h2>
     </header>
 
-    <section class="books" id="books" hidden data-i18n-aria="books.title">
-      <div class="books-inner" id="booksInner"></div>
-    </section>
-    <section class="books payments" id="payments" hidden data-i18n-aria="payments.nav">
-      <div class="books-inner" id="paymentsInner"></div>
-    </section>
-    <section class="books" id="reviews" hidden data-i18n-aria="review.title">
-      <div class="books-inner" id="reviewsInner"></div>
-    </section>
-
-    <div id="log" aria-live="polite">
-      <div class="thread" id="thread"></div>
-    </div>
-
-    <div class="composer-wrap">
-      <form class="composer" id="form">
-        <textarea id="message" rows="1" data-i18n-placeholder="composer.placeholder" data-i18n-aria="composer.aria"></textarea>
-        <button class="send" id="send" type="submit" data-i18n-title="composer.send" disabled>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </button>
-      </form>
-      <p class="fineprint" data-i18n="fineprint"></p>
+    <div class="views">
+      <section class="view" id="overview" hidden data-i18n-aria="nav.overview"><div class="page" id="overviewInner"></div></section>
+      <section class="view assistant" id="assistant" hidden data-i18n-aria="nav.assistant">
+        <aside class="chats" data-i18n-aria="history.label">
+          <button class="btn primary" id="newChatBtn" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            <span data-i18n="nav.newChat"></span>
+          </button>
+          <p class="section-label" data-i18n="history.label"></p>
+          <div class="history" id="history"></div>
+        </aside>
+        <div class="chat">
+          <div class="chat-head">
+            <h1 data-i18n="nav.assistant"></h1>
+            <span class="index-status" id="indexStatus"><span class="dot"></span></span>
+            <span class="pill" id="aiPill"><span class="dot"></span><span data-i18n="status.checking"></span></span>
+          </div>
+          <div id="log" aria-live="polite">
+            <div class="thread" id="thread"></div>
+          </div>
+          <div class="composer-wrap">
+            <form class="composer" id="form">
+              <textarea id="message" rows="1" data-i18n-placeholder="composer.placeholder" data-i18n-aria="composer.aria"></textarea>
+              <button class="send" id="send" type="submit" data-i18n-title="composer.send" disabled>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </button>
+            </form>
+            <p class="fineprint" data-i18n="fineprint"></p>
+          </div>
+        </div>
+      </section>
+      <section class="view books" id="books" hidden data-i18n-aria="books.title"><div class="books-inner" id="booksInner"></div></section>
+      <section class="view" id="calendar" hidden data-i18n-aria="nav.calendar"><div class="page" id="calendarInner"></div></section>
+      <section class="view books payments" id="payments" hidden data-i18n-aria="payments.nav"><div class="books-inner" id="paymentsInner"></div></section>
+      <section class="view" id="companies" hidden data-i18n-aria="nav.companies"><div class="page" id="companiesInner"></div></section>
+      <section class="view" id="banks" hidden data-i18n-aria="nav.banks"><div class="page" id="banksInner"></div></section>
+      <section class="view books" id="reviews" hidden data-i18n-aria="review.title"><div class="books-inner" id="reviewsInner"></div></section>
+      <div class="books-alerts" id="booksAlert" hidden></div>
     </div>
   </main>
+
+  <nav class="tabbar" data-i18n-aria="nav.aria">
+    <a class="tab" href="#overview" data-view="overview"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span data-i18n="nav.home"></span></a>
+    <a class="tab" href="#assistant" data-view="assistant"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><span data-i18n="nav.assistant"></span></a>
+    <a class="tab" href="#books" data-view="books"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2zM4 19a2 2 0 0 1 2-2h12M9 7h6M9 11h6"/></svg><span data-i18n="nav.records"></span></a>
+    <a class="tab" href="#calendar" data-view="calendar"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM3 10h18M8 3v4M16 3v4"/></svg><span data-i18n="nav.calendarShort"></span></a>
+    <button class="tab" type="button" id="moreTab"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span data-i18n="nav.more"></span></button>
+  </nav>
 </div>
 
 <section class="auth" id="auth" hidden data-i18n-aria="auth.aria">
@@ -961,10 +1137,10 @@ async function setLanguage(next, { save = true } = {}) {
   window.Books?.onLanguageChange();
   window.Reviews?.onLanguageChange();
   window.Pay?.onLanguageChange();
+  for (const m of [window.Overview, window.Calendar, window.Companies, window.Banks]) m?.onLanguageChange();
   renderReminders();
   if ($("thread").querySelector(".empty.start")) renderEmpty();
   else if ($("thread").querySelector(".empty.welcome")) renderWelcome();
-  if (!companies.length && user) $("title").textContent = t("noCompany.title");
   if (save && user) {
     try { await api("/auth/me", { method: "PATCH", body: { language: next } }); } catch { /* kept locally anyway */ }
   }
@@ -1116,11 +1292,12 @@ $("themeBtn").addEventListener("click", () => {
 
 /* ---------- drawer (mobile) ---------- */
 $("menuBtn").addEventListener("click", () => $("app").classList.add("drawer-open"));
+$("moreTab").addEventListener("click", () => $("app").classList.add("drawer-open"));
 $("scrim").addEventListener("click", () => $("app").classList.remove("drawer-open"));
 
 /* ---------- empty states ---------- */
 function ask(text) {
-  $("app").classList.remove("drawer-open");
+  go("assistant");
   $("message").value = text;
   send();
 }
@@ -1430,10 +1607,7 @@ function touchHistory() {
 }
 
 async function openConversation(id) {
-  $("app").classList.remove("drawer-open");
-  window.Books?.hide();
-  window.Reviews?.hide();
-  window.Pay?.hide();
+  go("assistant");
   if (busy) return;
   try {
     const conv = await api(`/conversations/${id}`);
@@ -1468,15 +1642,16 @@ async function deleteConversation(c) {
   }
 }
 
-function newChat() {
-  window.Books?.hide();
-  window.Reviews?.hide();
-  window.Pay?.hide();
+function resetChat() {
   conversationId = null;
   $("asOf").value = new Date().toISOString().slice(0, 10);
-  renderEmpty();
+  if (companies.length) renderEmpty(); else renderWelcome();
   renderHistory();
-  $("app").classList.remove("drawer-open");
+}
+
+function newChat() {
+  resetChat();
+  go("assistant");
   input.focus();
 }
 $("newChatBtn").addEventListener("click", newChat);
@@ -1501,65 +1676,25 @@ async function loadProfile(company) {
 
 function renderProfile() {
   const company = currentCompany();
-  const box = $("profile");
-  if (!company || profileState === "none") {
-    box.hidden = true; $("booksBtn").hidden = $("paymentsBtn").hidden = !company; return;
-  }
-  const yes = (b) => t(b ? "common.yes" : "common.no");
-  const rows = [[t("profile.taxId"), company.tax_id], [t("profile.legalForm"), t("legal." + company.legal_form)]];
-  const p = currentProfile;
-  if (p) {
-    rows.push([t("profile.vat"), yes(p.vat_registered)], [t("profile.employees"), yes(p.has_employees)],
-      [t("profile.property"), yes(p.owns_property)], [t("profile.regime"), t("regime." + p.tax_regime)]);
-  } else {
-    rows.push([t("profile.taxProfile"), t("profile.notSet")]);
-  }
-  box.replaceChildren(
-    ...rows.map(([k, v]) => el("div", { class: "profile-row" }, el("span", { text: k }), el("span", { text: v }))),
-    el("div", { class: "profile-actions" },
-      el("button", { class: "btn small", type: "button", text: t("common.edit"), onclick: openProfileDialog })));
-  box.hidden = false;
-  $("booksBtn").hidden = false;
-  $("paymentsBtn").hidden = false;
+  $("companyBadge").textContent = company ? initialsOf(company.name) : "";
+  window.Overview?.render();
+  window.Companies?.render();
 }
+
+// Georgian has no capitals in running text (upper-casing gives Mtavruli), so only other scripts are upper-cased.
+const initialsOf = (name) => name.replace(/[„“"'«»()]/g, "").replace(/^(შპს|სს|ი\/მ|LLC|JSC|IE)\s+/i, "")
+  .split(/\s+/).filter(Boolean).map((w) => (/[Ⴀ-ჿ]/.test(w[0]) ? w[0] : w[0].toUpperCase())).join("").slice(0, 2);
 
 /* ---------- deadlines ---------- */
 let deadlineItems = [];
-let showAllDeadlines = false;
-const SIDEBAR_LIMIT = 6;
 
+// The sidebar shows how many open deadlines need attention; the calendar and overview show the dates.
 function renderDeadlines() {
-  const box = $("deadlines");
-  $("deadlinesSection").hidden = !currentCompany();
-  if (!deadlineItems.length) {
-    box.replaceChildren(el("div", { class: "deadlines-empty", text: t("deadlines.none") }));
-    return;
-  }
-  // Open items first (overdue, then soonest); done ones stay visible at the end until they age out.
-  const sorted = [...deadlineItems].sort((a, b) => (a.state === "done") - (b.state === "done") || a.days_left - b.days_left);
-  const shown = showAllDeadlines ? sorted : sorted.slice(0, SIDEBAR_LIMIT);
-  box.replaceChildren(...shown.map((d) => {
-    const when = d.state === "done" ? "" : d.days_left < 0 ? tp("deadlines.overdue", -d.days_left)
-      : d.days_left === 0 ? t("deadlines.today") : d.days_left === 1 ? t("deadlines.tomorrow") : tp("deadlines.inDays", d.days_left);
-    const monthly = d.period_start.slice(0, 7) === d.period_end.slice(0, 7);
-    const period = monthly ? monthYear(d.period_start) : d.period_start.slice(0, 4);
-    const check = el("input", { type: "checkbox", "aria-label": t("deadlines.markDone"), title: t("deadlines.markDone") });
-    check.checked = d.state === "done";
-    check.addEventListener("change", () => markDeadline(d, check.checked));
-    return el("div", { class: `deadline ${d.state}`, title: loc(d.description) || "" }, check,
-      el("div", { class: "d-text" },
-        el("div", { class: "d-title", text: `${loc(d.title)} · ${period}` }),
-        el("div", { class: "d-when", text: t("deadlines.by", { date: shortDate(d.due_date) }) + (when ? " · " + when : "") }),
-        d.shifted_from ? el("div", { class: "d-shift", text: t("deadlines.shifted", { date: shortDate(d.shifted_from) }) }) : null,
-        d.paid_amount != null ? el("div", { class: "d-paid", text: t("deadlines.paid", { amount: `${formatAmount(d.paid_amount)} ${t("card.currency")}` }) }) : null,
-        d.payment && d.state !== "done" ? el("button", { class: "btn small d-pay", type: "button", text: t("deadlines.pay"),
-          onclick: () => window.Pay?.open(d) }) : null));
-  }));
-  if (sorted.length > SIDEBAR_LIMIT) {
-    box.append(el("button", { class: "btn small", type: "button",
-      text: showAllDeadlines ? t("deadlines.showLess") : t("deadlines.showAll", { n: sorted.length }),
-      onclick: () => { showAllDeadlines = !showAllDeadlines; renderDeadlines(); } }));
-  }
+  const urgent = deadlineItems.filter((d) => d.state === "overdue" || d.state === "due_soon").length;
+  $("calendarBadge").hidden = !urgent;
+  $("calendarBadge").textContent = String(urgent);
+  window.Overview?.render();
+  window.Calendar?.render();
 }
 
 async function loadDeadlines() {
@@ -1586,8 +1721,11 @@ async function markDeadline(d, done) {
 const profileDialog = $("profileDialog");
 const profileForm = $("profileForm");
 
-function openProfileDialog() {
-  const p = currentProfile || { vat_registered: false, has_employees: false, owns_property: false, tax_regime: "standard" };
+let profileTarget = null;  // { company, profile } being edited
+
+function openProfileDialog(company = currentCompany(), profile = currentProfile) {
+  profileTarget = { company, profile };
+  const p = profile || { vat_registered: false, has_employees: false, owns_property: false, tax_regime: "standard" };
   const f = profileForm.elements;
   f.vat_registered.checked = p.vat_registered;
   f.vat_registration_date.value = p.vat_registration_date || "";
@@ -1606,19 +1744,23 @@ profileForm.elements.vat_registered.addEventListener("change", (e) => { $("profi
 profileForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const f = profileForm.elements;
+  const { company, profile } = profileTarget;
   try {
-    await api(`/companies/${currentCompany().id}/tax-profile`, { method: "PUT", body: {
+    await api(`/companies/${company.id}/tax-profile`, { method: "PUT", body: {
       vat_registered: f.vat_registered.checked,
       vat_registration_date: f.vat_registered.checked && f.vat_registration_date.value ? f.vat_registration_date.value : null,
       has_employees: f.has_employees.checked,
       owns_property: f.owns_property.checked,
       tax_regime: f.tax_regime.value,
-      fiscal_year_start_month: currentProfile ? currentProfile.fiscal_year_start_month : 1,
+      fiscal_year_start_month: profile ? profile.fiscal_year_start_month : 1,
     } });
     profileDialog.close();
-    await loadProfile(currentCompany());
+    window.Companies?.reload();
+    if (company.id !== (currentCompany() || {}).id) return;
+    await loadProfile(company);
     loadDeadlines();
     window.Books?.onCompanyChange();
+    window.Overview?.reload();
   } catch (err) {
     if (!(err instanceof AuthError)) $("profileError").textContent = err.message;
   }
@@ -1632,20 +1774,19 @@ async function loadCompanies(selectId) {
   const select = $("company");
   select.replaceChildren(...companies.map((c) => new Option(c.name, c.id)));
   select.disabled = !companies.length;
+  $("companyBadge").textContent = "";
   if (!companies.length) {
     window.Books?.hide();
     window.Pay?.hide();
-    $("title").textContent = t("noCompany.title");
-    $("profile").hidden = true;
-    $("booksBtn").hidden = true;
-    $("paymentsBtn").hidden = true;
+    currentProfile = null;
+    profileState = "none";
     $("booksAlert").hidden = true;
     deadlineItems = [];
     renderDeadlines();
     historyItems = [];
-    renderHistory();
-    renderWelcome();
+    resetChat();
     autosize();
+    companyChanged();
     return;
   }
   const wanted = selectId || store.get("companyId");
@@ -1655,23 +1796,95 @@ async function loadCompanies(selectId) {
   loadDeadlines();
   window.Books?.onCompanyChange();
   window.Pay?.onCompanyChange();
+  companyChanged();
   autosize();
+}
+
+function companyChanged() {
+  for (const m of [window.Overview, window.Calendar, window.Companies, window.Banks]) m?.onCompanyChange();
+}
+
+function selectCompany(id) {
+  $("company").value = id;
+  $("company").dispatchEvent(new Event("change"));
 }
 
 $("company").addEventListener("change", () => {
   store.set("companyId", $("company").value);
   loadProfile(currentCompany());
   loadDeadlines();
-  const inBooks = window.Books?.open;
-  const inPayments = window.Pay?.isOpen;
-  newChat();
+  resetChat();
   loadHistory();
-  if (inBooks) window.Books.show();
-  if (inPayments) window.Pay.show();
   window.Books?.onCompanyChange();
   window.Pay?.onCompanyChange();
+  companyChanged();
+  if (view === "books") window.Books?.show();
+  if (view === "payments") window.Pay?.show();
 });
 $("asOf").addEventListener("change", loadDeadlines);
+
+/* ---------- views ---------- */
+// One screen at a time, named in the URL hash so reloads and the back button keep your place.
+const VIEWS = ["overview", "assistant", "books", "calendar", "payments", "companies", "banks", "reviews"];
+const MODULES = {
+  books: () => window.Books, payments: () => window.Pay, reviews: () => window.Reviews, overview: () => window.Overview,
+  calendar: () => window.Calendar, companies: () => window.Companies, banks: () => window.Banks,
+};
+const NEEDS_COMPANY = ["books", "calendar", "payments", "banks"];
+let view = null;
+
+function go(name) {
+  if (!VIEWS.includes(name)) name = "overview";
+  if (NEEDS_COMPANY.includes(name) && !currentCompany()) name = "overview";
+  view = name;
+  for (const [key, module] of Object.entries(MODULES)) if (key !== name) module()?.hide();
+  for (const section of document.querySelectorAll(".view")) section.hidden = section.id !== name;
+  MODULES[name]?.()?.show();
+  $(name).hidden = false;
+  for (const link of document.querySelectorAll("[data-view]")) {
+    if (link.dataset.view === name) link.setAttribute("aria-current", "page"); else link.removeAttribute("aria-current");
+  }
+  if (location.hash !== "#" + name) history.replaceState(null, "", "#" + name);
+  $("app").classList.remove("drawer-open");
+  closeAccountMenu();
+  $(name).scrollTop = 0;
+}
+
+for (const link of document.querySelectorAll("[data-view]")) {
+  link.addEventListener("click", (e) => { e.preventDefault(); go(link.dataset.view); });
+}
+$("helpCard").addEventListener("click", () => { go("assistant"); input.focus(); });
+
+// The ask box in the top bar sends straight to the assistant.
+$("askForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const text = $("askInput").value.trim();
+  if (!text) return;
+  $("askInput").value = "";
+  ask(text);
+});
+document.addEventListener("keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k" && user) {
+    e.preventDefault();
+    const box = $("askInput");
+    if (box.offsetParent) box.focus(); else { go("assistant"); input.focus(); }
+  }
+});
+
+/* ---------- account menu ---------- */
+function closeAccountMenu() {
+  $("accountMenuList").hidden = true;
+  $("accountMenuBtn").setAttribute("aria-expanded", "false");
+}
+$("accountMenuBtn").addEventListener("click", (e) => {
+  e.stopPropagation();
+  const open = $("accountMenuList").hidden;
+  $("accountMenuList").hidden = !open;
+  $("accountMenuBtn").setAttribute("aria-expanded", String(open));
+});
+document.addEventListener("click", (e) => { if (!$("accountMenu").contains(e.target)) closeAccountMenu(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("accountMenuList").hidden) { closeAccountMenu(); $("accountMenuBtn").focus(); } });
+for (const itemEl of document.querySelectorAll("#accountMenuList .menu-item")) itemEl.addEventListener("click", closeAccountMenu);
 
 /* ---------- status ---------- */
 let statusData = null;
@@ -1716,7 +1929,6 @@ function openCompanyDialog() {
   companyDialog.showModal();
   companyForm.elements.name.focus();
 }
-$("addCompanyBtn").addEventListener("click", openCompanyDialog);
 $("companyCancel").addEventListener("click", () => companyDialog.close());
 companyForm.elements.vat_registered.addEventListener("change", (e) => { $("vatDateField").hidden = !e.target.checked; });
 
@@ -1742,8 +1954,8 @@ companyForm.addEventListener("submit", async (e) => {
     } });
     companyDialog.close();
     await loadCompanies(company.id);
-    newChat();
     loadHistory();
+    window.Companies?.reload();
   } catch (err) {
     if (!(err instanceof AuthError)) error.textContent = err.message;
   }
@@ -1798,7 +2010,7 @@ $("rsLookupBtn").addEventListener("click", async () => {
 
 $("profileRsBtn").addEventListener("click", async () => {
   const note = $("profileRsNote");
-  const r = await rsLookup($("profileRsBtn"), note, currentCompany().tax_id);
+  const r = await rsLookup($("profileRsBtn"), note, profileTarget.company.tax_id);
   if (!r) return;
   profileForm.elements.vat_registered.checked = r.vat_payer;
   $("profileVatDate").hidden = !r.vat_payer;
@@ -1882,6 +2094,7 @@ async function saveReminders() {
 }
 
 $("remindersBtn").addEventListener("click", openReminders);
+$("remindersMenuBtn").addEventListener("click", openReminders);
 $("remEmail").addEventListener("change", saveReminders);
 $("remDays").addEventListener("change", saveReminders);
 $("remClose").addEventListener("click", () => $("remindersDialog").close());
@@ -2002,7 +2215,10 @@ $("resetForm").addEventListener("submit", async (e) => {
 // A reset link pasted into a tab that already has the app open.
 window.addEventListener("hashchange", () => {
   const reset = location.hash.match(/^#reset=([\w-]{20,128})$/);
-  if (!reset) return;
+  if (!reset) {
+    if (user && VIEWS.includes(location.hash.slice(1)) && location.hash.slice(1) !== view) go(location.hash.slice(1));
+    return;
+  }
   resetToken = reset[1];
   showAuth();
   showReset("confirm");
@@ -2068,6 +2284,7 @@ async function startApp(me) {
   loadStatus();
   await loadCompanies();
   loadHistory();
+  go(location.hash.slice(1));
 }
 
 (async function boot() {
@@ -2079,7 +2296,6 @@ async function startApp(me) {
   lang = initialLanguage();
   applyStatic();
   setAuthMode("login");
-  $("title").textContent = t("chat.title");
   loadAuthFeatures();
   const reset = location.hash.match(/^#reset=([\w-]{20,128})$/);
   if (reset) {
@@ -2101,5 +2317,7 @@ async function startApp(me) {
 <script src="/static/books.js"></script>
 <script src="/static/reviews.js"></script>
 <script src="/static/pay.js"></script>
+<script src="/static/overview.js"></script>
+<script src="/static/connections.js"></script>
 </body>
 </html>

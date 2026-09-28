@@ -13,6 +13,7 @@ from app.models import Company, CompanyTaxProfile, Employee, TaxEvent, Transacti
 from app.schemas.domain import (
     CompanyCreate,
     CompanyRead,
+    CompanyRename,
     EmployeeCreate,
     EmployeeRead,
     TaxEventCreate,
@@ -58,6 +59,12 @@ def list_companies(user: User = Depends(get_current_user), db: Session = Depends
 @router.get("/{company_id}", response_model=CompanyRead)
 def read_company(company: Company = Depends(get_company)):
     return company
+
+
+@router.patch("/{company_id}", response_model=CompanyRead)
+def rename_company(payload: CompanyRename, company: Company = Depends(get_company), db: Session = Depends(get_db)):
+    company.name = payload.name.strip()
+    return save(db, company)
 
 
 @router.get("/{company_id}/tax-profile", response_model=TaxProfileRead)

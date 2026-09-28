@@ -83,11 +83,17 @@ tax data (income, declarations, debts) is behind the RS login and isn't accessed
 PDF: every answer with a calculation has "Save as PDF" (under the reply), and the Sales & expenses
 screen has "Print / PDF" for the month. Both open the browser's print dialog; choose "Save as PDF".
 
-Tax payments (sidebar, under Sales & expenses): save the bank you pay from (and optionally its IBAN),
-see what's due with amounts, grouped by date, and what you've paid. "Pay", there or next to any deadline,
-shows the treasury transfer details to copy (one treasury code, 101001000, for every tax; your tax ID and
-name; the amount, filled in from Sales & expenses for VAT and small business tax) and opens your bank's
-internet banking. "I've paid" records the amount and date. The app never signs in to a bank or moves money.
+The app has seven screens: **Overview** (what you owe next, this month's figures, upcoming deadlines,
+a setup checklist), **Assistant** (chat), **Sales & expenses**, **Tax calendar**, **Tax payments**, and under
+Connections **Companies & RS.ge** and **Banks**. The ask box in the top bar (Ctrl K) goes straight to the assistant.
+
+Paying: "Pay" on any deadline shows the treasury transfer details to copy (one treasury code, 101001000, for
+every tax; your tax ID and name; the amount, filled in from Sales & expenses for VAT and small business tax) and
+opens the internet banking of the account you pay taxes from (Banks page). "I've paid" records the amount and
+date. The app never signs in to a bank or moves money.
+
+Connecting a company to RS.ge (Companies & RS.ge): create a service user in eservices.rs.ge and enter it there.
+It's stored encrypted with `CREDENTIALS_KEY` from `.env` (generate one as `.env.example` shows, and keep it).
 
 Deadline reminders (bell icon next to your account) go by email and/or Telegram, a chosen number of
 days before each deadline. Set `SMTP_*` and/or `TELEGRAM_BOT_TOKEN` in `.env` (see `.env.example`),

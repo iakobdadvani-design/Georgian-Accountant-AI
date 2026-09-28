@@ -8,13 +8,17 @@ from app import models, ratelimit  # noqa: F401 - models registers all tables wi
 from app.api.chat import ChatPipeline, get_pipeline
 from app.api.legal import get_legal_index
 from app.api.reminders import get_email, get_telegram
-from app.api.rsge import get_rs_client
+from app.api.rsge import get_rs_client, get_rs_factory
 from app.chat.extractor import KeywordExtractor
 from app.chat.responder import TemplateResponder
 from app.database import Base, get_db
 from app.main import app
 
 PASSWORD = "correct horse battery"
+
+
+def _no_rs(user, password):
+    raise AssertionError("tests must not build a real RS.ge client")
 
 
 @pytest.fixture
@@ -41,6 +45,7 @@ def make_client():
     app.dependency_overrides[get_pipeline] = lambda: ChatPipeline(KeywordExtractor(), TemplateResponder(), "keyword", "template")
     app.dependency_overrides[get_legal_index] = lambda: None
     app.dependency_overrides[get_rs_client] = lambda: None
+    app.dependency_overrides[get_rs_factory] = lambda: _no_rs
     app.dependency_overrides[get_email] = lambda: None
     app.dependency_overrides[get_telegram] = lambda: None
 

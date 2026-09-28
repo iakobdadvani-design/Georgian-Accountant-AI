@@ -5,7 +5,8 @@ Totals are sums of the company's own records; every tax answer is a rule evaluat
 
 import base64
 import binascii
-from datetime import date
+import uuid
+from datetime import UTC, date, datetime
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -21,7 +22,7 @@ from app.books import (
 from app.books.importer import COLUMNS, Column, ImportError_, ParsedRow, SkippedRow, find_table, parse_table, read_rows
 from app.database import get_db
 from app.facts import company_facts
-from app.models import Company, Transaction
+from app.models import Company, CompanyBank, Transaction
 from app.models.enums import TransactionDirection
 from app.rules.engine import evaluate
 from app.rules.loader import get_rules
@@ -129,6 +130,7 @@ class ImportFile(BaseModel):
 class ImportRequest(ImportFile):
     sales_include_vat: bool = Field(default=False, description="Record the 18% VAT inside each sale (VAT payers)")
     purchases_include_vat: bool = Field(default=False, description="Record the 18% VAT inside each purchase")
+    bank_account_id: uuid.UUID | None = Field(default=None, description="The company's bank account the statement is from")
 
 
 class ImportPreview(BaseModel):
@@ -186,6 +188,11 @@ def preview_import(payload: ImportFile, company: Company = Depends(get_company),
 
 @router.post("/import", response_model=ImportResult)
 def run_import(payload: ImportRequest, company: Company = Depends(get_company), db: Session = Depends(get_db)):
+    bank = None
+    if payload.bank_account_id is not None:
+        bank = db.get(CompanyBank, payload.bank_account_id)
+        if bank is None or bank.company_id != company.id:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "No such bank account")
     _, _, rows, skipped = parse_upload(payload)
     already = existing_ids(company, db, rows)
     facts = company_facts(company, db)
@@ -198,5 +205,7 @@ def run_import(payload: ImportRequest, company: Company = Depends(get_company), 
             vat_amount=vat_inside(r.amount, facts, r.occurred_on) if with_vat else None,
             category="sales" if is_sale else "purchase", counterparty=r.counterparty, description=r.description,
             external_id=r.external_id))
+    if bank is not None:
+        bank.last_import_at, bank.last_import_count = datetime.now(UTC), len(new)
     db.commit()
     return ImportResult(imported=len(new), duplicates=len(rows) - len(new), skipped=skipped)

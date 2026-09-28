@@ -22,6 +22,10 @@ class CompanyRead(ORMModel, CompanyCreate):
     id: uuid.UUID
 
 
+class CompanyRename(BaseModel):
+    name: str = Field(min_length=1, max_length=255)
+
+
 class TaxProfileUpdate(BaseModel):
     tax_regime: TaxRegime = TaxRegime.standard
     vat_registered: bool = False

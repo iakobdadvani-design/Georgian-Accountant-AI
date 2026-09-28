@@ -30,7 +30,8 @@ the date. Model replies are rejected if they contain a number the engine didn't 
 | `books/`, `api/books.py`, `static/books.js` | Sales & expenses: sums of recorded transactions (`books/__init__.py`), bank statement import (CSV/.xlsx, `books/importer.py`), monthly summary running the VAT registration / VAT payable / small business rules on those sums |
 | `facts.py` | `company_facts`: the `company.*` facts rules see |
 | `i18n/` | Reply catalogs `messages/<lang>.json`, `t()`/`tplural()`, locale number/date formatting |
-| `static/index.html`, `static/i18n.json` | The whole UI (vanilla JS, no build) and its catalog (all visible text) |
+| `static/index.html`, `static/i18n.json` | The page shell (sidebar menu, top bar, view switcher `go(name)`, chat, dialogs; vanilla JS, no build) and its catalog (all visible text) |
+| `static/overview.js`, `connections.js`, `books.js`, `pay.js`, `reviews.js` | One script per screen: Overview + Tax calendar, Companies & RS.ge + Banks, Sales & expenses, Tax payments, Rule review. Each exposes `window.X` with `show`/`hide` (called only by `go`) and `onCompanyChange`/`onLanguageChange`; the page calls them through `window.X?.` |
 
 ## Commands
 
@@ -148,29 +149,35 @@ configured): every minute it polls the Telegram bot for `/start <code>` links, e
 it's retried next round. Tests use `send_due`/`link_telegram` with fake senders and override
 `get_email`/`get_telegram`; they never start the loop (TestClient without `with` skips lifespan).
 
-## RS.ge lookup
+## RS.ge
 
-`GET /rs/taxpayers/{tin}` (9 or 11 digits) asks services.rs.ge for the registered name and VAT status;
-the add-company and tax-profile dialogs use it to fill the form. It needs an RS "service user"
-(`RS_SERVICE_USER` / `RS_SERVICE_PASSWORD` in `.env`), created by the taxpayer in eservices.rs.ge;
-without one the endpoint answers 503 "not set up". Never ask for or store a user's RS portal login,
-and don't scrape rs.ge pages. RS data only pre-fills facts the user then saves; it never feeds a
-calculation directly. Tests override `get_rs_client` and must never call RS.
+Two uses of RS's official WayBillService (`rsge.py`), both read-only (registered name + VAT-payer status):
+- **Lookup** `GET /rs/taxpayers/{tin}` with the server's own service user (`RS_SERVICE_USER` / `RS_SERVICE_PASSWORD`),
+  used by the add-company and tax-profile dialogs; without one it answers 503 "not set up".
+- **A company's own connection** (`/companies/{id}/rs`, Companies & RS.ge page): the owner enters a service user
+  they created in eservices.rs.ge. It's checked against RS with the company's tax ID before anything is stored; the
+  password is stored encrypted with `CREDENTIALS_KEY` (`app/crypto.py`, Fernet; without a key connecting is "not
+  available"). Losing the key means reconnecting. Never ask for or store a user's RS **portal** login, and don't
+  scrape rs.ge pages.
 
-## Paying taxes
+RS data never feeds a calculation directly: the page shows RS's values beside the profile and changes the profile
+(or the company name) only when the user presses "Use RS.ge value". Tests override `get_rs_client` and
+`get_rs_factory` and must never call RS.
 
-The app never moves money or signs in to a bank. **Tax payments** (`static/pay.js`, sidebar button under Sales &
-expenses) has three parts: the company's bank (`company_banks`: bank id + optional IBAN, checked with ISO 13616
-digits; saved for convenience, no credentials or access), what's due grouped by due date, and what's been paid
-(`GET /companies/{id}/payments/history`). The same "Pay" dialog opens from there and from each deadline in the
-sidebar: amount, the treasury transfer details to copy (single treasury code and the Treasury's bank code in
-`app/payments.py`, with sources; the company's tax ID and name), and a button that opens the saved bank's
-internet banking. The amount is pre-filled only where the books give it (`AMOUNT_FROM_BOOKS`: VAT payable, small
-business tax for that month, from rule results, never computed in the page). "I've paid" stores the amount and
-date on the deadline's `TaxEvent` (status `paid`, `paid_on`), which also stops its reminders. `"payment": false`
-in `deadlines.json` marks a return with nothing to pay. Banks are shown by name and colour, not copied logo files.
-Real bank linking or starting payments from the app (open banking) needs a National Bank licence or a licensed
-partner; don't imitate it.
+## Paying taxes and banks
+
+The app never moves money or signs in to a bank. **Banks** (`connections.js`, `company_banks`): a company's
+accounts (bank id, optional IBAN checked with ISO 13616 digits, currency, `is_primary` = taxes are paid from it;
+exactly one primary once any exist), with statement upload per account (`bank_account_id` on the import records
+`last_import_at/count`). **Tax payments** (`pay.js`): what's due grouped by date, paid history, and the "Pay" dialog
+(also on the Overview and Tax calendar): amount, the treasury transfer details to copy (single treasury code and
+the Treasury's bank code in `app/payments.py`, with sources; the company's tax ID and name), and a button that opens
+the primary bank's internet banking. Amounts are pre-filled only where the books give them (`AMOUNT_FROM_BOOKS`:
+VAT payable, small business tax for that month, from rule results, never computed in the page). "I've paid"
+stores the amount and date on the deadline's `TaxEvent` (status `paid`, `paid_on`), which also stops its
+reminders. `"payment": false` in `deadlines.json` marks a return with nothing to pay. Banks are shown by name and
+colour, not copied logo files. Linking a bank for real or paying from the app (open banking) needs a National
+Bank licence or a licensed partner; don't imitate it.
 
 ## Going public
 
@@ -196,5 +203,6 @@ partner; don't imitate it.
   file (Write tool) or edit files directly instead of `python -c "..."` with escapes.
 - There's no local Node; syntax-check the page's JS with `docker run node:20-alpine node --check`.
 - Paths contain spaces (`rag law/RAD law`); quote them.
-- Verify UI changes in a real browser (Playwright) — tests don't cover the page. Allow ~60 s for
+- Verify UI changes in a real browser (Playwright) — tests don't cover the page. The page's CSP forbids `eval`, so
+  Playwright's string `wait_for_function` fails; wait with locators (`expect(...).to_be_visible()`). Allow ~60 s for
   the first chat reply when `AI_PROVIDER=ollama` (the model loads on first use).

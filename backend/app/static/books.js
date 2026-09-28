@@ -242,7 +242,7 @@
                        text: "›", onclick: () => { month = shiftMonth(month, 1); load(); } })),
       el("div", { class: "books-actions" },
         el("button", { class: "btn", type: "button", text: t("books.print"), onclick: printMonth }),
-        el("button", { class: "btn", type: "button", text: t("books.import"), onclick: openImport }),
+        el("button", { class: "btn", type: "button", text: t("books.import"), onclick: () => openImport() }),
         el("button", { class: "btn primary", type: "button", text: t("books.add"),
                        onclick: () => { adding = true; render(); } })));
 
@@ -307,6 +307,7 @@
 
   /* ---------- import ---------- */
   let importState = null;  // { filename, content, preview, mapping }
+  let importBank = null;  // the company's bank account the statement comes from, if chosen
 
   function importDialog() {
     let dialog = $("importDialog");
@@ -317,7 +318,8 @@
     return dialog;
   }
 
-  function openImport() {
+  function openImport(bankAccountId = null) {
+    importBank = bankAccountId;
     importState = null;
     renderImport();
     importDialog().showModal();
@@ -419,11 +421,14 @@
           const result = await api(`/companies/${currentCompany().id}/books/import`, { method: "POST", body: {
             filename: st.filename, content: st.content, mapping: st.mapping,
             sales_include_vat: vatRegistered && salesVat.checked, purchases_include_vat: vatRegistered && purchasesVat.checked,
+            bank_account_id: importBank || undefined,
           } });
           st.done = result;
           renderImport();
           load();
           loadAlert();
+          window.Banks?.reload();
+          window.Overview?.reload();
         } catch (err) {
           go.disabled = false;
           if (!(err instanceof AuthError)) { st.error = err.message; renderImport(); }
@@ -439,9 +444,9 @@
   }
 
   /* ---------- hooks for the page ---------- */
-  $("booksBtn").addEventListener("click", () => (open ? hide() : show()));
   window.Books = {
-    show, hide,
+    show, hide, openImport, loadAlert,
+    startAdd() { adding = true; },  // then show the view; the form opens with it
     get open() { return open; },
     onCompanyChange() { summary = null; records = []; adding = false; if (open) show(); loadAlert(); },
     onLanguageChange() {

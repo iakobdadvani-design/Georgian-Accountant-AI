@@ -37,6 +37,7 @@ services:
       SMTP_FROM: ${SMTP_FROM:-}
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
       RS_SERVICE_PASSWORD: ${RS_SERVICE_PASSWORD:-}
+      CREDENTIALS_KEY: ${CREDENTIALS_KEY:-}
     ports:
       - "8000:8000"
     volumes:

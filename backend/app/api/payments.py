@@ -1,4 +1,5 @@
-from datetime import date
+import uuid
+from datetime import UTC, date, datetime
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
@@ -23,9 +24,14 @@ def payment_details():
     return PaymentDetails()
 
 
-class BankChoice(BaseModel):
+CURRENCIES = ("GEL", "USD", "EUR", "GBP")
+
+
+class BankAccountIn(BaseModel):
     bank_id: str
     iban: str | None = Field(default=None, max_length=40)
+    currency: str = "GEL"
+    is_primary: bool = False
 
     @field_validator("bank_id")
     @classmethod
@@ -44,33 +50,84 @@ class BankChoice(BaseModel):
             raise ValueError("not a valid Georgian IBAN")
         return iban
 
-
-def saved_bank(company: Company, db: Session) -> CompanyBank | None:
-    return db.scalar(select(CompanyBank).where(CompanyBank.company_id == company.id))
-
-
-@router.get("/companies/{company_id}/bank", response_model=BankChoice | None)
-def get_bank(company: Company = Depends(get_company), db: Session = Depends(get_db)):
-    """The bank this company pays from, or null. Stored for convenience only: the app has no access to it."""
-    bank = saved_bank(company, db)
-    return BankChoice(bank_id=bank.bank_id, iban=bank.iban) if bank else None
+    @field_validator("currency")
+    @classmethod
+    def known_currency(cls, value: str) -> str:
+        value = value.strip().upper()
+        if value not in CURRENCIES:
+            raise ValueError(f"currency must be one of {', '.join(CURRENCIES)}")
+        return value
 
 
-@router.put("/companies/{company_id}/bank", response_model=BankChoice)
-def set_bank(payload: BankChoice, company: Company = Depends(get_company), db: Session = Depends(get_db)):
-    bank = saved_bank(company, db) or CompanyBank(company_id=company.id)
-    bank.bank_id, bank.iban = payload.bank_id, payload.iban
+class BankAccount(BankAccountIn):
+    id: uuid.UUID
+    last_import_at: datetime | None = None
+    last_import_count: int | None = None
+
+
+def bank_accounts(company: Company, db: Session) -> list[CompanyBank]:
+    """Taxes-from account first, then in the order they were added."""
+    rows = db.scalars(select(CompanyBank).where(CompanyBank.company_id == company.id)).all()
+    return sorted(rows, key=lambda b: (not b.is_primary, b.created_at or datetime.min.replace(tzinfo=UTC), str(b.id)))
+
+
+def as_read(bank: CompanyBank) -> BankAccount:
+    return BankAccount(id=bank.id, bank_id=bank.bank_id, iban=bank.iban, currency=bank.currency,
+                       is_primary=bank.is_primary, last_import_at=bank.last_import_at,
+                       last_import_count=bank.last_import_count)
+
+
+def get_bank_account(bank_account_id: uuid.UUID, company: Company = Depends(get_company),
+                     db: Session = Depends(get_db)) -> CompanyBank:
+    bank = db.get(CompanyBank, bank_account_id)
+    if bank is None or bank.company_id != company.id:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "No such bank account")
+    return bank
+
+
+def make_primary(company: Company, db: Session, bank: CompanyBank) -> None:
+    for other in bank_accounts(company, db):
+        other.is_primary = other.id == bank.id
+
+
+@router.get("/companies/{company_id}/banks", response_model=list[BankAccount])
+def list_banks(company: Company = Depends(get_company), db: Session = Depends(get_db)):
+    """The company's bank accounts. Stored for convenience only: the app has no access to any bank."""
+    return [as_read(b) for b in bank_accounts(company, db)]
+
+
+@router.post("/companies/{company_id}/banks", response_model=BankAccount, status_code=status.HTTP_201_CREATED)
+def add_bank(payload: BankAccountIn, company: Company = Depends(get_company), db: Session = Depends(get_db)):
+    first = not bank_accounts(company, db)
+    bank = CompanyBank(company_id=company.id, bank_id=payload.bank_id, iban=payload.iban, currency=payload.currency,
+                       is_primary=False, created_at=datetime.now(UTC))
     db.add(bank)
+    db.flush()
+    if payload.is_primary or first:  # the first account is where taxes are paid from until changed
+        make_primary(company, db, bank)
     db.commit()
-    return payload
+    return as_read(bank)
 
 
-@router.delete("/companies/{company_id}/bank", status_code=status.HTTP_204_NO_CONTENT)
-def remove_bank(company: Company = Depends(get_company), db: Session = Depends(get_db)):
-    bank = saved_bank(company, db)
-    if bank is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "No bank saved")
+@router.put("/companies/{company_id}/banks/{bank_account_id}", response_model=BankAccount)
+def update_bank(payload: BankAccountIn, bank: CompanyBank = Depends(get_bank_account),
+                company: Company = Depends(get_company), db: Session = Depends(get_db)):
+    bank.bank_id, bank.iban, bank.currency = payload.bank_id, payload.iban, payload.currency
+    if payload.is_primary:
+        make_primary(company, db, bank)
+    db.commit()
+    return as_read(bank)
+
+
+@router.delete("/companies/{company_id}/banks/{bank_account_id}", status_code=status.HTTP_204_NO_CONTENT)
+def remove_bank(bank: CompanyBank = Depends(get_bank_account), company: Company = Depends(get_company),
+                db: Session = Depends(get_db)):
+    was_primary = bank.is_primary
     db.delete(bank)
+    db.flush()
+    rest = bank_accounts(company, db)
+    if was_primary and rest:
+        make_primary(company, db, rest[0])
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
