@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
@@ -13,6 +15,7 @@ from app.chat.extractor import KeywordExtractor
 from app.chat.responder import TemplateResponder
 from app.database import Base, get_db
 from app.main import app
+from app.nbg import NBGError, Rate, get_nbg
 
 PASSWORD = "correct horse battery"
 
@@ -21,8 +24,27 @@ def _no_rs(user, password):
     raise AssertionError("tests must not build a real RS.ge client")
 
 
+class FakeNBG:
+    """Fixed official rates, the same every day; `down` makes every lookup fail like an unreachable NBG."""
+
+    RATES = {"USD": Decimal("2.7"), "EUR": Decimal("3")}
+
+    def __init__(self):
+        self.down = False
+
+    def rate(self, currency, day):
+        if self.down or currency not in self.RATES:
+            raise NBGError("no rate")
+        return Rate(currency, self.RATES[currency], day)
+
+
 @pytest.fixture
-def make_client():
+def nbg():
+    return FakeNBG()
+
+
+@pytest.fixture
+def make_client(nbg):
     """Factory for TestClients sharing one in-memory DB; each has its own cookie jar (i.e. its own login)."""
     engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
 
@@ -46,6 +68,7 @@ def make_client():
     app.dependency_overrides[get_legal_index] = lambda: None
     app.dependency_overrides[get_rs_client] = lambda: None
     app.dependency_overrides[get_rs_factory] = lambda: _no_rs
+    app.dependency_overrides[get_nbg] = lambda: nbg
     app.dependency_overrides[get_email] = lambda: None
     app.dependency_overrides[get_telegram] = lambda: None
 

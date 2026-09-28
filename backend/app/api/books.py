@@ -19,11 +19,13 @@ from app.books import (
     Alert, Totals, alert, last_12_months, month_end, month_start, rule_threshold, taxable_turnover, totals,
     vat_inside,
 )
+from app.books.currency import LARI, convert
 from app.books.importer import COLUMNS, Column, ImportError_, ParsedRow, SkippedRow, find_table, parse_table, read_rows
 from app.database import get_db
 from app.facts import company_facts
 from app.models import Company, CompanyBank, Transaction
 from app.models.enums import TransactionDirection
+from app.nbg import NBGClient, get_nbg
 from app.rules.engine import evaluate
 from app.rules.loader import get_rules
 from app.reviews import apply_to_results
@@ -41,6 +43,7 @@ class TotalsRead(BaseModel):
     output_vat: Decimal
     input_vat: Decimal
     count: int
+    unconverted: int = 0
 
 
 class LimitStatus(BaseModel):
@@ -131,6 +134,8 @@ class ImportRequest(ImportFile):
     sales_include_vat: bool = Field(default=False, description="Record the 18% VAT inside each sale (VAT payers)")
     purchases_include_vat: bool = Field(default=False, description="Record the 18% VAT inside each purchase")
     bank_account_id: uuid.UUID | None = Field(default=None, description="The company's bank account the statement is from")
+    currency: str | None = Field(default=None, pattern=r"^[A-Za-z]{3}$",
+                                 description="The statement's currency; default: the bank account's, else GEL")
 
 
 class ImportPreview(BaseModel):
@@ -148,6 +153,12 @@ class ImportResult(BaseModel):
     imported: int
     duplicates: int
     skipped: list[SkippedRow]
+    unconverted: int = Field(default=0, description="Foreign-currency rows saved without an official rate yet")
+
+
+class ConvertResult(BaseModel):
+    converted: int
+    remaining: int
 
 
 def parse_upload(payload: ImportFile) -> tuple[list[str], dict, list[ParsedRow], list[SkippedRow]]:
@@ -187,25 +198,41 @@ def preview_import(payload: ImportFile, company: Company = Depends(get_company),
 
 
 @router.post("/import", response_model=ImportResult)
-def run_import(payload: ImportRequest, company: Company = Depends(get_company), db: Session = Depends(get_db)):
+def run_import(payload: ImportRequest, company: Company = Depends(get_company), db: Session = Depends(get_db),
+               nbg: NBGClient = Depends(get_nbg)):
     bank = None
     if payload.bank_account_id is not None:
         bank = db.get(CompanyBank, payload.bank_account_id)
         if bank is None or bank.company_id != company.id:
             raise HTTPException(status.HTTP_404_NOT_FOUND, "No such bank account")
+    currency = (payload.currency or (bank.currency if bank else LARI)).upper()
     _, _, rows, skipped = parse_upload(payload)
     already = existing_ids(company, db, rows)
     facts = company_facts(company, db)
     new = [r for r in rows if r.external_id not in already]
+    unconverted = 0
     for r in new:
         is_sale = r.direction == TransactionDirection.income
         with_vat = payload.sales_include_vat if is_sale else payload.purchases_include_vat
-        db.add(Transaction(
+        transaction = Transaction(
             company_id=company.id, occurred_on=r.occurred_on, direction=r.direction, amount=r.amount,
-            vat_amount=vat_inside(r.amount, facts, r.occurred_on) if with_vat else None,
+            vat_amount=vat_inside(r.amount, facts, r.occurred_on) if with_vat else None, currency=currency,
             category="sales" if is_sale else "purchase", counterparty=r.counterparty, description=r.description,
-            external_id=r.external_id))
+            external_id=r.external_id)
+        unconverted += not convert(transaction, nbg)
+        db.add(transaction)
     if bank is not None:
         bank.last_import_at, bank.last_import_count = datetime.now(UTC), len(new)
     db.commit()
-    return ImportResult(imported=len(new), duplicates=len(rows) - len(new), skipped=skipped)
+    return ImportResult(imported=len(new), duplicates=len(rows) - len(new), skipped=skipped, unconverted=unconverted)
+
+
+@router.post("/convert", response_model=ConvertResult)
+def convert_pending(company: Company = Depends(get_company), db: Session = Depends(get_db),
+                    nbg: NBGClient = Depends(get_nbg)):
+    """Try again to translate foreign-currency records that were saved while the NBG rate couldn't be fetched."""
+    pending = db.scalars(select(Transaction).where(
+        Transaction.company_id == company.id, Transaction.currency != LARI, Transaction.gel_amount.is_(None))).all()
+    converted = sum(convert(t, nbg) for t in pending)
+    db.commit()
+    return ConvertResult(converted=converted, remaining=len(pending) - converted)

@@ -7,9 +7,11 @@ from sqlalchemy.orm import Session
 
 from app.auth import get_current_user
 from app.books import vat_inside
+from app.books.currency import convert
 from app.database import get_db
 from app.facts import company_facts
 from app.models import Company, CompanyTaxProfile, Employee, TaxEvent, Transaction, User
+from app.nbg import NBGClient, get_nbg
 from app.schemas.domain import (
     CompanyCreate,
     CompanyRead,
@@ -101,7 +103,8 @@ def list_employees(company: Company = Depends(get_company), db: Session = Depend
 
 @router.post("/{company_id}/transactions", response_model=TransactionRead, status_code=status.HTTP_201_CREATED)
 def create_transaction(
-    payload: TransactionCreate, company: Company = Depends(get_company), db: Session = Depends(get_db)
+    payload: TransactionCreate, company: Company = Depends(get_company), db: Session = Depends(get_db),
+    nbg: NBGClient = Depends(get_nbg),
 ):
     if payload.employee_id is not None:
         employee = db.get(Employee, payload.employee_id)
@@ -110,7 +113,9 @@ def create_transaction(
     fields = payload.model_dump(exclude={"vat_included"})
     if payload.vat_included and payload.vat_amount is None:
         fields["vat_amount"] = vat_inside(payload.amount, company_facts(company, db), payload.occurred_on)
-    return save(db, Transaction(company_id=company.id, **fields))
+    transaction = Transaction(company_id=company.id, **fields)
+    convert(transaction, nbg)  # without a rate it's saved unconverted and reported; see /books/convert
+    return save(db, transaction)
 
 
 @router.get("/{company_id}/transactions", response_model=list[TransactionRead])

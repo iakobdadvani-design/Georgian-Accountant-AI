@@ -563,7 +563,16 @@
   "server.Stored RS.ge details can't be read; connect again": "The saved RS.ge details can't be read. Connect again.",
   "server.not a valid Georgian IBAN": "That isn't a valid Georgian IBAN: GE followed by 20 characters.",
   "server.No such bank account": "This bank account no longer exists.",
-  "nav.calendarShort": "Calendar"
+  "nav.calendarShort": "Calendar",
+  "books.fx.line": "{amount} × {rate} · NBG rate of {date}",
+  "books.fx.pending": "No official rate yet",
+  "books.fx.unconverted": {
+   "one": "{n} record in a foreign currency isn't counted yet: the National Bank rate couldn't be fetched.",
+   "other": "{n} records in a foreign currency aren't counted yet: the National Bank rate couldn't be fetched."
+  },
+  "books.fx.retry": "Try again",
+  "import.currency": "Statement currency",
+  "import.currencyHint": "Foreign amounts are converted to lari at the National Bank's official rate for each day (Tax Code, Art. 73(10))."
  },
  "ka": {
   "meta.locale": "ka-GE",
@@ -1120,7 +1129,15 @@
   "server.Stored RS.ge details can't be read; connect again": "შენახული RS.ge მონაცემების წაკითხვა ვერ ხერხდება. დააკავშირეთ ხელახლა.",
   "server.not a valid Georgian IBAN": "ეს არ არის სწორი ქართული IBAN: GE და 20 სიმბოლო.",
   "server.No such bank account": "ეს საბანკო ანგარიში აღარ არსებობს.",
-  "nav.calendarShort": "კალენდარი"
+  "nav.calendarShort": "კალენდარი",
+  "books.fx.line": "{amount} × {rate} · ეროვნული ბანკის კურსი, {date}",
+  "books.fx.pending": "ოფიციალური კურსი ჯერ არ არის",
+  "books.fx.unconverted": {
+   "other": "{n} ჩანაწერი უცხოურ ვალუტაში ჯერ არ არის დათვლილი: ეროვნული ბანკის კურსი ვერ მივიღეთ."
+  },
+  "books.fx.retry": "ხელახლა ცდა",
+  "import.currency": "ამონაწერის ვალუტა",
+  "import.currencyHint": "უცხოური ვალუტა ლარში გადაიყვანება ეროვნული ბანკის ოფიციალური კურსით, თითოეული დღისთვის (საგადასახადო კოდექსი, მუხლი 73(10))."
  },
  "ru": {
   "meta.locale": "ru-RU",
@@ -1704,7 +1721,18 @@
   "server.Stored RS.ge details can't be read; connect again": "Сохранённые данные RS.ge не читаются. Подключите заново.",
   "server.not a valid Georgian IBAN": "Это не грузинский IBAN: GE и ещё 20 символов.",
   "server.No such bank account": "Этого банковского счёта больше нет.",
-  "nav.calendarShort": "Календарь"
+  "nav.calendarShort": "Календарь",
+  "books.fx.line": "{amount} × {rate} · курс НБГ на {date}",
+  "books.fx.pending": "Официального курса пока нет",
+  "books.fx.unconverted": {
+   "one": "{n} запись в валюте пока не учтена: не удалось получить курс НБГ.",
+   "few": "{n} записи в валюте пока не учтены: не удалось получить курс НБГ.",
+   "many": "{n} записей в валюте пока не учтено: не удалось получить курс НБГ.",
+   "other": "{n} записи в валюте пока не учтены: не удалось получить курс НБГ."
+  },
+  "books.fx.retry": "Повторить",
+  "import.currency": "Валюта выписки",
+  "import.currencyHint": "Суммы в валюте пересчитываются в лари по официальному курсу НБГ на каждый день (Налоговый кодекс, ст. 73(10))."
  },
  "de": {
   "meta.locale": "de-DE",
@@ -2270,7 +2298,16 @@
   "server.Stored RS.ge details can't be read; connect again": "Die gespeicherten RS.ge-Daten sind nicht lesbar. Bitte neu verbinden.",
   "server.not a valid Georgian IBAN": "Das ist keine gültige georgische IBAN: GE und 20 Zeichen.",
   "server.No such bank account": "Dieses Bankkonto gibt es nicht mehr.",
-  "nav.calendarShort": "Kalender"
+  "nav.calendarShort": "Kalender",
+  "books.fx.line": "{amount} × {rate} · NBG-Kurs vom {date}",
+  "books.fx.pending": "Noch kein offizieller Kurs",
+  "books.fx.unconverted": {
+   "one": "{n} Buchung in Fremdwährung ist noch nicht erfasst: Der NBG-Kurs war nicht abrufbar.",
+   "other": "{n} Buchungen in Fremdwährung sind noch nicht erfasst: Der NBG-Kurs war nicht abrufbar."
+  },
+  "books.fx.retry": "Erneut versuchen",
+  "import.currency": "Währung des Auszugs",
+  "import.currencyHint": "Fremdwährungsbeträge werden zum offiziellen NBG-Tageskurs in Lari umgerechnet (Steuergesetzbuch, Art. 73(10))."
  },
  "fr": {
   "meta.locale": "fr-FR",
@@ -2836,6 +2873,15 @@
   "server.Stored RS.ge details can't be read; connect again": "Les données RS.ge enregistrées sont illisibles. Reconnectez-vous.",
   "server.not a valid Georgian IBAN": "Ce n’est pas un IBAN géorgien valide : GE suivi de 20 caractères.",
   "server.No such bank account": "Ce compte bancaire n’existe plus.",
-  "nav.calendarShort": "Calendrier"
+  "nav.calendarShort": "Calendrier",
+  "books.fx.line": "{amount} × {rate} · cours BNG du {date}",
+  "books.fx.pending": "Pas encore de cours officiel",
+  "books.fx.unconverted": {
+   "one": "{n} écriture en devise n’est pas encore comptée : le cours de la BNG n’a pas pu être obtenu.",
+   "other": "{n} écritures en devise ne sont pas encore comptées : le cours de la BNG n’a pas pu être obtenu."
+  },
+  "books.fx.retry": "Réessayer",
+  "import.currency": "Devise du relevé",
+  "import.currencyHint": "Les montants en devise sont convertis en lari au cours officiel de la BNG du jour (Code des impôts, art. 73(10))."
  }
 }

@@ -510,6 +510,11 @@
   .file-pick .file-input { position: absolute; width: 1px; height: 1px; opacity: 0; }
   .file-pick:focus-within .btn { border-color: var(--accent); }
   .file-name { color: var(--muted); font-size: 13px; font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .fx-line { font-size: 11.5px; color: var(--muted); font-weight: 400; white-space: nowrap; }
+  .fx-line.pending { color: var(--warn); font-weight: 600; }
+  .amount-with-currency { display: flex; gap: 6px; }
+  .amount-with-currency .field:first-child { flex: 1; min-width: 0; }
+  .currency-select { width: auto; flex: none; }
   .import-done { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--ok-soft); color: var(--ok); font-weight: 500; }
   @media (max-width: 860px) {
     .books { padding: 16px; }

@@ -140,6 +140,13 @@ fingerprint (`external_id`, unique per company) so re-imports add nothing. The c
 (`with_books` in `api/chat.py`) and says so (`Extraction.from_books`). `static/books.js` is a second
 script that reuses the page's globals; the page calls it only through `window.Books?.…`.
 
+Foreign currencies (Tax Code Art. 73(10)): a record keeps its currency and amount, and on saving/import gets the NBG
+official rate for its day (`app/nbg.py`; a day without a rate takes the latest earlier one, recorded as `rate_date`,
+pending an accountant's confirmation of the Board's procedure), stored with the lari figures (`gel_amount`,
+`gel_vat_amount`) so totals never move afterwards (`books/currency.py`). If the NBG can't be reached the record is saved
+unconverted, left out of the sums, counted in `totals.unconverted` and shown with a retry (`POST /books/convert`).
+Tests override `get_nbg` with `FakeNBG` (conftest) and must never call the NBG.
+
 ## Reminders
 
 `reminders.py` runs as a background task (started in `main.py` lifespan only when SMTP or Telegram is

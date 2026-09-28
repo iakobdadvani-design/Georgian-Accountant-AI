@@ -22,6 +22,11 @@ class Transaction(Base):
     amount: Mapped[Decimal] = mapped_column(Numeric(14, 2))  # the total paid or received, VAT included
     vat_amount: Mapped[Decimal | None] = mapped_column(Numeric(14, 2))  # VAT inside `amount`, if any
     currency: Mapped[str] = mapped_column(String(3), default="GEL")
+    # Foreign-currency records: the NBG official rate used, the day it's from, and the lari figures (Tax Code Art. 73(10)).
+    exchange_rate: Mapped[Decimal | None] = mapped_column(Numeric(14, 6))
+    rate_date: Mapped[date | None] = mapped_column(Date)
+    gel_amount: Mapped[Decimal | None] = mapped_column(Numeric(14, 2))
+    gel_vat_amount: Mapped[Decimal | None] = mapped_column(Numeric(14, 2))
     category: Mapped[str] = mapped_column(String(64))
     counterparty: Mapped[str | None] = mapped_column(String(255))
     description: Mapped[str | None] = mapped_column(String(1000))

@@ -176,7 +176,7 @@ def test_vat_payer_month_summary(client):
     add(client, company, "2026-08-20", "income", "1000")
     s = client.get(f"/companies/{company['id']}/books", params={"month": "2026-09"}).json()
     assert s["totals"] == {"income": "11800.00", "expense": "5900.00", "output_vat": "1800.00", "input_vat": "900.00",
-                           "count": 2}
+                           "count": 2, "unconverted": 0}
     assert s["vat_payable"]["amount"] == "900.00" and s["vat_registration"] is None
     assert s["turnover_12m"]["alert"] == "none"  # already registered
 

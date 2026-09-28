@@ -2,7 +2,7 @@ import uuid
 from datetime import date
 from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.models.enums import TaxEventStatus, TaxRegime, TransactionDirection
 
@@ -60,7 +60,12 @@ class TransactionCreate(BaseModel):
     amount: Decimal = Field(gt=0, max_digits=14, decimal_places=2, description="Total paid or received, VAT included")
     vat_amount: Decimal | None = Field(default=None, ge=0, max_digits=14, decimal_places=2)
     vat_included: bool = Field(default=False, description="Work out vat_amount as the 18% VAT inside amount (rule ge.vat.output_vat)")
-    currency: str = Field(default="GEL", min_length=3, max_length=3)
+    currency: str = Field(default="GEL", pattern=r"^[A-Za-z]{3}$", description="ISO code; foreign currencies are translated at the NBG rate")
+
+    @field_validator("currency")
+    @classmethod
+    def upper_currency(cls, value: str) -> str:
+        return value.upper()
     category: str = Field(default="other", max_length=64)
     counterparty: str | None = Field(default=None, max_length=255)
     description: str | None = Field(default=None, max_length=1000)
@@ -75,6 +80,10 @@ class TransactionRead(ORMModel):
     amount: Decimal
     vat_amount: Decimal | None
     currency: str
+    exchange_rate: Decimal | None = None
+    rate_date: date | None = None
+    gel_amount: Decimal | None = None
+    gel_vat_amount: Decimal | None = None
     category: str
     counterparty: str | None
     description: str | None

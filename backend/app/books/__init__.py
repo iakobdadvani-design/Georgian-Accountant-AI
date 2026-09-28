@@ -10,6 +10,7 @@ from datetime import date
 from decimal import Decimal
 from typing import Iterable, Literal
 
+from app.books.currency import in_lari
 from app.models import Transaction
 from app.models.enums import TransactionDirection
 from app.rules.engine import evaluate
@@ -39,24 +40,30 @@ class Totals:
     output_vat: Decimal = ZERO  # VAT inside recorded sales
     input_vat: Decimal = ZERO  # VAT inside recorded purchases
     count: int = 0
+    unconverted: int = 0  # foreign-currency records still without an official rate, left out of the sums
 
 
 def totals(transactions: Iterable[Transaction], start: date, end: date) -> Totals:
-    """Sums of GEL transactions dated start..end (inclusive). Other currencies aren't converted, so they're left out."""
+    """Lari sums of the records dated start..end (inclusive); foreign currencies at their stored NBG rate."""
     income = expense = output_vat = input_vat = ZERO
-    count = 0
+    count = unconverted = 0
     for t in transactions:
-        if not (start <= t.occurred_on <= end) or t.currency != "GEL":
+        if not (start <= t.occurred_on <= end):
+            continue
+        figures = in_lari(t)
+        if figures is None:
+            unconverted += 1
             continue
         count += 1
-        vat = t.vat_amount or ZERO
+        amount, vat = figures
+        vat = vat or ZERO
         if t.direction == TransactionDirection.income:
-            income += t.amount
+            income += amount
             output_vat += vat
         else:
-            expense += t.amount
+            expense += amount
             input_vat += vat
-    return Totals(income, expense, output_vat, input_vat, count)
+    return Totals(income, expense, output_vat, input_vat, count, unconverted)
 
 
 def last_12_months(as_of: date) -> tuple[date, date]:

@@ -173,13 +173,49 @@
         load();
       } catch (err) { if (!(err instanceof AuthError)) alert(err.message); }
     });
+    const sign = r.direction === "expense" ? "−" : "";
+    const foreign = r.currency !== "GEL";
+    const original = `${formatAmount(r.amount)} ${r.currency}`;
+    // Foreign records show the lari figure the totals use, and how it was converted (Tax Code Art. 73(10)).
+    const amountCell = !foreign ? el("td", { class: "num", text: sign + gel(r.amount) })
+      : r.gel_amount != null
+        ? el("td", { class: "num" }, el("div", { text: sign + gel(r.gel_amount) }),
+            el("div", { class: "fx-line", text: t("books.fx.line", { amount: original,
+              rate: formatAmount(Number(r.exchange_rate).toFixed(4)), date: shortDate(r.rate_date) }) }))
+        : el("td", { class: "num" }, el("div", { text: sign + original }),
+            el("div", { class: "fx-line pending", text: t("books.fx.pending") }));
+    const vat = foreign ? r.gel_vat_amount : r.vat_amount;
     return el("tr", { class: r.direction },
       el("td", { class: "nowrap", text: shortDate(r.occurred_on) }),
       el("td", { class: "who", text: who || "—", title: who }),
       el("td", {}, el("span", { class: `tag ${r.direction}`, text: t(`books.type.${r.direction}`) })),
-      el("td", { class: "num", text: (r.direction === "expense" ? "−" : "") + gel(r.amount) }),
-      el("td", { class: "num muted", text: r.vat_amount ? gel(r.vat_amount) : "—" }),
+      amountCell,
+      el("td", { class: "num muted", text: vat ? gel(vat) : "—" }),
       el("td", { class: "actions" }, remove));
+  }
+
+  const CURRENCIES = ["GEL", "USD", "EUR", "GBP", "TRY", "RUB"];
+
+  function currencySelect(name, value) {
+    return el("select", { class: "field currency-select", name, "aria-label": t("bk.currency") },
+      CURRENCIES.map((c) => el("option", { value: c, text: c, selected: c === value ? "true" : null })));
+  }
+
+  // Records in a foreign currency saved while the NBG rate couldn't be fetched: say so, and offer to retry.
+  function unconvertedNotice(s) {
+    if (!s.totals.unconverted) return null;
+    const retry = el("button", { class: "btn small", type: "button", text: t("books.fx.retry") });
+    retry.addEventListener("click", async () => {
+      retry.disabled = true;
+      try { await api(`/companies/${currentCompany().id}/books/convert`, { method: "POST" }); } catch (err) {
+        if (!(err instanceof AuthError)) alert(err.message);
+      }
+      load();
+      loadAlert();
+    });
+    return el("div", { class: "books-alert approaching", role: "status" },
+      el("span", { class: "alert-icon", "aria-hidden": "true", text: "!" }),
+      el("span", { style: "flex:1", text: tp("books.fx.unconverted", s.totals.unconverted) }), retry);
   }
 
   function addForm() {
@@ -193,7 +229,9 @@
           el("option", { value: "income", text: t("books.type.income") }),
           el("option", { value: "expense", text: t("books.type.expense") }))),
       el("label", {}, el("span", { text: t("books.form.amount") }),
-        el("input", { class: "field", name: "amount", inputmode: "decimal", required: "true", placeholder: "0.00" })),
+        el("span", { class: "amount-with-currency" },
+          el("input", { class: "field", name: "amount", inputmode: "decimal", required: "true", placeholder: "0.00" }),
+          currencySelect("currency", "GEL"))),
       el("label", { class: "wide" }, el("span", { text: t("books.form.counterparty") }),
         el("input", { class: "field", name: "counterparty", maxlength: "255" })),
       el("label", { class: "wide" }, el("span", { text: t("books.form.description") }),
@@ -214,7 +252,7 @@
       }
       try {
         await api(`/companies/${currentCompany().id}/transactions`, { method: "POST", body: {
-          occurred_on: f.occurred_on.value, direction: f.direction.value, amount,
+          occurred_on: f.occurred_on.value, direction: f.direction.value, amount, currency: f.currency.value,
           vat_included: !!(f.vat_included && f.vat_included.checked),
           category: f.direction.value === "income" ? "sales" : "purchase",
           counterparty: f.counterparty.value.trim() || null, description: f.description.value.trim() || null,
@@ -248,6 +286,8 @@
 
     const parts = [head];
     if (s) {
+      const pending = unconvertedNotice(s);
+      if (pending) parts.push(pending);
       const list = alerts(s);
       if (list.length) parts.push(el("div", { class: "books-alerts" }, list.map((a) =>
         el("div", { class: `books-alert ${a.level}`, role: "status" },
@@ -308,6 +348,7 @@
   /* ---------- import ---------- */
   let importState = null;  // { filename, content, preview, mapping }
   let importBank = null;  // the company's bank account the statement comes from, if chosen
+  let importCurrency = "GEL";
 
   function importDialog() {
     let dialog = $("importDialog");
@@ -318,8 +359,9 @@
     return dialog;
   }
 
-  function openImport(bankAccountId = null) {
+  function openImport(bankAccountId = null, currency = "GEL") {
     importBank = bankAccountId;
+    importCurrency = currency || "GEL";
     importState = null;
     renderImport();
     importDialog().showModal();
@@ -373,6 +415,7 @@
 
     if (st && st.done) {
       parts.push(el("p", { class: "import-done", role: "status", text: t("import.done", st.done) }));
+      if (st.done.unconverted) parts.push(el("p", { class: "form-error", text: tp("books.fx.unconverted", st.done.unconverted) }));
       parts.push(el("div", { class: "dialog-actions" },
         el("button", { class: "btn primary", type: "button", text: t("import.close"), onclick: () => dialog.close() })));
       dialog.replaceChildren(el("div", { class: "form-grid" }, parts));
@@ -393,6 +436,10 @@
         return el("label", {}, el("span", { text: t(`import.col.${column}`) }), select);
       });
       parts.push(el("div", { class: "import-columns" }, selects));
+      const currency = currencySelect("importCurrency", importCurrency);
+      currency.addEventListener("change", () => { importCurrency = currency.value; });
+      parts.push(el("label", {}, el("span", { text: t("import.currency") }), currency),
+        el("p", { class: "books-muted small", text: t("import.currencyHint") }));
       parts.push(el("p", { class: "books-muted", text: t("import.found", { total: p.total, income: p.income, expense: p.expense }) +
         (p.duplicates ? " " + t("import.duplicates", { n: p.duplicates }) : "") +
         (p.skipped.length ? " " + t("import.skipped", { n: p.skipped.length }) : "") }));
@@ -406,7 +453,8 @@
             el("td", {}, el("span", { class: `tag ${r.direction}`, text: t(`books.type.${r.direction}`) })),
             el("td", { class: "num", text: gel(r.amount) })))))));
       }
-      const salesVat = el("input", { type: "checkbox", id: "importSalesVat", checked: vatRegistered ? "true" : null });
+      // Foreign-currency sales are often exports (0% VAT), so VAT inside them is opt-in.
+      const salesVat = el("input", { type: "checkbox", id: "importSalesVat", checked: vatRegistered && importCurrency === "GEL" ? "true" : null });
       const purchasesVat = el("input", { type: "checkbox", id: "importPurchasesVat" });
       if (vatRegistered) {
         parts.push(el("label", { class: "check" }, salesVat, el("span", { text: t("import.salesVat") })));
@@ -421,7 +469,7 @@
           const result = await api(`/companies/${currentCompany().id}/books/import`, { method: "POST", body: {
             filename: st.filename, content: st.content, mapping: st.mapping,
             sales_include_vat: vatRegistered && salesVat.checked, purchases_include_vat: vatRegistered && purchasesVat.checked,
-            bank_account_id: importBank || undefined,
+            bank_account_id: importBank || undefined, currency: importCurrency,
           } });
           st.done = result;
           renderImport();

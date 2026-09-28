@@ -257,7 +257,7 @@
           el("div", { class: "actions" },
             b.url ? el("a", { class: "btn" + (account.is_primary ? " primary" : ""), href: b.url, target: "_blank", rel: "noopener noreferrer",
               text: `${t("bk.openBank")} ↗` }) : null,
-            el("button", { class: "btn", type: "button", text: t("bk.upload"), onclick: () => window.Books?.openImport(account.id) }),
+            el("button", { class: "btn", type: "button", text: t("bk.upload"), onclick: () => window.Books?.openImport(account.id, account.currency) }),
             account.is_primary ? null : el("button", { class: "btn small", type: "button", text: t("bk.makePrimary"), onclick: async () => {
               await api(url, { method: "PUT", body: { bank_id: account.bank_id, iban: account.iban, currency: account.currency, is_primary: true } });
               changed();
@@ -299,7 +299,7 @@
     const head = el("div", { class: "page-head" }, el("div", {}, el("h1", { text: t("nav.banks") }), el("p", { text: t("bk.desc") })));
     if (!banks || !catalog) { $("banksInner").replaceChildren(head); return; }
     const primary = banks.find((b) => b.is_primary);
-    const upload = el("button", { class: "dropzone", type: "button", onclick: () => window.Books?.openImport(primary ? primary.id : null) },
+    const upload = el("button", { class: "dropzone", type: "button", onclick: () => window.Books?.openImport(primary ? primary.id : null, primary ? primary.currency : "GEL") },
       uploadIcon(), el("b", { text: t("bk.drop") }), el("span", { text: t("bk.dropHint") }));
     $("banksInner").replaceChildren(head, el("div", { class: "two-col" },
       el("div", { class: "stack" },
