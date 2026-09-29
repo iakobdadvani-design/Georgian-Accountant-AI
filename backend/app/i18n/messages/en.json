@@ -119,5 +119,16 @@
   "phrase.penalty_fine": "If the return is filed that late too, add a fine of {fine} GEL: 5% of the tax for each started month, 10% once it's more than 2 months.",
   "phrase.penalty_fine_only": "The fine for filing the return late is {fine} GEL: 5% of {tax} GEL for each started month, 10% once it's more than 2 months. If the tax was paid late as well, tell me how many days late and I'll add the penalty interest.",
   "phrase.penalty_ask": "Paying late costs 0.05% of the unpaid tax for each day, and filing the return late adds a fine of 5% per started month (10% after 2 months). How much tax is it, and how many days late?",
-  "phrase.penalty_ask_days": "How many days late is the payment of {tax} GEL?"
+  "phrase.penalty_ask_days": "How many days late is the payment of {tax} GEL?",
+  "record.confirm": "I'll record {what}: {amount} on {date}. Check the details and press Save.",
+  "record.income": "a sale",
+  "record.expense": "an expense",
+  "record.gel": "GEL",
+  "record.today_assumed": "You didn't give a date, so I used today; change it on the card if needed.",
+  "record.converted": "It will be counted in lari at the National Bank's official rate for that day.",
+  "record.ask_both": "What should I record? Tell me whether it's a sale or an expense, and the amount.",
+  "record.ask_direction": "Was it a sale (money in) or an expense (money out)?",
+  "record.ask_amount": "How much was it?",
+  "fact.input.record_amount": "How much was it?",
+  "fact.input.record_direction": "Was it a sale or an expense?"
 }

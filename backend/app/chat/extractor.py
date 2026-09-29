@@ -14,7 +14,8 @@ from app.i18n import Language
 
 Intent = Literal[
     "calculate_payroll_tax", "check_vat_registration", "calculate_vat", "calculate_distribution",
-    "calculate_small_business_tax", "calculate_vat_payable", "calculate_late_penalty", "list_deadlines", "unknown",
+    "calculate_small_business_tax", "calculate_vat_payable", "calculate_late_penalty", "record_transaction",
+    "list_deadlines", "unknown",
 ]
 
 # Which input fact each intent's amount becomes; the rules engine decides which rules read that fact.
@@ -26,6 +27,7 @@ INTENT_AMOUNT_FACT: dict[str, str] = {
     "calculate_small_business_tax": "small_business_income",
     "calculate_vat_payable": "output_vat",
     "calculate_late_penalty": "tax_due",
+    "record_transaction": "record_amount",  # no rule reads it: the chat drafts a record instead (chat/records.py)
 }
 # Intents that take a second amount; context.py fills whichever one the engine is still waiting for.
 SECOND_AMOUNT_FACT: dict[str, str] = {"calculate_vat_payable": "input_vat", "calculate_late_penalty": "days_late"}
@@ -339,8 +341,14 @@ class KeywordExtractor:
     """Offline fallback: first intent group with a keyword hit wins."""
 
     def extract(self, message: str, preferred: Language = "en") -> Extraction:
+        from app.chat.records import RECORD_COMMAND, record_entities  # records.py reads amounts with this module
+
         text = message.lower()
         language = detect_language(message, preferred)
+        # "Record a sale of 1,000" asks to write to the books, whatever tax words it contains.
+        if command := RECORD_COMMAND.search(message):
+            return Extraction(intent="record_transaction", entities=record_entities(message), language=language,
+                              matched_keywords=[command.group(0).lower()])
         for intent, words in KEYWORDS:
             hits = _keyword_hits(words, text)
             if hits:

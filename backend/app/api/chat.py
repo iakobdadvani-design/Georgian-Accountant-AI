@@ -20,6 +20,7 @@ from app.chat.context import apply_context, inherit_language, pending_state, top
 from app.chat.extractor import INTENT_AMOUNT_FACT, Extraction, Extractor, KeywordExtractor
 from app.chat.llm import AIUnavailable, LLMExtractor, LLMResponder
 from app.chat.ollama import OllamaBackend
+from app.chat.records import TransactionDraft, draft_from, missing_for_record, record_reply
 from app.chat.responder import TemplateResponder, compose_reply, deadlines_reply, missing_questions, suggestions_for
 from app.config import settings
 from app.i18n import Language, t
@@ -114,6 +115,7 @@ class ChatResponse(BaseModel):
     questions: list[str] = Field(default=[], description="Follow-up questions for facts the engine still needs")
     suggestions: list[str] = Field(default=[], description="Example questions to offer when the turn wasn't a tax question")
     deadlines: list[DeadlineItem] = []
+    draft: TransactionDraft | None = Field(default=None, description="A record to confirm; saved only when the user presses Save")
     warnings: list[str] = []
 
 
@@ -205,8 +207,14 @@ def chat(
 
     results: list[RuleResult] = []
     deadlines: list[DeadlineItem] = []
+    draft: TransactionDraft | None = None
+    record_missing: list[str] = []
     if extraction.intent == "list_deadlines":
         deadlines = deadline_items(company, db, payload.as_of)
+    elif extraction.intent == "record_transaction":
+        vat_payer = company_facts(company, db).get("company.vat_registered") is True
+        draft = draft_from(extraction.entities, payload.message, vat_payer, payload.as_of)
+        record_missing = missing_for_record(extraction.entities)
     elif extraction.intent != "unknown":
         topic_fact = f"input.{INTENT_AMOUNT_FACT[extraction.intent]}"
         rules = [r for r in get_rules() if topic_fact in referenced_facts(r)]
@@ -218,6 +226,8 @@ def chat(
     try:
         if extraction.intent == "list_deadlines":  # dates straight from the calendar; nothing to phrase
             reply, reply_source = deadlines_reply(deadlines, extraction.language, payload.as_of), "template"
+        elif extraction.intent == "record_transaction":  # a draft to confirm, in fixed wording
+            reply, reply_source = record_reply(draft, extraction.entities, extraction.language), "template"
         else:
             reply = pipeline.responder.compose(payload.message, extraction, results)
     except AIUnavailable as e:
@@ -229,12 +239,12 @@ def chat(
     response = ChatResponse(conversation_id=conversation.id, reply=reply, reply_source=reply_source,
                             extraction=extraction, used_context=used_context, results=results,
                             questions=questions, suggestions=suggestions_for(extraction, payload.message),
-                            deadlines=deadlines, warnings=warnings)
+                            deadlines=deadlines, draft=draft, warnings=warnings)
 
     record = response.model_dump(mode="json", exclude={"conversation_id"})
     record["as_of"] = payload.as_of.isoformat()
     # A turn the engine couldn't act on ("hi", "thanks") keeps an unanswered question open.
-    missing = list(dict.fromkeys(f for r in results for f in r.missing_facts))
+    missing = list(dict.fromkeys(f for r in results for f in r.missing_facts)) + record_missing
     record["pending"] = pending_state(extraction, missing) or (pending if extraction.intent == "unknown" else None)
     record["topic"] = topic_state(extraction) or (previous.get("topic") if extraction.intent == "unknown" else None)
     db.add_all([

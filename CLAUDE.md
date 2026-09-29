@@ -61,7 +61,13 @@ Schema changes go through Alembic (see "Database" below).
 Chat intents (`chat/extractor.py`): `calculate_payroll_tax`, `check_vat_registration`, `calculate_vat`,
 `calculate_distribution`, `calculate_small_business_tax`, `calculate_vat_payable` (two amounts: `SECOND_AMOUNT_FACT`),
 `calculate_late_penalty` (tax + days late; `with_lateness` in `api/chat.py` derives the started months from the days,
-taking the delay as ending on as_of), `list_deadlines`, `unknown`. Overdue deadlines with a known amount carry both
+taking the delay as ending on as_of), `record_transaction` (see below), `list_deadlines`, `unknown`.
+
+**Recording from the chat** (`chat/records.py`): "ჩაწერე ხარჯი 150 ლარი გუშინ" → a `TransactionDraft` in the chat
+response (amount, direction, currency, date parsed deterministically; a model may supply amount/direction for natural
+phrasing). The page shows it as an editable card and posts it to `/transactions` only when the user presses Save; the
+chat itself never writes. The keyword path needs a record command (`RECORD_COMMAND`, whole words: "recorded" and
+"m'enregistrer" are not commands). A pending draft is completed by follow-ups ("ხარჯი", "80") in `context.py`. Overdue deadlines with a known amount carry both
 penalty results for paying and filing on as_of (`penalties` in `api/deadlines.py`); days and months come from
 `rules/lateness.py` (date arithmetic only). Each has an amount fact in `INTENT_AMOUNT_FACT`
 (except deadlines), keyword group(s) in priority order, answer phrasing in `responder.py`, and a field

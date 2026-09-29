@@ -64,5 +64,12 @@
   {"id": "penalty-ru", "message": "Заплатил налог 5 000 лари с опозданием на 30 дней, какая пеня?", "intent": "calculate_late_penalty", "entities": {"tax_due": "5000", "days_late": "30"}, "rule": "ge.penalty.late_payment", "amount": "75.00", "language": "ru"},
   {"id": "penalty-de", "message": "Ich habe 1.000 GEL Steuer 45 Tage zu spät gezahlt, wie hoch ist der Säumniszuschlag?", "intent": "calculate_late_penalty", "entities": {"tax_due": "1000", "days_late": "45"}, "rule": "ge.penalty.late_payment", "amount": "22.50", "language": "de"},
   {"id": "penalty-fr", "message": "J'ai payé 4 000 GEL d'impôt avec 12 jours de retard, quelles pénalités ?", "intent": "calculate_late_penalty", "entities": {"tax_due": "4000", "days_late": "12"}, "rule": "ge.penalty.late_payment", "amount": "24.00", "language": "fr"},
-  {"id": "penalty-months-en", "message": "We filed the VAT return 3 months late, tax was 1,000 GEL. What fine?", "intent": "calculate_late_penalty", "entities": {"tax_due": "1000", "months_late": "3"}, "rule": "ge.penalty.late_filing", "amount": "100.00", "language": "en"}
+  {"id": "penalty-months-en", "message": "We filed the VAT return 3 months late, tax was 1,000 GEL. What fine?", "intent": "calculate_late_penalty", "entities": {"tax_due": "1000", "months_late": "3"}, "rule": "ge.penalty.late_filing", "amount": "100.00", "language": "en"},
+
+  {"id": "record-en", "message": "Record a sale of 1,000 GEL today", "intent": "record_transaction", "entities": {"record_amount": "1000", "record_direction": "income", "record_date": "today"}, "language": "en"},
+  {"id": "record-ka", "message": "ჩაწერე ხარჯი 150 ლარი ქირა გუშინ", "intent": "record_transaction", "entities": {"record_amount": "150", "record_direction": "expense", "record_date": "yesterday"}, "language": "ka"},
+  {"id": "record-ru", "message": "Запиши продажу 500 долларов 25.09.2026", "intent": "record_transaction", "entities": {"record_amount": "500", "record_direction": "income", "record_currency": "USD", "record_date": "2026-09-25"}, "language": "ru"},
+  {"id": "record-de", "message": "Trage eine Ausgabe von 80 EUR ein", "intent": "record_transaction", "entities": {"record_amount": "80", "record_direction": "expense", "record_currency": "EUR"}, "language": "de"},
+  {"id": "record-fr", "message": "Enregistre une vente de 2 000 GEL", "intent": "record_transaction", "entities": {"record_amount": "2000", "record_direction": "income"}, "language": "fr"},
+  {"id": "record-natural-en", "message": "I sold 1,200 GEL of furniture to Nika today, please add it to my books", "intent": "record_transaction", "entities": {"record_amount": "1200", "record_direction": "income", "record_date": "today"}, "language": "en", "hard": true}
 ]

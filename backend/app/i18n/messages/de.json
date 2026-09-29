@@ -119,5 +119,16 @@
   "phrase.penalty_fine": "Wird auch die Erklärung so spät abgegeben, kommt ein Bußgeld von {fine} GEL hinzu: 5 % der Steuer je angefangenen Monat, 10 % bei mehr als 2 Monaten.",
   "phrase.penalty_fine_only": "Das Bußgeld für die verspätete Erklärung beträgt {fine} GEL: 5 % von {tax} GEL je angefangenen Monat, 10 % bei mehr als 2 Monaten. Wurde auch die Steuer zu spät gezahlt, nennen Sie mir die Tage, dann rechne ich den Säumniszuschlag dazu.",
   "phrase.penalty_ask": "Verspätetes Zahlen kostet 0,05 % der unbezahlten Steuer pro Tag, eine verspätete Erklärung zusätzlich 5 % je angefangenen Monat (nach 2 Monaten 10 %). Um welchen Steuerbetrag geht es und wie viele Tage zu spät?",
-  "phrase.penalty_ask_days": "Wie viele Tage zu spät ist die Zahlung von {tax} GEL?"
+  "phrase.penalty_ask_days": "Wie viele Tage zu spät ist die Zahlung von {tax} GEL?",
+  "record.confirm": "Ich erfasse {what}: {amount} am {date}. Prüfen Sie die Angaben und klicken Sie auf „Speichern“.",
+  "record.income": "einen Verkauf",
+  "record.expense": "eine Ausgabe",
+  "record.gel": "GEL",
+  "record.today_assumed": "Sie haben kein Datum genannt, daher habe ich heute eingetragen; ändern Sie es bei Bedarf auf der Karte.",
+  "record.converted": "Er wird zum offiziellen Tageskurs der Nationalbank in Lari umgerechnet.",
+  "record.ask_both": "Was soll ich erfassen? Sagen Sie mir, ob es ein Verkauf oder eine Ausgabe ist, und den Betrag.",
+  "record.ask_direction": "War es ein Verkauf (Geld rein) oder eine Ausgabe (Geld raus)?",
+  "record.ask_amount": "Wie hoch war der Betrag?",
+  "fact.input.record_amount": "Wie hoch war der Betrag?",
+  "fact.input.record_direction": "Verkauf oder Ausgabe?"
 }

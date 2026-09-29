@@ -575,7 +575,13 @@
   "import.currencyHint": "Foreign amounts are converted to lari at the National Bank's official rate for each day (Tax Code, Art. 73(10)).",
   "pen.ifToday": "If paid and filed today: {items}",
   "pen.interest": "penalty interest {amount}",
-  "pen.fine": "late filing fine {amount}"
+  "pen.fine": "late filing fine {amount}",
+  "draft.title": "New record",
+  "draft.save": "Save",
+  "draft.saved": "Saved to Sales & expenses",
+  "draft.dropped": "Not recorded",
+  "draft.open": "Open Sales & expenses →",
+  "draft.note": "Note"
  },
  "ka": {
   "meta.locale": "ka-GE",
@@ -1143,7 +1149,13 @@
   "import.currencyHint": "უცხოური ვალუტა ლარში გადაიყვანება ეროვნული ბანკის ოფიციალური კურსით, თითოეული დღისთვის (საგადასახადო კოდექსი, მუხლი 73(10)).",
   "pen.ifToday": "დღეს გადახდისა და წარდგენის შემთხვევაში: {items}",
   "pen.interest": "საურავი {amount}",
-  "pen.fine": "ჯარიმა დაგვიანებისთვის {amount}"
+  "pen.fine": "ჯარიმა დაგვიანებისთვის {amount}",
+  "draft.title": "ახალი ჩანაწერი",
+  "draft.save": "შენახვა",
+  "draft.saved": "შენახულია: გაყიდვები და ხარჯები",
+  "draft.dropped": "არ ჩაიწერა",
+  "draft.open": "გაყიდვები და ხარჯები →",
+  "draft.note": "შენიშვნა"
  },
  "ru": {
   "meta.locale": "ru-RU",
@@ -1741,7 +1753,13 @@
   "import.currencyHint": "Суммы в валюте пересчитываются в лари по официальному курсу НБГ на каждый день (Налоговый кодекс, ст. 73(10)).",
   "pen.ifToday": "Если оплатить и подать сегодня: {items}",
   "pen.interest": "пеня {amount}",
-  "pen.fine": "штраф за просрочку {amount}"
+  "pen.fine": "штраф за просрочку {amount}",
+  "draft.title": "Новая запись",
+  "draft.save": "Сохранить",
+  "draft.saved": "Сохранено в «Продажи и расходы»",
+  "draft.dropped": "Не записано",
+  "draft.open": "Продажи и расходы →",
+  "draft.note": "Комментарий"
  },
  "de": {
   "meta.locale": "de-DE",
@@ -2319,7 +2337,13 @@
   "import.currencyHint": "Fremdwährungsbeträge werden zum offiziellen NBG-Tageskurs in Lari umgerechnet (Steuergesetzbuch, Art. 73(10)).",
   "pen.ifToday": "Bei Zahlung und Abgabe heute: {items}",
   "pen.interest": "Säumniszuschlag {amount}",
-  "pen.fine": "Verspätungsbußgeld {amount}"
+  "pen.fine": "Verspätungsbußgeld {amount}",
+  "draft.title": "Neuer Eintrag",
+  "draft.save": "Speichern",
+  "draft.saved": "In „Verkäufe & Ausgaben“ gespeichert",
+  "draft.dropped": "Nicht erfasst",
+  "draft.open": "Verkäufe & Ausgaben →",
+  "draft.note": "Notiz"
  },
  "fr": {
   "meta.locale": "fr-FR",
@@ -2897,6 +2921,12 @@
   "import.currencyHint": "Les montants en devise sont convertis en lari au cours officiel de la BNG du jour (Code des impôts, art. 73(10)).",
   "pen.ifToday": "Si payé et déclaré aujourd’hui : {items}",
   "pen.interest": "intérêts de retard {amount}",
-  "pen.fine": "amende de retard {amount}"
+  "pen.fine": "amende de retard {amount}",
+  "draft.title": "Nouvelle écriture",
+  "draft.save": "Enregistrer",
+  "draft.saved": "Enregistré dans « Ventes et dépenses »",
+  "draft.dropped": "Non enregistré",
+  "draft.open": "Ventes et dépenses →",
+  "draft.note": "Note"
  }
 }

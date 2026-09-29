@@ -512,6 +512,21 @@
   .file-pick .file-input { position: absolute; width: 1px; height: 1px; opacity: 0; }
   .file-pick:focus-within .btn { border-color: var(--accent); }
   .file-name { color: var(--muted); font-size: 13px; font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .draft-card { display: grid; gap: 12px; padding: 16px 18px; border-radius: 16px; background: var(--surface);
+    border: 1.5px solid color-mix(in srgb, var(--c-teal) 45%, var(--border)); box-shadow: var(--shadow); max-width: 560px; }
+  .draft-head { display: flex; align-items: center; justify-content: space-between; }
+  .draft-head strong { color: var(--c-teal); font-size: 14px; letter-spacing: .02em; }
+  .draft-currency { font-size: 12.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px;
+    background: color-mix(in srgb, var(--c-teal) 12%, var(--surface)); color: var(--c-teal); }
+  .draft-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .draft-grid label { display: grid; gap: 5px; font-size: 12.5px; font-weight: 600; color: var(--muted); }
+  .draft-grid .wide { grid-column: 1 / -1; }
+  .draft-grid .check { display: flex; align-items: center; gap: 8px; font-weight: 500; color: var(--ink); }
+  .draft-status { margin: 0; font-size: 13.5px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .draft-status:empty { display: none; }
+  .draft-status.ok { color: var(--ok); font-weight: 600; }
+  .draft-status.err { color: var(--accent); }
+  @media (max-width: 520px) { .draft-grid { grid-template-columns: 1fr; } }
   .fx-line { font-size: 11.5px; color: var(--muted); font-weight: 400; white-space: nowrap; }
   .fx-line.pending { color: var(--warn); font-weight: 600; }
   .amount-with-currency { display: flex; gap: 6px; }
@@ -1434,6 +1449,7 @@ function renderResponse(body, live = true) {
   parts.push(el("div", { class: "reply", text, lang: l }));
 
   parts.push(...body.results.map((r) => resultCard(r, l)));
+  if (body.draft) parts.push(draftCard(body.draft, live));
   if (chips.length) {
     parts.push(el("div", { class: "chips" }, chips.map((c) =>
       el("button", { class: "chip", type: "button", text: c, onclick: () => ask(c) }))));
@@ -1452,6 +1468,61 @@ function renderResponse(body, live = true) {
       onclick: (e) => printAnswer(e.target.closest(".row")) }) : null));
   parts.push(debug);
   addBot(...parts);
+}
+
+/* ---------- a record drafted by the chat ---------- */
+// Nothing is written until the user presses Save; then it's posted exactly like the Sales & expenses form.
+function draftCard(d, live) {
+  const status = el("p", { class: "draft-status", role: "status" });
+  const direction = el("select", { class: "field", name: "direction" },
+    ["income", "expense"].map((v) => el("option", { value: v, text: t(`books.type.${v}`), selected: v === d.direction ? "true" : null })));
+  const amount = el("input", { class: "field", name: "amount", inputmode: "decimal", value: d.amount });
+  const date = el("input", { class: "field", type: "date", name: "occurred_on", value: d.occurred_on });
+  const vat = el("input", { type: "checkbox", name: "vat_included", checked: d.vat_included ? "true" : null });
+  const note = el("input", { class: "field", name: "description", maxlength: "1000", value: d.description || "" });
+  const save = el("button", { class: "btn primary", type: "button", text: t("draft.save") });
+  const drop = el("button", { class: "btn", type: "button", text: t("common.cancel") });
+  const fields = [direction, amount, date, vat, note];
+  const card = el("div", { class: "draft-card" },
+    el("div", { class: "draft-head" }, el("strong", { text: t("draft.title") }), el("span", { class: "draft-currency", text: d.currency })),
+    el("div", { class: "draft-grid" },
+      el("label", {}, el("span", { text: t("books.form.type") }), direction),
+      el("label", {}, el("span", { text: t("books.form.amount") }), amount),
+      el("label", {}, el("span", { text: t("books.form.date") }), date),
+      el("label", { class: "wide" }, el("span", { text: t("draft.note") }), note),
+      d.vat_payer ? el("label", { class: "check wide" }, vat, el("span", { text: t("books.form.vatAuto") })) : null),
+    status,
+    live ? el("div", { class: "dialog-actions start" }, save, drop) : null);
+  const finish = (text, ok) => {
+    for (const f of fields) f.disabled = true;
+    save.remove(); drop.remove();
+    status.className = "draft-status " + (ok ? "ok" : "");
+    status.replaceChildren(el("span", { text }),
+      ok ? el("button", { class: "link-btn", type: "button", text: t("draft.open"), onclick: () => go("books") }) : null);
+  };
+  if (!live) for (const f of fields) f.disabled = true;
+  save.addEventListener("click", async () => {
+    const value = amount.value.replace(/[\s  ]/g, "").replace(",", ".");
+    if (!/^\d+(\.\d{1,2})?$/.test(value) || Number(value) <= 0 || !date.value) {
+      status.className = "draft-status err"; status.textContent = t("books.form.required"); return;
+    }
+    save.disabled = true;
+    try {
+      await api(`/companies/${currentCompany().id}/transactions`, { method: "POST", body: {
+        occurred_on: date.value, direction: direction.value, amount: value, currency: d.currency,
+        vat_included: d.vat_payer && vat.checked, category: direction.value === "income" ? "sales" : "purchase",
+        description: note.value.trim() || null } });
+      finish(t("draft.saved"), true);
+      window.Books?.onCompanyChange();
+      window.Overview?.reload();
+      loadDeadlines();
+    } catch (err) {
+      save.disabled = false;
+      if (!(err instanceof AuthError)) { status.className = "draft-status err"; status.textContent = err.message; }
+    }
+  });
+  drop.addEventListener("click", () => finish(t("draft.dropped"), false));
+  return card;
 }
 
 /* ---------- print / PDF ---------- */

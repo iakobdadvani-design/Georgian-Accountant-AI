@@ -51,6 +51,14 @@ def apply_context(
         return extraction, False
     intent, prior = base["intent"], base.get("entities", {})
 
+    # A record being drafted: "a sale", "500", "it was an expense of 80 EUR" fill in what it still needs.
+    if pending is not None and intent == "record_transaction" and extraction.intent != "record_transaction":
+        from app.chat.records import record_entities
+        found = {k: v for k, v in record_entities(message).items() if k != "record_date" or "record_date" not in prior}
+        if found:
+            return Extraction(intent=intent, entities={**prior, **found}, language=extraction.language,
+                              source=extraction.source), True
+
     if extraction.intent == intent:
         own_amount = INTENT_AMOUNT_FACT.get(intent) in extraction.entities
         if pending is None and own_amount:
