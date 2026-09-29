@@ -70,16 +70,38 @@
   .burger { display: none; width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--white); cursor: pointer; }
 
   /* mega menu */
-  .mega { position: absolute; left: 0; right: 0; top: 100%; background: var(--white); border-bottom: 1px solid var(--line);
-    box-shadow: 0 30px 60px rgb(14 21 37 / .10); opacity: 0; visibility: hidden; transform: translateY(-8px);
-    transition: opacity .22s var(--ease), transform .22s var(--ease), visibility 0s linear .22s; }
-  .mega.open { opacity: 1; visibility: visible; transform: none; transition: opacity .22s var(--ease), transform .22s var(--ease); }
-  .mega-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px; padding: 30px 0 34px; }
-  .mega h4 { margin: 0 0 12px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
-  .mega a { display: flex; gap: 12px; padding: 10px; margin: 0 -10px; border-radius: 14px; text-decoration: none; transition: background .15s; }
-  .mega a:hover { background: var(--paper); }
-  .mega a b { display: block; font-size: 15px; font-weight: 600; }
-  .mega a small { display: block; font-size: 13px; color: var(--muted); line-height: 1.4; }
+  .mega { position: absolute; left: 0; right: 0; top: calc(100% - 6px); pointer-events: none; opacity: 0; visibility: hidden;
+    transform: translateY(-10px) scale(.985); transform-origin: top center;
+    transition: opacity .25s var(--ease), transform .25s var(--ease), visibility 0s linear .25s; }
+  .mega.open { opacity: 1; visibility: visible; transform: none; pointer-events: auto; transition: opacity .25s var(--ease), transform .25s var(--ease); }
+  .mega-grid { display: grid; grid-template-columns: 250px minmax(0, 1fr) 290px; background: var(--white); border: 1px solid var(--line);
+    border-radius: 26px; box-shadow: 0 40px 80px -20px rgb(14 21 37 / .28), 0 2px 6px rgb(14 21 37 / .05); overflow: hidden; }
+  .mega-rail { background: var(--paper); padding: 14px; display: grid; gap: 4px; align-content: start; border-right: 1px solid var(--line); }
+  .mega-rail button { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; padding: 13px 14px;
+    border: 0; border-radius: 14px; background: none; font: 600 15px var(--sans); color: var(--muted); text-align: left; cursor: pointer;
+    transition: background .2s, color .2s, box-shadow .2s; }
+  .mega-rail button::after { content: "→"; opacity: 0; transform: translateX(-6px); transition: opacity .2s, transform .2s var(--ease); }
+  .mega-rail button[aria-selected="true"] { background: var(--white); color: var(--ink); box-shadow: 0 4px 14px rgb(14 21 37 / .08); }
+  .mega-rail button[aria-selected="true"]::after { opacity: 1; transform: none; color: var(--wine); }
+  .mega-rail b { font-size: 12px; font-weight: 700; min-width: 24px; height: 24px; border-radius: 999px; display: grid; place-items: center;
+    background: rgb(14 21 37 / .06); margin-left: auto; }
+  .mega-items { padding: 18px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; align-content: start; }
+  .mega-items a { display: flex; gap: 14px; padding: 16px; border-radius: 18px; text-decoration: none; border: 1px solid transparent;
+    transition: background .2s, border-color .2s, transform .25s var(--ease); animation: rise .35s var(--ease) both; animation-delay: calc(var(--i) * 45ms); }
+  .mega-items a:hover { background: color-mix(in srgb, var(--c) 6%, #fff); border-color: color-mix(in srgb, var(--c) 22%, var(--line)); transform: translateY(-2px); }
+  .mega-items a b { display: block; font-size: 15.5px; font-weight: 650; line-height: 1.35; margin: 1px 0 4px; }
+  .mega-items a small { display: block; font-size: 13.5px; color: var(--muted); line-height: 1.45; }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+  .mega-feature { margin: 14px; border-radius: 20px; background: var(--ink); color: #fff; padding: 22px; display: flex; flex-direction: column; gap: 14px;
+    position: relative; overflow: hidden; isolation: isolate; }
+  .mega-feature::before { content: ""; position: absolute; z-index: -1; width: 220px; height: 220px; right: -70px; top: -80px; border-radius: 50%;
+    background: radial-gradient(circle, rgb(140 29 51 / .9), transparent 70%); }
+  .mega-feature .ico { --c: var(--lime); background: rgb(212 243 107 / .14); }
+  .mega-feature h5 { margin: 0; font-family: var(--display); font-size: 22px; font-weight: 600; line-height: 1.2; }
+  .mega-feature p { margin: 0; font-size: 13.5px; color: rgb(255 255 255 / .7); line-height: 1.5; }
+  .mega-feature .bubble { align-self: flex-start; background: rgb(255 255 255 / .1); border: 1px solid rgb(255 255 255 / .14); border-radius: 14px 14px 14px 4px;
+    padding: 10px 13px; font-size: 13.5px; }
+  .mega-feature .btn { margin-top: auto; min-height: 42px; font-size: 14px; }
   .ico { width: 38px; height: 38px; flex: none; border-radius: 11px; display: grid; place-items: center; color: var(--c);
     background: color-mix(in srgb, var(--c) 12%, #fff); }
 
@@ -253,10 +275,9 @@
     .services, .plans { grid-template-columns: 1fr 1fr; }
     .float.one { left: 8px; } .float.two { right: 8px; }
     .final-box { grid-template-columns: 1fr; padding: 48px 32px; }
-    .mega-grid { grid-template-columns: 1fr 1fr; }
   }
   @media (max-width: 640px) {
-    .services, .plans, .points, .steps, .mega-grid { grid-template-columns: 1fr; }
+    .services, .plans, .points, .steps { grid-template-columns: 1fr; }
     .steps::before, .steps::after { display: none; }
     section.block { padding: 76px 0; }
     .float { display: none; }
@@ -512,12 +533,35 @@
   const BANKS = ["tbc", "bog", "liberty", "basis", "procredit", "credo", "tera", "halyk"];
   const FAQ = [1, 2, 3, 4, 5];
 
-  function renderDynamic() {
-    $("megaGrid").replaceChildren(...GROUPS.map(([group, items]) => el("div", {},
-      el("h4", { text: t(group) }),
-      items.map(([id, c]) => el("a", { href: "#services", style: `--c:var(${c})` },
+  // Services menu: groups on the left, the chosen group's services in the middle, the assistant on the right.
+  let megaGroup = 0;
+  function renderMegaItems() {
+    $("megaItems").replaceChildren(...GROUPS[megaGroup][1].map(([id, c], i) =>
+      el("a", { href: "#services", style: `--c:var(${c});--i:${i}` },
         el("span", { class: "ico", html: svg(id, 19) }),
-        el("span", {}, el("b", { text: t(`lp.s.${id}`) }), el("small", { text: t(`lp.s.${id}.d`) })))))));
+        el("span", {}, el("b", { text: t(`lp.s.${id}`) }), el("small", { text: t(`lp.s.${id}.d`) })))));
+    for (const [i, b] of [...$("megaRail").children].entries()) b.setAttribute("aria-selected", String(i === megaGroup));
+  }
+  function renderMega() {
+    const rail = el("div", { class: "mega-rail", id: "megaRail", role: "tablist" }, GROUPS.map(([group, items], i) => {
+      const b = el("button", { type: "button", role: "tab" }, el("span", { text: t(group) }), el("b", { text: String(items.length) }));
+      const pick = () => { if (megaGroup !== i) { megaGroup = i; renderMegaItems(); } };
+      b.addEventListener("mouseenter", pick);
+      b.addEventListener("focus", pick);
+      b.addEventListener("click", pick);
+      return b;
+    }));
+    const feature = el("div", { class: "mega-feature" },
+      el("span", { class: "ico", html: svg("assistant", 19) }),
+      el("h5", { text: t("lp.s.assistant") }), el("p", { text: t("lp.s.assistant.d") }),
+      el("span", { class: "bubble", text: t("lp.demo.q") }),
+      el("a", { class: "btn lime", href: "/app#register", text: t("lp.hero.cta") }));
+    $("megaGrid").replaceChildren(rail, el("div", { class: "mega-items", id: "megaItems", role: "tabpanel" }), feature);
+    renderMegaItems();
+  }
+
+  function renderDynamic() {
+    renderMega();
     let i = 0;
     $("serviceGrid").replaceChildren(...GROUPS.flatMap(([group, items]) => items.map(([id, c]) =>
       el("a", { class: "svc reveal", href: "/app#register", style: `--c:var(${c});--d:${(i++ % 3) + 1}` },
