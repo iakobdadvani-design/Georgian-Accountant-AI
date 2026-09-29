@@ -74,3 +74,28 @@ def test_static_catalog_is_served(client):
     response = client.get("/static/i18n.json")
     assert response.status_code == 200
     assert response.json()["ka"]["nav.newChat"] == "ახალი საუბარი"
+
+
+LANDING = (STATIC / "landing.html").read_text(encoding="utf-8")
+
+
+def test_landing_page_keys_exist():
+    used = set(re.findall(r'data-i18n(?:-aria)?="([^"]+)"', LANDING)) | set(re.findall(r'\bt\("([a-zA-Z_.]+)"', LANDING))
+    used |= {f"lp.s.{name}{suffix}" for name in re.findall(r'\["(\w+)", "--\w+"\]', LANDING) for suffix in ("", ".d")}
+    used |= {f"lp.faq.{kind}{n}" for n in range(1, 6) for kind in ("q", "a")}
+    banks = LANDING.split("const BANKS = [", 1)[1].split("]", 1)[0]
+    used |= {f"bank.{bank}" for bank in re.findall(r'"(\w+)"', banks)}
+    missing = {key for key in used if key not in CATALOG["en"]}
+    assert not missing, missing
+    assert len(used) > 90
+
+
+def test_no_hard_coded_english_on_the_landing_page():
+    body = LANDING.split("<body>", 1)[1].split("<script>", 1)[0]
+    text = re.sub(r"<[^>]+>", " ", body)
+    assert re.findall(r"[A-Za-z]{4,}", text) == []
+
+
+def test_landing_and_app_routes(client):
+    assert 'id="serviceGrid"' in client.get("/").text
+    assert 'id="authForm"' in client.get("/app").text

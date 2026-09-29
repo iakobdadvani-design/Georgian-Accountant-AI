@@ -57,7 +57,8 @@ cp .env.example .env      # then optionally set ANTHROPIC_API_KEY
 docker compose up --build
 ```
 
-- Chat page: http://localhost:8000/ (create an account on first visit)
+- Website: http://localhost:8000/
+- App: http://localhost:8000/app (create an account on first visit)
 - API docs: http://localhost:8000/docs
 
 `AI_PROVIDER` picks who reads messages and writes replies:

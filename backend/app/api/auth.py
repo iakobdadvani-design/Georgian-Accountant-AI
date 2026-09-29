@@ -143,7 +143,7 @@ def request_reset(payload: ResetRequest, request: Request, db: Session = Depends
                              expires_at=datetime.now(UTC) + timedelta(hours=RESET_HOURS)))
         db.commit()
         lang = payload.language or user.language or "ka"
-        link = f"{settings.public_url.rstrip('/')}/#reset={token}"
+        link = f"{settings.public_url.rstrip('/')}/app#reset={token}"
         try:
             email.send(user.email, t("reset.subject", lang),
                        t("reset.body", lang, name=user.full_name, link=link, hours=RESET_HOURS))

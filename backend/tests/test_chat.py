@@ -126,7 +126,7 @@ def test_greeting_keeps_pending_question(client, company):
 
 
 def test_chat_page_served(client):
-    response = client.get("/")
+    response = client.get("/app")
     assert response.status_code == 200
     assert "Georgian AI Accountant" in response.text
 

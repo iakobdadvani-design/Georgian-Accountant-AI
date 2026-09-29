@@ -30,13 +30,14 @@ the date. Model replies are rejected if they contain a number the engine didn't 
 | `books/`, `api/books.py`, `static/books.js` | Sales & expenses: sums of recorded transactions (`books/__init__.py`), bank statement import (CSV/.xlsx, `books/importer.py`), monthly summary running the VAT registration / VAT payable / small business rules on those sums |
 | `facts.py` | `company_facts`: the `company.*` facts rules see |
 | `i18n/` | Reply catalogs `messages/<lang>.json`, `t()`/`tplural()`, locale number/date formatting |
-| `static/index.html`, `static/i18n.json` | The page shell (sidebar menu, top bar, view switcher `go(name)`, chat, dialogs; vanilla JS, no build) and its catalog (all visible text) |
+| `static/landing.html` | Public website at `/` (services menu, animated demo, pricing, FAQ; texts are the `lp.*` keys in `i18n.json`). Its "Sign in" / "Start free" go to `/app` / `/app#register`; the demo figures are illustrative, labelled "Example"; pricing is a draft until the owner confirms it |
+| `static/index.html`, `static/i18n.json` | The app at `/app`: page shell (sidebar menu, top bar, view switcher `go(name)`, chat, dialogs; vanilla JS, no build) and its catalog (all visible text) |
 | `static/overview.js`, `connections.js`, `books.js`, `pay.js`, `reviews.js` | One script per screen: Overview + Tax calendar, Companies & RS.ge + Banks, Sales & expenses, Tax payments, Rule review. Each exposes `window.X` with `show`/`hide` (called only by `go`) and `onCompanyChange`/`onLanguageChange`; the page calls them through `window.X?.` |
 
 ## Commands
 
 ```powershell
-docker compose up -d --build      # app on http://localhost:8000 (UI) and /docs (API)
+docker compose up -d --build      # app on http://localhost:8000 (website), /app (the app), /docs (API)
 cd backend; .\.venv\Scripts\python -m pytest -q -p no:warnings   # tests: SQLite, fake AI, no network
 ```
 
@@ -204,7 +205,7 @@ Bank licence or a licensed partner; don't imitate it.
 - Sign-in, sign-up and reset are rate-limited in memory (`ratelimit.py`, cleared per test in `conftest`).
   Per process: fine for the single-process deployment, move to Redis before running several.
 - Password reset: `POST /auth/password-reset` always answers 202 (never reveals accounts) and emails a
-  1-hour single-use link (`PUBLIC_URL/#reset=<token>`, only its SHA-256 stored); confirming signs out every
+  1-hour single-use link (`PUBLIC_URL/app#reset=<token>`, only its SHA-256 stored); confirming signs out every
   session. Needs SMTP; without it the page hides "Forgot password?".
 - Security headers and a Content-Security-Policy come from middleware in `main.py` (not on `/docs`,
   which loads Swagger from a CDN). Anything the page loads from a new origin must be added there.

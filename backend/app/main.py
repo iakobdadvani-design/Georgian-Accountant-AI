@@ -66,7 +66,7 @@ async def security_headers(request: Request, call_next):
         response.headers.setdefault("Content-Security-Policy", CONTENT_POLICY)
     # The page and its scripts change with each release: browsers must revalidate (a cheap 304) instead of showing
     # a stale copy after an update.
-    if request.url.path == "/" or request.url.path.startswith("/static/"):
+    if request.url.path in ("/", "/app") or request.url.path.startswith("/static/"):
         response.headers.setdefault("Cache-Control", "no-cache")
     if settings.session_cookie_secure:  # served over HTTPS
         response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
@@ -90,6 +90,11 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
 @app.get("/", include_in_schema=False)
+def landing_page():
+    return FileResponse(STATIC_DIR / "landing.html")
+
+
+@app.get("/app", include_in_schema=False)
 def chat_page():
     return FileResponse(STATIC_DIR / "index.html")
 

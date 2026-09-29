@@ -65,7 +65,7 @@ def test_password_reset_flow(make_client):
     assert anon.post("/auth/password-reset", json={"email": "Reset@Example.com", "language": "en"}).status_code == 202
     to, subject, body = mailbox.sent[0]
     assert to == "reset@example.com" and subject == "Reset your password"
-    assert "http://localhost:8000/#reset=" in body and "expires in 1 hour" in body
+    assert "http://localhost:8000/app#reset=" in body and "expires in 1 hour" in body
     token = mailbox.link()
 
     assert anon.post("/auth/password-reset/confirm", json={"token": token, "password": "short"}).status_code == 422
@@ -129,7 +129,7 @@ def test_privacy_page(make_client):
 
 def test_page_and_scripts_are_revalidated(make_client):
     client = make_client()
-    for path in ("/", "/static/i18n.json", "/static/banks/tbc.png"):
+    for path in ("/", "/app", "/static/i18n.json", "/static/banks/tbc.png"):
         response = client.get(path)
         assert response.status_code == 200 and response.headers["cache-control"] == "no-cache", path
     assert "cache-control" not in client.get("/health").headers

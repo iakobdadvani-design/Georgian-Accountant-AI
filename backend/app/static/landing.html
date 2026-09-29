@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="ka">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Georgian AI Accountant</title>
+<meta name="description" content="AI accountant for businesses in Georgia: taxes, VAT, payroll, deadlines and payments, from the Tax Code of Georgia.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%238c1d33'/><text x='16' y='23' font-size='20' text-anchor='middle' fill='white' font-family='sans-serif'>₾</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Noto+Serif+Georgian:wght@500;600;700&family=Noto+Serif:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+Georgian:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0e1525; --ink-2: #1a2438; --paper: #f6f4ee; --white: #ffffff; --line: #e6e2d8; --muted: #5b6270;
+    --wine: #8c1d33; --wine-2: #a8243f; --lime: #d4f36b; --lime-2: #c4ea4a; --teal: #0f766e; --blue: #1d4ed8;
+    --amber: #b45309; --violet: #6d28d9; --green: #15803d; --indigo: #4338ca;
+    --display: "Fraunces", "Noto Serif Georgian", "Noto Serif", Georgia, serif;
+    --sans: "IBM Plex Sans", "Noto Sans Georgian", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --radius: 22px; --ease: cubic-bezier(.2, .7, .2, 1);
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { scroll-behavior: smooth; scroll-padding-top: 88px; }
+  body { margin: 0; font: 16px/1.6 var(--sans); color: var(--ink); background: var(--paper); -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  img { display: block; }
+  .wrap { width: min(1200px, calc(100% - 40px)); margin: 0 auto; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+  /* buttons */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 0 22px;
+    border-radius: 999px; border: 1px solid transparent; font: 600 15px var(--sans); text-decoration: none; cursor: pointer;
+    transition: transform .2s var(--ease), background .2s, box-shadow .2s, border-color .2s; white-space: nowrap; }
+  .btn:hover { transform: translateY(-2px); }
+  .btn.lime { background: var(--lime); color: var(--ink); box-shadow: 0 8px 24px rgb(196 234 74 / .35); }
+  .btn.lime:hover { background: var(--lime-2); }
+  .btn.dark { background: var(--ink); color: var(--white); }
+  .btn.ghost { border-color: rgb(255 255 255 / .28); color: var(--white); background: rgb(255 255 255 / .04); }
+  .btn.ghost:hover { border-color: rgb(255 255 255 / .6); }
+  .btn.line { border-color: var(--line); color: var(--ink); background: var(--white); }
+  .btn .arrow { transition: transform .2s var(--ease); }
+  .btn:hover .arrow { transform: translateX(3px); }
+
+  /* header */
+  .header { position: sticky; top: 0; z-index: 50; background: rgb(246 244 238 / .82); backdrop-filter: saturate(1.4) blur(14px);
+    border-bottom: 1px solid transparent; transition: border-color .2s, background .2s; }
+  .header.scrolled { border-color: var(--line); background: rgb(246 244 238 / .94); }
+  .bar { display: flex; align-items: center; gap: 28px; height: 76px; }
+  .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 700; letter-spacing: -.01em; }
+  .logo-mark { width: 38px; height: 38px; border-radius: 11px; background: var(--wine); color: #fff; display: grid; place-items: center;
+    font-size: 20px; font-weight: 700; }
+  .logo span:last-child { font-size: 15.5px; line-height: 1.15; max-width: 150px; }
+  .nav { display: flex; align-items: center; gap: 4px; }
+  .nav > a, .nav > button { background: none; border: none; font: 500 15px var(--sans); color: var(--ink); text-decoration: none;
+    padding: 10px 14px; border-radius: 999px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+  .nav > a:hover, .nav > button:hover, .nav > button[aria-expanded="true"] { background: rgb(14 21 37 / .06); }
+  .chev { width: 8px; height: 8px; border-right: 1.8px solid currentColor; border-bottom: 1.8px solid currentColor; transform: translateY(-2px) rotate(45deg);
+    transition: transform .2s; }
+  [aria-expanded="true"] .chev { transform: translateY(1px) rotate(225deg); }
+  .bar-end { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .signin { text-decoration: none; font-weight: 600; font-size: 15px; padding: 10px 12px; }
+  .lang { position: relative; }
+  .lang > button { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border: 1px solid var(--line); background: var(--white);
+    border-radius: 999px; font: 600 13.5px var(--sans); cursor: pointer; color: var(--ink); }
+  .lang ul { position: absolute; right: 0; top: calc(100% + 8px); margin: 0; padding: 6px; list-style: none; background: var(--white);
+    border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 18px 40px rgb(14 21 37 / .14); min-width: 170px; }
+  .lang li button { width: 100%; text-align: left; border: none; background: none; padding: 9px 12px; border-radius: 10px; font: 500 14px var(--sans);
+    cursor: pointer; color: var(--ink); }
+  .lang li button:hover, .lang li button[aria-current="true"] { background: var(--paper); }
+  .burger { display: none; width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--white); cursor: pointer; }
+
+  /* mega menu */
+  .mega { position: absolute; left: 0; right: 0; top: 100%; background: var(--white); border-bottom: 1px solid var(--line);
+    box-shadow: 0 30px 60px rgb(14 21 37 / .10); opacity: 0; visibility: hidden; transform: translateY(-8px);
+    transition: opacity .22s var(--ease), transform .22s var(--ease), visibility 0s linear .22s; }
+  .mega.open { opacity: 1; visibility: visible; transform: none; transition: opacity .22s var(--ease), transform .22s var(--ease); }
+  .mega-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px; padding: 30px 0 34px; }
+  .mega h4 { margin: 0 0 12px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .mega a { display: flex; gap: 12px; padding: 10px; margin: 0 -10px; border-radius: 14px; text-decoration: none; transition: background .15s; }
+  .mega a:hover { background: var(--paper); }
+  .mega a b { display: block; font-size: 15px; font-weight: 600; }
+  .mega a small { display: block; font-size: 13px; color: var(--muted); line-height: 1.4; }
+  .ico { width: 38px; height: 38px; flex: none; border-radius: 11px; display: grid; place-items: center; color: var(--c);
+    background: color-mix(in srgb, var(--c) 12%, #fff); }
+
+  /* hero */
+  .hero { position: relative; background: var(--ink); color: var(--white); overflow: hidden; isolation: isolate; }
+  .hero::before { content: ""; position: absolute; inset: 0; z-index: -1; opacity: .5;
+    background-image: linear-gradient(rgb(255 255 255 / .05) 1px, transparent 1px), linear-gradient(90deg, rgb(255 255 255 / .05) 1px, transparent 1px);
+    background-size: 56px 56px; mask-image: radial-gradient(ellipse at 70% 30%, #000 20%, transparent 70%); }
+  .glow { position: absolute; z-index: -1; border-radius: 50%; filter: blur(80px); opacity: .55; animation: drift 16s ease-in-out infinite alternate; }
+  .glow.a { width: 460px; height: 460px; background: #3b1624; right: -80px; top: -120px; }
+  .glow.b { width: 380px; height: 380px; background: #25361a; left: 30%; bottom: -200px; animation-delay: -6s; }
+  @keyframes drift { to { transform: translate(-40px, 30px) scale(1.08); } }
+  .hero-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 56px; align-items: center; padding: 88px 0 96px; }
+  .pill { display: inline-flex; align-items: center; gap: 10px; padding: 7px 14px 7px 8px; border-radius: 999px; border: 1px solid rgb(255 255 255 / .16);
+    background: rgb(255 255 255 / .05); font-size: 13.5px; color: rgb(255 255 255 / .85); }
+  .pill i { width: 22px; height: 22px; border-radius: 50%; background: var(--lime); display: grid; place-items: center; color: var(--ink); font-style: normal;
+    font-size: 12px; font-weight: 700; }
+  h1 { font-family: var(--display); font-weight: 600; font-size: clamp(40px, 5.6vw, 78px); line-height: 1.04; letter-spacing: -.025em; margin: 22px 0 22px; }
+  h1 .hl { color: var(--lime); }
+  .hero p.sub { font-size: clamp(16px, 1.4vw, 19px); line-height: 1.6; color: rgb(255 255 255 / .74); max-width: 560px; margin: 0 0 34px; }
+  .ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+  .ticks { display: flex; gap: 22px; flex-wrap: wrap; margin-top: 34px; font-size: 14px; color: rgb(255 255 255 / .72); }
+  .ticks span { display: inline-flex; align-items: center; gap: 8px; }
+  .ticks svg { color: var(--lime); flex: none; }
+
+  /* hero demo */
+  .demo { position: relative; }
+  .device { background: rgb(255 255 255 / .06); border: 1px solid rgb(255 255 255 / .14); border-radius: 28px; padding: 18px;
+    box-shadow: 0 40px 80px rgb(0 0 0 / .45), inset 0 1px 0 rgb(255 255 255 / .08); backdrop-filter: blur(6px); }
+  .device-top { display: flex; align-items: center; gap: 8px; padding: 2px 4px 14px; color: rgb(255 255 255 / .55); font-size: 12.5px; }
+  .device-top i { width: 9px; height: 9px; border-radius: 50%; background: rgb(255 255 255 / .2); }
+  .device-top em { margin-left: auto; font-style: normal; padding: 3px 9px; border-radius: 999px; background: rgb(255 255 255 / .08); }
+  .screen { background: #f7f6f2; border-radius: 20px; padding: 20px; min-height: 380px; color: var(--ink); display: flex; flex-direction: column; gap: 14px; }
+  .msg { max-width: 86%; padding: 12px 16px; border-radius: 18px; font-size: 15px; line-height: 1.45; opacity: 0; transform: translateY(8px);
+    transition: opacity .35s var(--ease), transform .35s var(--ease); }
+  .msg.show { opacity: 1; transform: none; }
+  .msg.me { align-self: flex-end; background: var(--ink); color: #fff; border-bottom-right-radius: 6px; }
+  .msg.bot { align-self: flex-start; background: #fff; border: 1px solid var(--line); border-bottom-left-radius: 6px; }
+  .caret { display: inline-block; width: 2px; height: 1.05em; background: #fff; vertical-align: -2px; margin-left: 1px; animation: blink 1s steps(2) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .dots { display: inline-flex; gap: 5px; }
+  .dots b { width: 7px; height: 7px; border-radius: 50%; background: #9aa0aa; animation: bounce 1.1s infinite ease-in-out; }
+  .dots b:nth-child(2) { animation-delay: .15s; } .dots b:nth-child(3) { animation-delay: .3s; }
+  @keyframes bounce { 0%, 80%, 100% { transform: translateY(0); opacity: .4; } 40% { transform: translateY(-4px); opacity: 1; } }
+  .tax-card { margin-top: auto; background: var(--ink); color: #fff; border-radius: 18px; padding: 18px 20px; display: grid; gap: 6px;
+    opacity: 0; transform: translateY(14px) scale(.98); transition: opacity .45s var(--ease), transform .45s var(--ease); }
+  .tax-card.show { opacity: 1; transform: none; }
+  .tax-card small { color: rgb(255 255 255 / .65); font-size: 13px; }
+  .tax-card strong { font-family: var(--display); font-size: 38px; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .tax-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .tax-row .btn { min-height: 38px; padding: 0 16px; font-size: 14px; }
+  .pulse { animation: pulse 2.2s infinite; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgb(212 243 107 / .55); } 70% { box-shadow: 0 0 0 12px rgb(212 243 107 / 0); } 100% { box-shadow: 0 0 0 0 rgb(212 243 107 / 0); } }
+  .float { position: absolute; background: #fff; color: var(--ink); border-radius: 16px; padding: 12px 14px; box-shadow: 0 20px 40px rgb(0 0 0 / .25);
+    display: flex; align-items: center; gap: 10px; font-size: 13.5px; font-weight: 600; animation: bob 6s ease-in-out infinite; }
+  .float.one { left: -34px; top: 64px; }
+  .float.two { right: -22px; bottom: 120px; animation-delay: -3s; }
+  @keyframes bob { 50% { transform: translateY(-10px); } }
+  .float .ico { width: 32px; height: 32px; border-radius: 10px; }
+
+  /* banks strip */
+  .banks { padding: 34px 0; border-bottom: 1px solid var(--line); background: var(--white); }
+  .banks p { text-align: center; margin: 0 0 18px; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .marquee { overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+  .track { display: flex; gap: 56px; width: max-content; animation: scroll 32s linear infinite; }
+  .track div { display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 15px; color: #2b3140; white-space: nowrap; }
+  .track img { width: 36px; height: 36px; border-radius: 10px; box-shadow: 0 0 0 1px var(--line); }
+  @keyframes scroll { to { transform: translateX(-50%); } }
+
+  /* sections */
+  section.block { padding: 110px 0; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 10px; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; font-weight: 700; color: var(--wine); }
+  .eyebrow::before { content: ""; width: 26px; height: 2px; background: currentColor; border-radius: 2px; }
+  h2 { font-family: var(--display); font-weight: 600; font-size: clamp(32px, 3.8vw, 54px); line-height: 1.08; letter-spacing: -.02em; margin: 16px 0 16px; max-width: 820px; }
+  .lead { font-size: 18px; color: var(--muted); max-width: 640px; margin: 0; }
+  .head { margin-bottom: 54px; }
+
+  .services { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+  .svc { position: relative; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; display: grid; gap: 14px;
+    align-content: start; text-decoration: none; overflow: hidden; transition: transform .3s var(--ease), box-shadow .3s var(--ease), border-color .3s; }
+  .svc::after { content: ""; position: absolute; inset: auto -40% -60% auto; width: 220px; height: 220px; border-radius: 50%;
+    background: color-mix(in srgb, var(--c) 10%, transparent); transform: scale(.4); opacity: 0; transition: transform .5s var(--ease), opacity .5s; }
+  .svc:hover { transform: translateY(-6px); box-shadow: 0 24px 50px rgb(14 21 37 / .10); border-color: color-mix(in srgb, var(--c) 35%, var(--line)); }
+  .svc:hover::after { transform: scale(1); opacity: 1; }
+  .svc .ico { width: 48px; height: 48px; border-radius: 14px; }
+  .svc h3 { margin: 4px 0 0; font-size: 19px; font-weight: 650; letter-spacing: -.01em; }
+  .svc p { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.55; }
+  .svc .tag { position: absolute; top: 22px; right: 22px; font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+
+  .how { background: var(--white); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .steps { position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 34px; }
+  .steps::before { content: ""; position: absolute; left: 0; right: 0; top: 34px; height: 2px; background: var(--line); }
+  .steps::after { content: ""; position: absolute; left: 0; top: 34px; height: 2px; width: 0; background: var(--wine); transition: width 1.6s var(--ease) .2s; }
+  .steps.in::after { width: 100%; }
+  .step { position: relative; }
+  .num { position: relative; z-index: 1; width: 68px; height: 68px; border-radius: 50%; background: var(--ink); color: var(--lime); display: grid; place-items: center;
+    font-family: var(--display); font-size: 24px; font-weight: 600; box-shadow: 0 0 0 8px var(--white); }
+  .step h3 { margin: 26px 0 10px; font-size: 22px; font-weight: 650; }
+  .step p { margin: 0; color: var(--muted); }
+
+  .trust { background: var(--ink); color: var(--white); position: relative; overflow: hidden; }
+  .trust .eyebrow { color: var(--lime); }
+  .trust .lead { color: rgb(255 255 255 / .7); }
+  .trust-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 56px; align-items: center; }
+  .points { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .point { padding: 24px; border-radius: var(--radius); background: rgb(255 255 255 / .05); border: 1px solid rgb(255 255 255 / .1); transition: background .3s, transform .3s var(--ease); }
+  .point:hover { background: rgb(255 255 255 / .08); transform: translateY(-4px); }
+  .point svg { color: var(--lime); }
+  .point h3 { margin: 14px 0 8px; font-size: 17.5px; font-weight: 650; }
+  .point p { margin: 0; color: rgb(255 255 255 / .68); font-size: 14.5px; }
+  .cite { background: #f7f6f2; color: var(--ink); border-radius: 24px; padding: 26px; box-shadow: 0 40px 80px rgb(0 0 0 / .4); display: grid; gap: 14px;
+    transform: rotate(-1.5deg); }
+  .cite .row { display: flex; justify-content: space-between; font-size: 15px; padding: 10px 0; border-top: 1px solid var(--line); }
+  .cite .row:first-of-type { border-top: 0; }
+  .cite .row b { font-variant-numeric: tabular-nums; }
+  .cite .law { display: flex; align-items: center; gap: 10px; font-size: 13.5px; color: var(--muted); padding-top: 6px; border-top: 1px dashed var(--line); }
+  .cite .big { font-family: var(--display); font-size: 44px; font-weight: 600; letter-spacing: -.02em; }
+
+  .plans { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; align-items: stretch; }
+  .plan { background: var(--white); border: 1px solid var(--line); border-radius: 26px; padding: 30px; display: flex; flex-direction: column; gap: 16px;
+    transition: transform .3s var(--ease), box-shadow .3s; }
+  .plan:hover { transform: translateY(-6px); box-shadow: 0 24px 50px rgb(14 21 37 / .10); }
+  .plan.pop { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .plan h3 { margin: 0; font-size: 18px; font-weight: 650; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .badge { font-size: 11.5px; font-weight: 700; letter-spacing: .04em; padding: 4px 10px; border-radius: 999px; background: var(--lime); color: var(--ink); }
+  .badge.soon { background: color-mix(in srgb, var(--amber) 14%, #fff); color: var(--amber); }
+  .price { font-family: var(--display); font-size: 54px; font-weight: 600; letter-spacing: -.03em; line-height: 1; }
+  .price small { font-family: var(--sans); font-size: 15px; font-weight: 500; color: var(--muted); letter-spacing: 0; }
+  .plan.pop .price small, .plan.pop p { color: rgb(255 255 255 / .7); }
+  .plan p { margin: 0; color: var(--muted); flex: 1; }
+  .plan .btn { width: 100%; }
+
+  .faq { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 56px; }
+  details { border-bottom: 1px solid var(--line); }
+  summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 22px 0;
+    font-size: 18px; font-weight: 600; }
+  summary::-webkit-details-marker { display: none; }
+  summary i { width: 30px; height: 30px; flex: none; border-radius: 50%; border: 1px solid var(--line); position: relative; transition: transform .3s var(--ease), background .2s; }
+  summary i::before, summary i::after { content: ""; position: absolute; left: 50%; top: 50%; width: 11px; height: 1.8px; background: var(--ink); transform: translate(-50%, -50%); }
+  summary i::after { transform: translate(-50%, -50%) rotate(90deg); transition: transform .3s var(--ease); }
+  details[open] summary i { background: var(--lime); border-color: var(--lime); }
+  details[open] summary i::after { transform: translate(-50%, -50%) rotate(0deg); }
+  details p { margin: 0 0 22px; color: var(--muted); max-width: 660px; animation: open .35s var(--ease); }
+  @keyframes open { from { opacity: 0; transform: translateY(-6px); } }
+
+  .final { padding: 0 0 110px; }
+  .final-box { background: var(--lime); border-radius: 34px; padding: 70px 56px; display: grid; grid-template-columns: minmax(0, 1.3fr) auto; gap: 30px; align-items: center;
+    position: relative; overflow: hidden; }
+  .final-box::after { content: "₾"; position: absolute; right: 26%; bottom: -70px; font-family: var(--display); font-size: 320px; line-height: 1; color: rgb(14 21 37 / .06);
+    pointer-events: none; }
+  .final-box h2 { margin: 0 0 10px; }
+  .final-box p { margin: 0; font-size: 18px; color: #36401c; }
+
+  footer { background: var(--ink); color: rgb(255 255 255 / .7); padding: 56px 0 40px; font-size: 14px; }
+  .foot { display: flex; justify-content: space-between; gap: 30px; flex-wrap: wrap; align-items: flex-start; }
+  .foot .logo { color: #fff; }
+  .foot p { max-width: 560px; margin: 16px 0 0; }
+  .foot nav { display: flex; gap: 22px; flex-wrap: wrap; }
+  .foot a { color: rgb(255 255 255 / .8); text-decoration: none; }
+  .foot a:hover { color: #fff; }
+
+  /* scroll reveal */
+  .reveal { opacity: 0; transform: translateY(26px); transition: opacity .8s var(--ease), transform .8s var(--ease); transition-delay: calc(var(--d, 0) * 80ms); }
+  .reveal.in { opacity: 1; transform: none; }
+
+  @media (max-width: 1000px) {
+    .nav, .signin, .bar-end .btn { display: none; }
+    .burger { display: grid; place-items: center; }
+    .hero-grid, .trust-grid, .faq { grid-template-columns: 1fr; }
+    .hero-grid { padding: 56px 0 72px; gap: 48px; }
+    .services, .plans { grid-template-columns: 1fr 1fr; }
+    .float.one { left: 8px; } .float.two { right: 8px; }
+    .final-box { grid-template-columns: 1fr; padding: 48px 32px; }
+    .mega-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 640px) {
+    .services, .plans, .points, .steps, .mega-grid { grid-template-columns: 1fr; }
+    .steps::before, .steps::after { display: none; }
+    section.block { padding: 76px 0; }
+    .float { display: none; }
+    .logo span:last-child { display: none; }
+  }
+  .mobile-menu { position: fixed; inset: 76px 0 0 0; z-index: 49; background: var(--paper); overflow-y: auto; padding: 18px 20px 40px; }
+  .mobile-menu a { display: block; padding: 14px 4px; font-size: 18px; font-weight: 600; text-decoration: none; border-bottom: 1px solid var(--line); }
+  .mobile-menu .btn { margin-top: 22px; width: 100%; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .reveal, .msg, .tax-card { opacity: 1; transform: none; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+<header class="header" id="header">
+  <div class="wrap bar">
+    <a class="logo" href="#top" aria-label="Georgian AI Accountant"><span class="logo-mark" aria-hidden="true">₾</span><span data-i18n="app.name"></span></a>
+    <nav class="nav" data-i18n-aria="nav.aria">
+      <button type="button" id="servicesBtn" aria-expanded="false" aria-controls="mega"><span data-i18n="lp.nav.services"></span><span class="chev" aria-hidden="true"></span></button>
+      <a href="#how" data-i18n="lp.nav.how"></a>
+      <a href="#pricing" data-i18n="lp.nav.pricing"></a>
+      <a href="#faq" data-i18n="lp.nav.faq"></a>
+    </nav>
+    <div class="bar-end">
+      <div class="lang" id="lang">
+        <button type="button" aria-haspopup="listbox" aria-expanded="false" id="langBtn"></button>
+        <ul role="listbox" id="langList" hidden></ul>
+      </div>
+      <a class="signin" href="/app" data-i18n="lp.nav.signin" id="signinLink"></a>
+      <a class="btn dark" href="/app#register" id="startTop"><span data-i18n="lp.nav.start"></span><span class="arrow" aria-hidden="true">→</span></a>
+      <button class="burger" type="button" id="burger" data-i18n-aria="lp.nav.menu" aria-expanded="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="mega" id="mega">
+    <div class="wrap mega-grid" id="megaGrid"></div>
+  </div>
+</header>
+<div class="mobile-menu" id="mobileMenu" hidden></div>
+
+<main id="top">
+  <section class="hero">
+    <span class="glow a" aria-hidden="true"></span><span class="glow b" aria-hidden="true"></span>
+    <div class="wrap hero-grid">
+      <div>
+        <span class="pill reveal"><i aria-hidden="true">₾</i><span data-i18n="lp.hero.eyebrow"></span></span>
+        <h1 class="reveal" style="--d:1" data-i18n="lp.hero.title"></h1>
+        <p class="sub reveal" style="--d:2" data-i18n="lp.hero.sub"></p>
+        <div class="ctas reveal" style="--d:3">
+          <a class="btn lime" href="/app#register"><span data-i18n="lp.hero.cta"></span><span class="arrow" aria-hidden="true">→</span></a>
+          <a class="btn ghost" href="#how" data-i18n="lp.hero.cta2"></a>
+        </div>
+        <div class="ticks reveal" style="--d:4">
+          <span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span data-i18n="lp.hero.t1"></span></span>
+          <span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span data-i18n="lp.hero.t2"></span></span>
+          <span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span data-i18n="lp.hero.t3"></span></span>
+        </div>
+      </div>
+      <div class="demo reveal" style="--d:2" aria-hidden="true">
+        <div class="device">
+          <div class="device-top"><i></i><i></i><i></i><em data-i18n="lp.demo.example"></em></div>
+          <div class="screen">
+            <div class="msg me" id="demoQ"><span id="demoQText"></span><span class="caret"></span></div>
+            <div class="msg bot" id="demoDots"><span class="dots"><b></b><b></b><b></b></span></div>
+            <div class="msg bot" id="demoA" data-i18n="lp.demo.a"></div>
+            <div class="tax-card" id="demoCard">
+              <small data-i18n="lp.demo.card"></small>
+              <strong id="demoAmount">0,00 ₾</strong>
+              <div class="tax-row"><small data-i18n="lp.demo.due"></small><span class="btn lime pulse" data-i18n="lp.demo.pay"></span></div>
+            </div>
+          </div>
+        </div>
+        <div class="float one"><span class="ico" style="--c:var(--green)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><span data-i18n="lp.s.rs.d"></span></div>
+        <div class="float two"><span class="ico" style="--c:var(--amber)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM3 10h18M8 3v4M16 3v4"/></svg></span><span data-i18n="lp.s.calendar"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="banks">
+    <p data-i18n="lp.banksline"></p>
+    <div class="marquee"><div class="track" id="bankTrack"></div></div>
+  </div>
+
+  <section class="block" id="services">
+    <div class="wrap">
+      <div class="head reveal">
+        <span class="eyebrow" data-i18n="lp.services.eyebrow"></span>
+        <h2 data-i18n="lp.services.title"></h2>
+        <p class="lead" data-i18n="lp.services.sub"></p>
+      </div>
+      <div class="services" id="serviceGrid"></div>
+    </div>
+  </section>
+
+  <section class="block how" id="how">
+    <div class="wrap">
+      <div class="head reveal">
+        <span class="eyebrow" data-i18n="lp.how.eyebrow"></span>
+        <h2 data-i18n="lp.how.title"></h2>
+      </div>
+      <div class="steps reveal" id="steps">
+        <div class="step"><div class="num">01</div><h3 data-i18n="lp.how.1"></h3><p data-i18n="lp.how.1.d"></p></div>
+        <div class="step"><div class="num">02</div><h3 data-i18n="lp.how.2"></h3><p data-i18n="lp.how.2.d"></p></div>
+        <div class="step"><div class="num">03</div><h3 data-i18n="lp.how.3"></h3><p data-i18n="lp.how.3.d"></p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block trust">
+    <div class="wrap trust-grid">
+      <div>
+        <div class="head reveal" style="margin-bottom:34px">
+          <span class="eyebrow" data-i18n="lp.trust.eyebrow"></span>
+          <h2 data-i18n="lp.trust.title"></h2>
+        </div>
+        <div class="points">
+          <div class="point reveal" style="--d:1"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2zM4 19a2 2 0 0 1 2-2h12M9 7h6M9 11h6"/></svg><h3 data-i18n="lp.trust.1"></h3><p data-i18n="lp.trust.1.d"></p></div>
+          <div class="point reveal" style="--d:2"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h14v18H5zM8 7h8M8 11h2M12 11h2M16 11h0M8 15h2M12 15h2M8 19h8"/></svg><h3 data-i18n="lp.trust.2"></h3><p data-i18n="lp.trust.2.d"></p></div>
+          <div class="point reveal" style="--d:3"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4"/></svg><h3 data-i18n="lp.trust.3"></h3><p data-i18n="lp.trust.3.d"></p></div>
+          <div class="point reveal" style="--d:4"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6zM8.5 12l2.5 2.5 4.5-5"/></svg><h3 data-i18n="lp.trust.4"></h3><p data-i18n="lp.trust.4.d"></p></div>
+        </div>
+      </div>
+      <div class="cite reveal" style="--d:2" aria-hidden="true">
+        <small data-i18n="lp.demo.card" style="color:var(--muted)"></small>
+        <div class="big" id="citeAmount"></div>
+        <div class="row"><span data-i18n="books.outputVat"></span><b id="citeOut"></b></div>
+        <div class="row"><span data-i18n="books.inputVat"></span><b id="citeIn"></b></div>
+        <div class="law"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/></svg><span data-i18n="lp.demo.due"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="pricing">
+    <div class="wrap">
+      <div class="head reveal">
+        <span class="eyebrow" data-i18n="lp.pricing.eyebrow"></span>
+        <h2 data-i18n="lp.pricing.title"></h2>
+      </div>
+      <div class="plans">
+        <div class="plan reveal" style="--d:1">
+          <h3 data-i18n="lp.plan.free"></h3>
+          <div class="price">0 ₾ <small data-i18n="lp.pricing.month"></small></div>
+          <p data-i18n="lp.plan.free.d"></p>
+          <a class="btn line" href="/app#register" data-i18n="lp.plan.cta"></a>
+        </div>
+        <div class="plan pop reveal" style="--d:2">
+          <h3><span data-i18n="lp.plan.self"></span><span class="badge" data-i18n="lp.plan.popular"></span></h3>
+          <div class="price">39 ₾ <small data-i18n="lp.pricing.month"></small></div>
+          <p data-i18n="lp.plan.self.d"></p>
+          <a class="btn lime" href="/app#register" data-i18n="lp.plan.cta"></a>
+        </div>
+        <div class="plan reveal" style="--d:3">
+          <h3><span data-i18n="lp.plan.accountant"></span><span class="badge soon" data-i18n="lp.plan.soon"></span></h3>
+          <div class="price"><small data-i18n="lp.pricing.from"></small> 99 ₾ <small data-i18n="lp.pricing.month"></small></div>
+          <p data-i18n="lp.plan.accountant.d"></p>
+          <a class="btn line" href="/app#register" data-i18n="lp.plan.notify"></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="faq" style="padding-top:0">
+    <div class="wrap faq">
+      <div class="reveal">
+        <span class="eyebrow" data-i18n="lp.faq.eyebrow"></span>
+        <h2 data-i18n="lp.faq.title"></h2>
+      </div>
+      <div class="reveal" style="--d:1" id="faqList"></div>
+    </div>
+  </section>
+
+  <section class="final">
+    <div class="wrap">
+      <div class="final-box reveal">
+        <div><h2 data-i18n="lp.final.title"></h2><p data-i18n="lp.final.sub"></p></div>
+        <a class="btn dark" href="/app#register"><span data-i18n="lp.hero.cta"></span><span class="arrow" aria-hidden="true">→</span></a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <div>
+      <a class="logo" href="#top"><span class="logo-mark" aria-hidden="true">₾</span><span data-i18n="app.name"></span></a>
+      <p data-i18n="lp.footer.rights"></p>
+    </div>
+    <nav>
+      <a href="#services" data-i18n="lp.nav.services"></a>
+      <a href="#pricing" data-i18n="lp.nav.pricing"></a>
+      <a href="/privacy" data-i18n="lp.footer.privacy"></a>
+      <a href="/app" data-i18n="lp.nav.signin"></a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+(() => {
+  // A password-reset link from an older email lands here; the app handles it.
+  if (/^#reset=/.test(location.hash)) { location.replace("/app" + location.hash); return; }
+
+  const $ = (id) => document.getElementById(id);
+  const LANGS = ["ka", "en", "ru", "de", "fr"];
+  let I18N = {};
+  let lang = "ka";
+  const store = { get: (k) => { try { return localStorage.getItem(k); } catch { return null; } },
+                  set: (k, v) => { try { localStorage.setItem(k, v); } catch { /* not saved */ } } };
+  const t = (key) => (I18N[lang] && key in I18N[lang] ? I18N[lang][key] : (I18N.en || {})[key] ?? key);
+
+  function initialLanguage() {
+    const saved = store.get("lang");
+    if (LANGS.includes(saved)) return saved;
+    for (const pref of navigator.languages || [navigator.language || ""]) {
+      const code = pref.toLowerCase().split("-")[0];
+      if (LANGS.includes(code)) return code;
+    }
+    return "ka";
+  }
+
+  function el(tag, attrs = {}, ...children) {
+    const node = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (v == null) continue;
+      if (k === "class") node.className = v; else if (k === "text") node.textContent = v; else if (k === "html") node.innerHTML = v;
+      else node.setAttribute(k, v);
+    }
+    for (const c of children.flat()) if (c) node.append(c);
+    return node;
+  }
+
+  // Icons (stroke paths) and the colour of each service.
+  const ICON = {
+    sb: "M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6", penalty: "M12 8v5M12 16.5v.5M10.3 3.9L2 18a2 2 0 0 0 1.7 3h16.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z",
+    currency: "M12 2v20M17 6.5C17 4.6 14.8 3 12 3S7 4.6 7 6.5 9.2 10 12 10s5 1.6 5 3.5S14.8 17 12 17s-5-1.6-5-3.5",
+    vat: "M19 5L5 19M6.5 9a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM17.5 20a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z",
+    payroll: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8",
+    dividends: "M21 12a9 9 0 1 1-9-9v9z M21 3v9h-9", assistant: "M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z",
+    books: "M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2zM4 19a2 2 0 0 1 2-2h12M9 7h6M9 11h6",
+    calendar: "M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM3 10h18M8 3v4M16 3v4",
+    payments: "M22 2L11 13M22 2l-7 20-4-9-9-4z", rs: "M4 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16M16 9h2a2 2 0 0 1 2 2v10M2 21h20M8 7h4M8 11h4M8 15h4",
+    banks: "M3 6h18a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zM2 10h20M6 15h4",
+  };
+  const GROUPS = [
+    ["lp.group.entrepreneurs", [["sb", "--green"], ["penalty", "--amber"], ["currency", "--blue"]]],
+    ["lp.group.companies", [["vat", "--wine"], ["payroll", "--teal"], ["dividends", "--indigo"]]],
+    ["lp.group.everyday", [["assistant", "--violet"], ["books", "--teal"], ["calendar", "--amber"], ["payments", "--blue"]]],
+    ["lp.group.connections", [["rs", "--indigo"], ["banks", "--green"]]],
+  ];
+  const svg = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${ICON[name]}"/></svg>`;
+  const BANKS = ["tbc", "bog", "liberty", "basis", "procredit", "credo", "tera", "halyk"];
+  const FAQ = [1, 2, 3, 4, 5];
+
+  function renderDynamic() {
+    $("megaGrid").replaceChildren(...GROUPS.map(([group, items]) => el("div", {},
+      el("h4", { text: t(group) }),
+      items.map(([id, c]) => el("a", { href: "#services", style: `--c:var(${c})` },
+        el("span", { class: "ico", html: svg(id, 19) }),
+        el("span", {}, el("b", { text: t(`lp.s.${id}`) }), el("small", { text: t(`lp.s.${id}.d`) })))))));
+    let i = 0;
+    $("serviceGrid").replaceChildren(...GROUPS.flatMap(([group, items]) => items.map(([id, c]) =>
+      el("a", { class: "svc reveal", href: "/app#register", style: `--c:var(${c});--d:${(i++ % 3) + 1}` },
+        el("span", { class: "tag", text: t(group) }),
+        el("span", { class: "ico", html: svg(id, 24) }),
+        el("h3", { text: t(`lp.s.${id}`) }), el("p", { text: t(`lp.s.${id}.d`) })))));
+    const bankItems = BANKS.map((b) => el("div", {}, el("img", { src: `/static/banks/${b}.png`, alt: "", width: 36, height: 36, loading: "lazy" }),
+      el("span", { text: t(`bank.${b}`) })));
+    $("bankTrack").replaceChildren(...bankItems, ...bankItems.map((n) => n.cloneNode(true)));  // twice, for a seamless loop
+    $("faqList").replaceChildren(...FAQ.map((n) => el("details", {},
+      el("summary", {}, el("span", { text: t(`lp.faq.q${n}`) }), el("i", { "aria-hidden": "true" })),
+      el("p", { text: t(`lp.faq.a${n}`) }))));
+    $("mobileMenu").replaceChildren(
+      ...GROUPS.flatMap(([, items]) => items).map(([id]) => el("a", { href: "#services", text: t(`lp.s.${id}`) })),
+      el("a", { href: "#how", text: t("lp.nav.how") }), el("a", { href: "#pricing", text: t("lp.nav.pricing") }),
+      el("a", { href: "#faq", text: t("lp.nav.faq") }), el("a", { href: "/app", text: t("lp.nav.signin") }),
+      el("a", { class: "btn dark", href: "/app#register", text: t("lp.nav.start") }));
+    observe();
+  }
+
+  function money(value) {
+    const [whole, frac] = value.toFixed(2).split(".");
+    return whole.replace(/\B(?=(\d{3})+(?!\d))/g, t("number.group")) + t("number.decimal") + frac + " ₾";
+  }
+
+  function apply() {
+    document.documentElement.lang = lang;
+    document.title = `${t("app.name")} · ${t("lp.hero.eyebrow")}`;
+    for (const n of document.querySelectorAll("[data-i18n]")) n.textContent = t(n.dataset.i18n);
+    for (const n of document.querySelectorAll("[data-i18n-aria]")) n.setAttribute("aria-label", t(n.dataset.i18nAria));
+    $("langBtn").textContent = t("meta.native");
+    $("langList").replaceChildren(...LANGS.map((l) => el("li", {}, el("button", { type: "button", "aria-current": String(l === lang),
+      lang: l, text: (I18N[l] || {})["meta.native"] || l }))));
+    for (const b of $("langList").querySelectorAll("button")) b.addEventListener("click", () => { setLang(b.lang); closeLang(); });
+    $("citeAmount").textContent = money(1170);
+    $("citeOut").textContent = money(2160);
+    $("citeIn").textContent = money(990);
+    renderDynamic();
+    playDemo();
+  }
+
+  function setLang(l) { lang = l; store.set("lang", l); apply(); }
+  function closeLang() { $("langList").hidden = true; $("langBtn").setAttribute("aria-expanded", "false"); }
+  $("langBtn").addEventListener("click", (e) => {
+    e.stopPropagation();
+    const open = $("langList").hidden;
+    $("langList").hidden = !open;
+    $("langBtn").setAttribute("aria-expanded", String(open));
+  });
+
+  // services menu
+  const mega = $("mega"), servicesBtn = $("servicesBtn");
+  const setMega = (open) => { mega.classList.toggle("open", open); servicesBtn.setAttribute("aria-expanded", String(open)); };
+  servicesBtn.addEventListener("click", (e) => { e.stopPropagation(); setMega(!mega.classList.contains("open")); });
+  mega.addEventListener("click", (e) => { if (e.target.closest("a")) setMega(false); });
+  document.addEventListener("click", (e) => {
+    if (!mega.contains(e.target)) setMega(false);
+    if (!$("lang").contains(e.target)) closeLang();
+  });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") { setMega(false); closeLang(); toggleMobile(false); } });
+
+  // mobile menu
+  const toggleMobile = (open) => { $("mobileMenu").hidden = !open; $("burger").setAttribute("aria-expanded", String(open)); document.body.style.overflow = open ? "hidden" : ""; };
+  $("burger").addEventListener("click", () => toggleMobile($("mobileMenu").hidden));
+  $("mobileMenu").addEventListener("click", (e) => { if (e.target.closest("a")) toggleMobile(false); });
+
+  // header shadow once the page scrolls
+  const onScroll = () => $("header").classList.toggle("scrolled", scrollY > 8);
+  addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+
+  // scroll reveal
+  let io = null;
+  function observe() {
+    const nodes = document.querySelectorAll(".reveal:not(.in), .steps:not(.in)");
+    if (!("IntersectionObserver" in window)) { nodes.forEach((n) => n.classList.add("in")); return; }
+    io = io || new IntersectionObserver((entries) => {
+      for (const e of entries) if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+    }, { threshold: .14, rootMargin: "0px 0px -40px 0px" });
+    nodes.forEach((n) => io.observe(n));
+  }
+
+  // hero demo: the message types itself, the assistant answers, the amount counts up; then it starts over
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let demoRun = 0;
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  async function playDemo() {
+    const run = ++demoRun;
+    const q = t("lp.demo.q"), qText = $("demoQText"), amount = $("demoAmount");
+    const parts = ["demoQ", "demoDots", "demoA", "demoCard"].map($);
+    if (reduced) { qText.textContent = q; parts.forEach((p) => p.classList.add("show")); parts[1].hidden = true; amount.textContent = money(1800); return; }
+    while (run === demoRun) {
+      parts.forEach((p) => p.classList.remove("show")); parts[1].hidden = false; qText.textContent = ""; amount.textContent = money(0);
+      await wait(500); parts[0].classList.add("show");
+      for (const ch of q) { if (run !== demoRun) return; qText.textContent += ch; await wait(38); }
+      await wait(350); parts[1].classList.add("show");
+      await wait(1100); parts[1].hidden = true; parts[2].classList.add("show");
+      await wait(600); parts[3].classList.add("show");
+      const start = performance.now();
+      await new Promise((done) => {
+        const tick = (now) => {
+          const k = Math.min((now - start) / 1300, 1), eased = 1 - Math.pow(1 - k, 3);
+          amount.textContent = money(1800 * eased);
+          if (k < 1 && run === demoRun) requestAnimationFrame(tick); else { amount.textContent = money(1800); done(); }
+        };
+        requestAnimationFrame(tick);
+      });
+      await wait(5200);
+    }
+  }
+
+  (async function boot() {
+    try { I18N = await (await fetch("/static/i18n.json")).json(); } catch { I18N = {}; }
+    lang = initialLanguage();
+    apply();
+    // Signed in already: the header goes straight to the app.
+    try {
+      const me = await fetch("/auth/me");
+      if (me.ok) { $("signinLink").hidden = true; $("startTop").href = "/app"; }
+    } catch { /* offline: keep the defaults */ }
+  })();
+})();
+</script>
+</body>
+</html>
