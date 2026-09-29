@@ -6,7 +6,9 @@ and entities. A bare follow-up ("2500") then completes that question instead of 
 
 import re
 
-from app.chat.extractor import INTENT_AMOUNT_FACT, SECOND_AMOUNT_FACT, Extraction, parse_amount, yes_no
+from app.chat.extractor import (
+    ALT_AMOUNT_FACT, INTENT_AMOUNT_FACT, SECOND_AMOUNT_FACT, Extraction, parse_amount, payroll_entities, yes_no,
+)
 from app.i18n import Language
 
 # Facts a bare "yes"/"no" can answer when the assistant just asked about them.
@@ -60,7 +62,7 @@ def apply_context(
                               source=extraction.source), True
 
     if extraction.intent == intent:
-        own_amount = INTENT_AMOUNT_FACT.get(intent) in extraction.entities
+        own_amount = any(f in extraction.entities for f in (INTENT_AMOUNT_FACT.get(intent), ALT_AMOUNT_FACT.get(intent)))
         if pending is None and own_amount:
             return extraction, False  # a new figure on the same topic is a new question
         merged = {**prior, **extraction.entities}
@@ -76,9 +78,11 @@ def apply_context(
         if answer is not None and yes_no_fact:
             entities = {**prior, yes_no_fact: answer}
         elif intent in INTENT_AMOUNT_FACT and (amount := parse_amount(message)) is not None:
-            amount_facts = [INTENT_AMOUNT_FACT[intent], SECOND_AMOUNT_FACT.get(intent)]
+            amount_facts = [INTENT_AMOUNT_FACT[intent], SECOND_AMOUNT_FACT.get(intent), ALT_AMOUNT_FACT.get(intent)]
             target = next((f for f in amount_facts if f in awaiting), INTENT_AMOUNT_FACT[intent])
             entities = {**prior, target: amount}
+            if intent == "calculate_payroll_tax":  # "2500 on hand" answers the salary question as take-home pay
+                entities = payroll_entities(message, entities)
         else:
             return extraction, False
         return Extraction(intent=intent, entities=entities, language=extraction.language,

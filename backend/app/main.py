@@ -13,6 +13,7 @@ from app.api.chat import router as chat_router
 from app.api.companies import router as companies_router
 from app.api.conversations import router as conversations_router
 from app.api.deadlines import router as deadlines_router
+from app.api.employees import router as employees_router
 from app.api.health import router as health_router
 from app.api.legal import router as legal_router
 from app.api.payments import router as payments_router
@@ -86,6 +87,7 @@ app.include_router(books_router)
 app.include_router(reviews_router)
 app.include_router(reminders_router)
 app.include_router(payments_router)
+app.include_router(employees_router)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 

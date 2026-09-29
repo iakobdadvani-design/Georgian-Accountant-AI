@@ -130,5 +130,10 @@
   "record.ask_direction": "Était-ce une vente (entrée d’argent) ou une dépense (sortie d’argent) ?",
   "record.ask_amount": "Quel était le montant ?",
   "fact.input.record_amount": "Quel était le montant ?",
-  "fact.input.record_direction": "Vente ou dépense ?"
+  "fact.input.record_direction": "Vente ou dépense ?",
+  "fact.input.net_salary": "Combien l’employé touche-t-il net chaque mois ?",
+  "phrase.payroll_from_net_with_pension": "Pour verser {net} GEL net, le salaire brut doit être de {gross} GEL. Vous en retenez {pension} GEL de cotisation retraite (2 %) et {tax} GEL d’impôt sur le revenu (20 % du reste). En plus, vous payez {employer_pension} GEL de cotisation retraite employeur : ce salaire vous coûte donc {cost} GEL par mois.",
+  "phrase.payroll_from_net_no_pension": "Pour verser {net} GEL net, le salaire brut doit être de {gross} GEL, dont {tax} GEL d’impôt sur le revenu (20 %). Aucune cotisation retraite ne s’applique, car l’employé ne participe pas au régime de retraite par capitalisation.",
+  "phrase.payroll_net_ask": "Bien sûr. Combien touchera-t-il net chaque mois ?",
+  "phrase.hire_card": "J’ai préparé une fiche employé ci-dessous : indiquez son nom et son numéro personnel, puis appuyez sur Enregistrer. L’application l’inclura ensuite dans chaque déclaration mensuelle des salaires."
 }

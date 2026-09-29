@@ -13,7 +13,7 @@ from pydantic import BaseModel, ValidationError
 
 from app.chat.extractor import (
     AMOUNT, INTENT_AMOUNT_FACT, SECOND_AMOUNT_FACT, Extraction, Intent, detect_language, normalize_amount,
-    vat_inclusive_flag,
+    payroll_entities, vat_inclusive_flag,
 )
 from app.chat.records import record_entities
 from app.i18n import LANGUAGE_NAMES, LANGUAGES, Language
@@ -160,6 +160,8 @@ class LLMExtractor:
                 log.warning("Discarding unparseable amount from %s: %r", self.backend.name, raw)
             else:
                 entities[fact] = amount
+        if out.intent == "calculate_payroll_tax":  # take-home or gross, and whether it's a hire: read from the text
+            entities = payroll_entities(message, entities)
         # Script detection is deterministic; trust it over the model's language field.
         return Extraction(intent=out.intent, entities=entities, language=detect_language(message, preferred),
                           source=self.backend.name)

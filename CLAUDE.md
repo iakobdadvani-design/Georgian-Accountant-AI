@@ -32,7 +32,7 @@ the date. Model replies are rejected if they contain a number the engine didn't 
 | `i18n/` | Reply catalogs `messages/<lang>.json`, `t()`/`tplural()`, locale number/date formatting |
 | `static/landing.html` | Public website at `/` (services menu, animated demo, pricing, FAQ; texts are the `lp.*` keys in `i18n.json`). Its "Sign in" / "Start free" go to `/app` / `/app#register`; the demo figures are illustrative, labelled "Example"; pricing is a draft until the owner confirms it |
 | `static/index.html`, `static/i18n.json` | The app at `/app`: page shell (sidebar menu, top bar, view switcher `go(name)`, chat, dialogs; vanilla JS, no build) and its catalog (all visible text) |
-| `static/overview.js`, `connections.js`, `books.js`, `pay.js`, `reviews.js` | One script per screen: Overview + Tax calendar, Companies & RS.ge + Banks, Sales & expenses, Tax payments, Rule review. Each exposes `window.X` with `show`/`hide` (called only by `go`) and `onCompanyChange`/`onLanguageChange`; the page calls them through `window.X?.` |
+| `static/overview.js`, `connections.js`, `books.js`, `employees.js`, `pay.js`, `reviews.js` | One script per screen: Overview + Tax calendar, Companies & RS.ge + Banks, Sales & expenses, Employees (+ the chat's new-employee card), Tax payments, Rule review. Each exposes `window.X` with `show`/`hide` (called only by `go`) and `onCompanyChange`/`onLanguageChange`; the page calls them through `window.X?.` |
 
 ## Commands
 
@@ -48,6 +48,7 @@ Schema changes go through Alembic (see "Database" below).
 | Rule / deadline | Law |
 |---|---|
 | `ge.payroll.income_tax` — 2% pension, 20% income tax, take-home, employer cost | Tax Code 81(1), 82(1)(b3); Funded Pension law 3(6) (from Matsne, not in the corpus) |
+| `ge.payroll.gross_from_net` — the same rates solved for gross from take-home pay: net / 0.784 in the pension scheme, net / 0.8 outside it, gross rounded to the tetri and everything recomputed from it | same as above |
 | `ge.vat.registration_threshold` — register once 12-month taxable supplies > GEL 100 000 | 165(1) |
 | `ge.vat.output_vat` — VAT on a net price, or 18/118 of a VAT-inclusive one | 166 |
 | `ge.vat.payable` — output VAT minus deductible input VAT; `max` step keeps payable and the refundable excess at 0 or more | 174-176, 181(1) |
@@ -63,6 +64,17 @@ Chat intents (`chat/extractor.py`): `calculate_payroll_tax`, `check_vat_registra
 `calculate_distribution`, `calculate_small_business_tax`, `calculate_vat_payable` (two amounts: `SECOND_AMOUNT_FACT`),
 `calculate_late_penalty` (tax + days late; `with_lateness` in `api/chat.py` derives the started months from the days,
 taking the delay as ending on as_of), `record_transaction` (see below), `list_deadlines`, `unknown`.
+
+**Salaries and hiring** (`payroll_entities` in `chat/extractor.py`, `chat/hiring.py`, `api/employees.py`,
+`static/employees.js`): "2 500 on hand / ხელზე / на руки / netto / net" puts the amount in `net_salary` (`ALT_AMOUNT_FACT`),
+so `rules_for` in `api/chat.py` runs `ge.payroll.gross_from_net` instead of the gross rule; "hired / დავიქირავე / нанял /
+eingestellt / embauché" sets `hire`, and the chat response then carries an `employee_draft` (gross from the rule result)
+that the page shows as a card; the employee is saved only when the user adds name + personal number and presses Save.
+The Employees screen lists them and shows each month's declaration figures (`GET /companies/{id}/payroll?month=`: the
+payroll rule per employee employed that month, totals added up). With an employee list, the withholding return is only
+on the calendar for months someone was employed. Income tax is paid on salary day (Art. 154(3)), so no amount is
+pre-filled on the 15th. Filing with RS.ge isn't possible yet: the "Send to RS.ge" button is disabled with an
+explanation and the page links to the RS.ge portal; switch it on only when an official RS.ge filing API exists.
 
 **Recording from the chat** (`chat/records.py`): "ჩაწერე ხარჯი 150 ლარი გუშინ" → a `TransactionDraft` in the chat
 response (amount, direction, currency, date parsed deterministically; a model may supply amount/direction for natural

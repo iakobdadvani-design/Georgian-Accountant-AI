@@ -31,6 +31,8 @@ INTENT_AMOUNT_FACT: dict[str, str] = {
 }
 # Intents that take a second amount; context.py fills whichever one the engine is still waiting for.
 SECOND_AMOUNT_FACT: dict[str, str] = {"calculate_vat_payable": "input_vat", "calculate_late_penalty": "days_late"}
+# Where the amount goes instead when the user states it the other way round ("2 500 on hand" is take-home pay).
+ALT_AMOUNT_FACT: dict[str, str] = {"calculate_payroll_tax": "net_salary"}
 
 
 class Extraction(BaseModel):
@@ -269,6 +271,33 @@ def pension_flag(message: str) -> bool | None:
     return False if NO_PENSION.search(message) else None
 
 
+# "2 500 on hand", "ხელზე 2500", "2500 на руки", "2500 netto", "2 500 net": the salary is take-home pay.
+NET_SALARY = re.compile(
+    r"\b(on hand|in hand|in their hand|take[- ]home|net|after tax(es)?)\b"
+    r"|ხელზე|ხელში|სუფთა"
+    r"|на\s+руки|чистыми|\bчистых\b|после\s+налог"
+    r"|\bnetto\b|\bnet\b|nach\s+steuern"
+    r"|\bnets?\b|en\s+main|après\s+impôts?|apres\s+impots?", re.I)
+GROSS_SALARY = re.compile(r"\b(gross|before tax(es)?)\b|დარიცხ|ბინძურ|\bгрязн|брутто|начисл|\bbrutto\b|\bbruts?\b", re.I)
+# "I hired", "we took on", "დავიქირავე", "нанял", "eingestellt", "embauché": a new employee to add to the list.
+HIRED = re.compile(
+    r"\b(hired|hiring|took on|taken on|new employee)\b"
+    r"|დავიქირავე|დავიქირავეთ|ავიყვანე|ავიყვანეთ|დავასაქმე|დავასაქმეთ|ახალი თანამშრომ"
+    r"|нанял|наняла|наняли|нанимаю|принял\w* на работу|новый сотрудник|новая сотрудница"
+    r"|eingestellt|einstellen|neue[nr]? mitarbeiter"
+    r"|embauch|recrut|nouvel employé|nouvelle employée", re.I)
+
+
+def payroll_entities(message: str, entities: dict[str, str | bool]) -> dict[str, str | bool]:
+    """A stated take-home amount becomes net_salary; a hire is flagged so the chat offers to add the employee."""
+    found = dict(entities)
+    if "gross_salary" in found and NET_SALARY.search(message) and not GROSS_SALARY.search(message):
+        found["net_salary"] = found.pop("gross_salary")
+    if HIRED.search(message):
+        found["hire"] = True
+    return found
+
+
 # --- language ---
 
 GEORGIAN = re.compile(r"[Ⴀ-ჿ]")
@@ -356,8 +385,10 @@ class KeywordExtractor:
                 amount = parse_amount(message)
                 if amount is not None and intent in INTENT_AMOUNT_FACT:
                     entities[INTENT_AMOUNT_FACT[intent]] = amount
-                if intent == "calculate_payroll_tax" and pension_flag(message) is False:
-                    entities["pension_participant"] = False
+                if intent == "calculate_payroll_tax":
+                    if pension_flag(message) is False:
+                        entities["pension_participant"] = False
+                    entities = payroll_entities(message, entities)
                 if intent == "calculate_vat" and (inclusive := vat_inclusive_flag(message)) is not None:
                     entities["vat_inclusive"] = inclusive
                 if intent == "calculate_distribution" and (recipient := dividend_recipient(message)):

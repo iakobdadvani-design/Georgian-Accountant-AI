@@ -130,5 +130,10 @@
   "record.ask_direction": "Was it a sale (money in) or an expense (money out)?",
   "record.ask_amount": "How much was it?",
   "fact.input.record_amount": "How much was it?",
-  "fact.input.record_direction": "Was it a sale or an expense?"
+  "fact.input.record_direction": "Was it a sale or an expense?",
+  "fact.input.net_salary": "How much does the employee get on hand each month?",
+  "phrase.payroll_from_net_with_pension": "To pay {net} GEL on hand, the gross salary is {gross} GEL. From it you withhold {pension} GEL for their pension (2%) and {tax} GEL income tax (20% of what's left). On top you pay a {employer_pension} GEL employer pension contribution, so this salary costs you {cost} GEL a month.",
+  "phrase.payroll_from_net_no_pension": "To pay {net} GEL on hand, the gross salary is {gross} GEL, of which {tax} GEL is income tax (20%). No pension contributions apply, since they're not in the funded pension scheme.",
+  "phrase.payroll_net_ask": "Sure. How much will they get on hand each month?",
+  "phrase.hire_card": "I've prepared an employee card below: add their name and personal number and press Save. From then on the app includes them in each month's salary declaration."
 }

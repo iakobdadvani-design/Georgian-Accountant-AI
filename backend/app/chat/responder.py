@@ -13,7 +13,7 @@ from app.i18n import Language, format_amount, format_date, format_month, t, tlis
 from app.rules.schema import RuleResult, localize
 
 KNOWN_FACTS = {
-    "input.gross_salary", "input.taxable_turnover_12m", "company.vat_registered", "input.sale_amount",
+    "input.gross_salary", "input.net_salary", "input.taxable_turnover_12m", "company.vat_registered", "input.sale_amount",
     "input.vat_inclusive", "input.distribution_amount", "company.tax_regime", "input.small_business_income",
     "input.output_vat", "input.input_vat", "input.tax_due", "input.days_late", "input.months_late",
 }
@@ -79,13 +79,19 @@ def _payroll(results: list[RuleResult], extraction: Extraction, lang: Language) 
     result = next((r for r in results if "payroll" in r.rule_id), None)
     if result is None:
         return None
+    from_net = result.rule_id == "ge.payroll.gross_from_net"
     if result.status == "applies" and result.breakdown:
         v = _values(result, lang)
         in_scheme = extraction.entities.get("pension_participant") is not False
-        key = "phrase.payroll_with_pension" if in_scheme else "phrase.payroll_no_pension"
-        return [t(key, lang, gross=_entity(extraction, "gross_salary", lang), net=v["net_salary"],
-                  tax=v["income_tax"], pension=v["employee_pension"], employer_pension=v["employer_pension"],
-                  cost=v["employer_cost"])]
+        key = ("phrase.payroll_from_net" if from_net else "phrase.payroll") + ("_with_pension" if in_scheme else "_no_pension")
+        gross = v["gross_salary"] if from_net else _entity(extraction, "gross_salary", lang)
+        lines = [t(key, lang, gross=gross, net=v["net_salary"], tax=v["income_tax"], pension=v["employee_pension"],
+                   employer_pension=v["employer_pension"], cost=v["employer_cost"])]
+        if extraction.entities.get("hire"):
+            lines.append(t("phrase.hire_card", lang))
+        return [" ".join(lines)]
+    if result.status == "insufficient_data" and result.missing_facts == ["input.net_salary"]:
+        return [t("phrase.payroll_net_ask", lang)]
     if result.status == "insufficient_data" and result.missing_facts == ["input.gross_salary"]:
         return [t("phrase.payroll_ask", lang)]
     return None

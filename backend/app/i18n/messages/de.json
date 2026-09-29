@@ -130,5 +130,10 @@
   "record.ask_direction": "War es ein Verkauf (Geld rein) oder eine Ausgabe (Geld raus)?",
   "record.ask_amount": "Wie hoch war der Betrag?",
   "fact.input.record_amount": "Wie hoch war der Betrag?",
-  "fact.input.record_direction": "Verkauf oder Ausgabe?"
+  "fact.input.record_direction": "Verkauf oder Ausgabe?",
+  "fact.input.net_salary": "Wie viel bekommt der Mitarbeiter monatlich netto ausgezahlt?",
+  "phrase.payroll_from_net_with_pension": "Für {net} GEL netto muss das Bruttogehalt {gross} GEL betragen. Davon behalten Sie {pension} GEL Rentenbeitrag (2 %) und {tax} GEL Einkommensteuer (20 % vom Rest) ein. Zusätzlich zahlen Sie {employer_pension} GEL Arbeitgeberbeitrag zur Rente, das Gehalt kostet Sie also {cost} GEL im Monat.",
+  "phrase.payroll_from_net_no_pension": "Für {net} GEL netto muss das Bruttogehalt {gross} GEL betragen, davon {tax} GEL Einkommensteuer (20 %). Rentenbeiträge fallen nicht an, da der Mitarbeiter nicht an der kapitalgedeckten Rente teilnimmt.",
+  "phrase.payroll_net_ask": "Gern. Wie viel soll der Mitarbeiter monatlich netto bekommen?",
+  "phrase.hire_card": "Unten habe ich eine Mitarbeiterkarte vorbereitet: Tragen Sie Name und persönliche Identifikationsnummer ein und drücken Sie auf Speichern. Danach erscheint der Mitarbeiter in jeder monatlichen Lohnsteuererklärung."
 }

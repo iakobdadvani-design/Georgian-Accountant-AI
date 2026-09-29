@@ -15,7 +15,7 @@
     --display: "Fraunces", "Noto Serif Georgian", "Noto Serif", Georgia, serif; --ease: cubic-bezier(.2, .7, .2, 1); --accent: #8c1d33; --accent-ink: #ffffff; --accent-soft: #fbeff1;
     --ok: #1e7a4c; --ok-soft: #e8f5ee; --warn: #a15c00; --warn-soft: #fff4e0; --info: #2b5c95; --info-soft: #eaf1fa;
     --demo: #6d28d9; --demo-soft: #efe9fb;
-    --c-wine: #8c1d33; --c-violet: #6d28d9; --c-teal: #0f766e; --c-amber: #b45309; --c-blue: #1d4ed8; --c-indigo: #4338ca; --c-green: #15803d; --c-slate: #475569; --hero: #0e1525;
+    --c-wine: #8c1d33; --c-violet: #6d28d9; --c-teal: #0f766e; --c-amber: #b45309; --c-blue: #1d4ed8; --c-indigo: #4338ca; --c-green: #15803d; --c-slate: #475569; --c-rose: #be185d; --hero: #0e1525;
     --shadow: 0 1px 2px rgb(17 20 24 / .04);
     --shadow-lg: 0 12px 32px rgb(17 20 24 / .12), 0 2px 6px rgb(17 20 24 / .06);
     --radius: 18px;
@@ -29,7 +29,7 @@
     --border: #2a2f37; --border-strong: #3a404a; --accent: #e5738a; --accent-ink: #16181c; --accent-soft: #3a1e27;
     --ok: #4ade80; --ok-soft: #16301f; --warn: #fbbf24; --warn-soft: #3a2c12; --info: #8fb8ea; --info-soft: #1b2a3d;
     --demo: #b79cf5; --demo-soft: #2a2140;
-    --c-wine: #f07a92; --c-violet: #a78bfa; --c-teal: #2dd4bf; --c-amber: #fbbf24; --c-blue: #60a5fa; --c-indigo: #818cf8; --c-green: #4ade80; --c-slate: #94a3b8; --hero: #1d2a3e;
+    --c-wine: #f07a92; --c-violet: #a78bfa; --c-teal: #2dd4bf; --c-amber: #fbbf24; --c-blue: #60a5fa; --c-indigo: #818cf8; --c-green: #4ade80; --c-slate: #94a3b8; --c-rose: #f472b6; --hero: #1d2a3e;
     --shadow: 0 1px 2px rgb(0 0 0 / .3); --shadow-lg: 0 12px 32px rgb(0 0 0 / .45);
     color-scheme: dark;
   }
@@ -62,6 +62,7 @@
   [data-view="overview"] { --c: var(--c-wine); }
   [data-view="assistant"] { --c: var(--c-violet); }
   [data-view="books"] { --c: var(--c-teal); }
+  [data-view="employees"] { --c: var(--c-rose); }
   [data-view="calendar"] { --c: var(--c-amber); }
   [data-view="payments"] { --c: var(--c-blue); }
   [data-view="companies"] { --c: var(--c-indigo); }
@@ -147,7 +148,7 @@
   @keyframes pageIn { from { opacity: 0; transform: translateY(12px); } }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
   #overview { --c: var(--c-wine); } #calendar { --c: var(--c-amber); } #companies { --c: var(--c-indigo); } #banks { --c: var(--c-green); }
-  #payments { --c: var(--c-blue); } #books { --c: var(--c-teal); } #reviews { --c: var(--c-slate); }
+  #payments { --c: var(--c-blue); } #books { --c: var(--c-teal); } #employees { --c: var(--c-rose); } #reviews { --c: var(--c-slate); }
   .page-head h1::after { content: ""; display: block; width: 44px; height: 4px; border-radius: 2px; margin-top: 10px; background: var(--c, var(--accent)); }
   .page-head p { margin: 4px 0 0; color: var(--muted); font-size: 15px; max-width: 720px; }
   .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 22px; padding: 22px 24px;
@@ -525,6 +526,14 @@
   .books-table .nowrap { white-space: nowrap; }
   .books-table .who { max-width: 340px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .books-table .actions { width: 1%; }
+  .emp-table tr.total td { border-top: 2px solid var(--border-strong); }
+  .emp-salary { font-family: var(--display); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .panel.entity.left { opacity: .72; }
+  .emp-people { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 16px; align-items: start; }
+  .field-hint { font-size: 12px; font-weight: 400; color: var(--muted); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .rs-send { display: grid; gap: 10px; padding: 16px; border-radius: 16px; background: var(--surface-2); border: 1px dashed var(--border-strong); }
+  .hire-card .stack { gap: 12px; }
   .small-icon { width: 28px; height: 28px; }
   .tag { display: inline-block; font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
   .tag.income { background: var(--ok-soft); color: var(--ok); }
@@ -852,6 +861,7 @@
       <a class="nav-item" href="#overview" data-view="overview"><span class="nav-ico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span><span class="nav-text" data-i18n="nav.overview"></span></a>
       <a class="nav-item" href="#assistant" data-view="assistant"><span class="nav-ico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg></span><span class="nav-text" data-i18n="nav.assistant"></span></a>
       <a class="nav-item" href="#books" data-view="books"><span class="nav-ico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2zM4 19a2 2 0 0 1 2-2h12M9 7h6M9 11h6"/></svg></span><span class="nav-text" data-i18n="books.nav"></span></a>
+      <a class="nav-item" href="#employees" data-view="employees"><span class="nav-ico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg></span><span class="nav-text" data-i18n="nav.employees"></span></a>
       <a class="nav-item" href="#calendar" data-view="calendar"><span class="nav-ico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM3 10h18M8 3v4M16 3v4"/></svg></span><span class="nav-text" data-i18n="nav.calendar"></span><span class="nav-badge" id="calendarBadge" hidden></span></a>
       <a class="nav-item" href="#payments" data-view="payments"><span class="nav-ico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg></span><span class="nav-text" data-i18n="payments.nav"></span></a>
       <p class="nav-label" data-i18n="nav.connections"></p>
@@ -930,6 +940,7 @@
         </div>
       </section>
       <section class="view books" id="books" hidden data-i18n-aria="books.title"><div class="books-inner" id="booksInner"></div></section>
+      <section class="view" id="employees" hidden data-i18n-aria="nav.employees"><div class="page" id="employeesInner"></div></section>
       <section class="view" id="calendar" hidden data-i18n-aria="nav.calendar"><div class="page" id="calendarInner"></div></section>
       <section class="view books payments" id="payments" hidden data-i18n-aria="payments.nav"><div class="books-inner" id="paymentsInner"></div></section>
       <section class="view" id="companies" hidden data-i18n-aria="nav.companies"><div class="page" id="companiesInner"></div></section>
@@ -1217,7 +1228,7 @@ async function setLanguage(next, { save = true } = {}) {
   window.Books?.onLanguageChange();
   window.Reviews?.onLanguageChange();
   window.Pay?.onLanguageChange();
-  for (const m of [window.Overview, window.Calendar, window.Companies, window.Banks]) m?.onLanguageChange();
+  for (const m of [window.Overview, window.Calendar, window.Companies, window.Banks, window.Employees]) m?.onLanguageChange();
   renderReminders();
   if ($("thread").querySelector(".empty.start")) renderEmpty();
   else if ($("thread").querySelector(".empty.welcome")) renderWelcome();
@@ -1480,6 +1491,7 @@ function renderResponse(body, live = true) {
 
   parts.push(...body.results.map((r) => resultCard(r, l)));
   if (body.draft) parts.push(draftCard(body.draft, live));
+  if (body.employee_draft && window.Employees) parts.push(window.Employees.hireCard(body.employee_draft, live));
   if (chips.length) {
     parts.push(el("div", { class: "chips" }, chips.map((c) =>
       el("button", { class: "chip", type: "button", text: c, onclick: () => ask(c) }))));
@@ -1943,7 +1955,7 @@ async function loadCompanies(selectId) {
 }
 
 function companyChanged() {
-  for (const m of [window.Overview, window.Calendar, window.Companies, window.Banks]) m?.onCompanyChange();
+  for (const m of [window.Overview, window.Calendar, window.Companies, window.Banks, window.Employees]) m?.onCompanyChange();
 }
 
 function selectCompany(id) {
@@ -1967,12 +1979,13 @@ $("asOf").addEventListener("change", loadDeadlines);
 
 /* ---------- views ---------- */
 // One screen at a time, named in the URL hash so reloads and the back button keep your place.
-const VIEWS = ["overview", "assistant", "books", "calendar", "payments", "companies", "banks", "reviews"];
+const VIEWS = ["overview", "assistant", "books", "employees", "calendar", "payments", "companies", "banks", "reviews"];
 const MODULES = {
   books: () => window.Books, payments: () => window.Pay, reviews: () => window.Reviews, overview: () => window.Overview,
   calendar: () => window.Calendar, companies: () => window.Companies, banks: () => window.Banks,
+  employees: () => window.Employees,
 };
-const NEEDS_COMPANY = ["books", "calendar", "payments", "banks"];
+const NEEDS_COMPANY = ["books", "employees", "calendar", "payments", "banks"];
 let view = null;
 
 function go(name) {
@@ -2462,5 +2475,6 @@ async function startApp(me) {
 <script src="/static/pay.js"></script>
 <script src="/static/overview.js"></script>
 <script src="/static/connections.js"></script>
+<script src="/static/employees.js"></script>
 </body>
 </html>

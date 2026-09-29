@@ -47,7 +47,7 @@ def chat(client, company, message, as_of="2025-06-01"):
 
 def test_payroll_message_runs_only_payroll_rules(client, company):
     body = chat(client, company, "I hired someone for GEL 2,500")
-    assert body["extraction"]["entities"] == {"gross_salary": "2500", "pension_participant": True}
+    assert body["extraction"]["entities"] == {"gross_salary": "2500", "pension_participant": True, "hire": True}
     assert body["extraction"]["assumed"] == ["pension_participant"]
     [result] = body["results"]
     assert result["rule_id"] == "ge.payroll.income_tax"

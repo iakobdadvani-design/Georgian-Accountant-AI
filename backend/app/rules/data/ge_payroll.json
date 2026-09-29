@@ -147,5 +147,167 @@
     },
     "last_verified_date": null,
     "is_demo": false
+  },
+  {
+    "rule_id": "ge.payroll.gross_from_net",
+    "version": 1,
+    "title": {
+      "ka": "ხელფასი ხელზე ასაღები თანხიდან: დარიცხული ხელფასი, გადასახადი და საპენსიო",
+      "en": "Salary from take-home pay: gross salary, income tax and pension",
+      "ru": "Зарплата от суммы на руки: начисленная зарплата, налог и пенсионный взнос",
+      "de": "Gehalt aus dem Nettobetrag: Bruttogehalt, Einkommensteuer und Rente",
+      "fr": "Salaire à partir du net : salaire brut, impôt et retraite"
+    },
+    "tax_type": "payroll",
+    "effective_from": "2019-01-01",
+    "conditions": {
+      "fact": "input.net_salary",
+      "op": "gt",
+      "value": 0,
+      "if_false": {
+        "ka": "ნულოვან ხელფასს საშემოსავლო გადასახადი და საპენსიო შენატანი არ ეკისრება.",
+        "en": "A salary of zero has no income tax or pension contributions.",
+        "ru": "С нулевой зарплаты подоходный налог и пенсионные взносы не начисляются.",
+        "de": "Bei einem Gehalt von null fallen weder Einkommensteuer noch Rentenbeiträge an.",
+        "fr": "Un salaire nul n’entraîne ni impôt sur le revenu ni cotisation retraite."
+      }
+    },
+    "calculation": {
+      "type": "steps",
+      "result": "gross_salary",
+      "steps": [
+        {
+          "name": "gross_in_scheme",
+          "label": {
+            "ka": "დარიცხული ხელფასი (ხელზე ასაღები / 0.784)",
+            "en": "Gross salary (take-home / 0.784)",
+            "ru": "Начисленная зарплата (на руки / 0,784)",
+            "de": "Bruttogehalt (netto / 0,784)",
+            "fr": "Salaire brut (net / 0,784)"
+          },
+          "op": "divide",
+          "args": ["input.net_salary", "0.784"],
+          "when": {"fact": "input.pension_participant", "op": "eq", "value": true},
+          "show": false
+        },
+        {
+          "name": "gross_outside_scheme",
+          "label": {
+            "ka": "დარიცხული ხელფასი (ხელზე ასაღები / 0.8)",
+            "en": "Gross salary (take-home / 0.8)",
+            "ru": "Начисленная зарплата (на руки / 0,8)",
+            "de": "Bruttogehalt (netto / 0,8)",
+            "fr": "Salaire brut (net / 0,8)"
+          },
+          "op": "divide",
+          "args": ["input.net_salary", "0.8"],
+          "when": {"fact": "input.pension_participant", "op": "eq", "value": false},
+          "show": false
+        },
+        {
+          "name": "gross_salary",
+          "label": {
+            "ka": "დარიცხული ხელფასი (დეკლარაციაში შესატანი)",
+            "en": "Gross salary (goes on the declaration)",
+            "ru": "Начисленная зарплата (для декларации)",
+            "de": "Bruttogehalt (für die Erklärung)",
+            "fr": "Salaire brut (à déclarer)"
+          },
+          "op": "add",
+          "args": ["gross_in_scheme", "gross_outside_scheme"]
+        },
+        {
+          "name": "employee_pension",
+          "label": {
+            "ka": "დასაქმებულის საპენსიო შენატანი (2%)",
+            "en": "Employee pension (2%)",
+            "ru": "Пенсионный взнос работника (2%)",
+            "de": "Rentenbeitrag Arbeitnehmer (2 %)",
+            "fr": "Cotisation retraite salarié (2 %)"
+          },
+          "op": "multiply",
+          "args": ["gross_salary", "0.02"],
+          "when": {"fact": "input.pension_participant", "op": "eq", "value": true}
+        },
+        {
+          "name": "taxable_income",
+          "label": {
+            "ka": "დასაბეგრი შემოსავალი",
+            "en": "Taxable income",
+            "ru": "Облагаемый доход",
+            "de": "Steuerpflichtiges Einkommen",
+            "fr": "Revenu imposable"
+          },
+          "op": "subtract",
+          "args": ["gross_salary", "employee_pension"],
+          "show": false
+        },
+        {
+          "name": "income_tax",
+          "label": {
+            "ka": "საშემოსავლო გადასახადი (20%)",
+            "en": "Income tax (20%)",
+            "ru": "Подоходный налог (20%)",
+            "de": "Einkommensteuer (20 %)",
+            "fr": "Impôt sur le revenu (20 %)"
+          },
+          "op": "multiply",
+          "args": ["taxable_income", "0.20"]
+        },
+        {
+          "name": "net_salary",
+          "label": {
+            "ka": "ხელზე ასაღები თანხა",
+            "en": "Take-home pay",
+            "ru": "Сумма на руки",
+            "de": "Nettogehalt",
+            "fr": "Salaire net"
+          },
+          "op": "subtract",
+          "args": ["gross_salary", "employee_pension", "income_tax"]
+        },
+        {
+          "name": "employer_pension",
+          "label": {
+            "ka": "დამსაქმებლის საპენსიო შენატანი (2%, ხელფასის გარდა)",
+            "en": "Employer pension (2%, on top of salary)",
+            "ru": "Пенсионный взнос работодателя (2%, сверх зарплаты)",
+            "de": "Rentenbeitrag Arbeitgeber (2 %, zusätzlich zum Gehalt)",
+            "fr": "Cotisation retraite employeur (2 %, en plus du salaire)"
+          },
+          "op": "multiply",
+          "args": ["gross_salary", "0.02"],
+          "when": {"fact": "input.pension_participant", "op": "eq", "value": true}
+        },
+        {
+          "name": "employer_cost",
+          "label": {
+            "ka": "დამსაქმებლის ჯამური ხარჯი",
+            "en": "Total cost to employer",
+            "ru": "Общие расходы работодателя",
+            "de": "Gesamtkosten für den Arbeitgeber",
+            "fr": "Coût total pour l’employeur"
+          },
+          "op": "add",
+          "args": ["gross_salary", "employer_pension"]
+        }
+      ]
+    },
+    "legal_source": {
+      "citation": {
+        "ka": "საქართველოს საგადასახადო კოდექსი, მუხლი 81(1) და 82(1)(ბ³); კანონი დაგროვებითი პენსიის შესახებ, მუხლი 3(6)",
+        "en": "Tax Code of Georgia, Art. 81(1) and 82(1)(b³); Law on Funded Pension, Art. 3(6)",
+        "ru": "Налоговый кодекс Грузии, ст. 81(1) и 82(1)(б³); Закон о накопительной пенсии, ст. 3(6)",
+        "de": "Steuergesetzbuch Georgiens, Art. 81(1) und 82(1)(b³); Gesetz über die kapitalgedeckte Rente, Art. 3(6)",
+        "fr": "Code des impôts de Géorgie, art. 81(1) et 82(1)(b³) ; loi sur la retraite par capitalisation, art. 3(6)"
+      },
+      "url": "https://matsne.gov.ge/en/document/view/1043717",
+      "note": "The same rates as ge.payroll.income_tax, solved for the gross salary: take-home = gross x (1 - 0.02) x (1 - 0.20) = gross x 0.784 in the pension scheme (2% employee contribution, Funded Pension law Art. 3(6)(a), exempt from income tax under Tax Code Art. 82(1)(b3); 20% income tax, Art. 81(1)), or gross x 0.8 outside it. The gross salary is rounded to the tetri, then every figure is computed from it the way ge.payroll.income_tax does, so the take-home shown can differ from the one asked for by a tetri. Needs review by a qualified accountant before last_verified_date is set.",
+      "search_query": "natural person taxable income taxed rate 20%",
+      "document_id": "1043717",
+      "language": "en"
+    },
+    "last_verified_date": null,
+    "is_demo": false
   }
 ]

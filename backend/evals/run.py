@@ -21,12 +21,11 @@ from datetime import date
 from decimal import Decimal
 from pathlib import Path
 
-from app.api.chat import with_defaults
+from app.api.chat import rules_for, with_defaults
 from app.chat.extractor import GEORGIAN, CYRILLIC, INTENT_AMOUNT_FACT, KeywordExtractor, detect_language
 from app.chat.llm import AIUnavailable, LLMExtractor, LLMResponder, ungrounded_numbers
 from app.chat.responder import TemplateResponder
-from app.rules.engine import evaluate, referenced_facts
-from app.rules.loader import get_rules
+from app.rules.engine import evaluate
 
 CASES = Path(__file__).parent / "cases.json"
 AS_OF = date(2026, 9, 24)
@@ -85,8 +84,7 @@ def run_case(case: dict, extractor, responder) -> Outcome:
 
     results = []
     if extraction.intent in INTENT_AMOUNT_FACT:
-        topic = f"input.{INTENT_AMOUNT_FACT[extraction.intent]}"
-        rules = [r for r in get_rules() if topic in referenced_facts(r)]
+        rules = rules_for(extraction)
         facts = COMPANY | case.get("company", {}) | {f"input.{k}": v for k, v in extraction.entities.items()}
         results = evaluate(rules, facts, AS_OF)
     if "rule" in case:

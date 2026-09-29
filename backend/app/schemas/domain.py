@@ -39,21 +39,6 @@ class TaxProfileRead(ORMModel, TaxProfileUpdate):
     company_id: uuid.UUID
 
 
-class EmployeeCreate(BaseModel):
-    full_name: str = Field(max_length=255)
-    personal_id: str = Field(max_length=32)
-    gross_monthly_salary: Decimal = Field(ge=0, max_digits=14, decimal_places=2)
-    currency: str = Field(default="GEL", min_length=3, max_length=3)
-    pension_participant: bool = True
-    hired_on: date
-    terminated_on: date | None = None
-
-
-class EmployeeRead(ORMModel, EmployeeCreate):
-    id: uuid.UUID
-    company_id: uuid.UUID
-
-
 class TransactionCreate(BaseModel):
     occurred_on: date
     direction: TransactionDirection

@@ -11,7 +11,8 @@ from app.api.books import run, summary
 from app.api.companies import get_company
 from app.facts import company_facts
 from app.database import get_db
-from app.models import Company, TaxEvent
+from app.api.employees import WITHHOLDING_RETURN, employed_during
+from app.models import Company, Employee, TaxEvent
 from app.models.enums import TaxEventStatus
 from app.payments import AMOUNT_FROM_BOOKS
 from app.reviews import deadline_standing
@@ -84,8 +85,13 @@ def deadline_items(
                                                    TaxEvent.status != TaxEventStatus.pending))
     }
     signed = deadline_standing(db)
+    staff = db.scalars(select(Employee).where(Employee.company_id == company.id)).all()
     items = []
     for o in occurrences:
+        # With an employee list, a salary return is only due for months when someone was employed.
+        if o.deadline.deadline_id == WITHHOLDING_RETURN and staff and not any(
+                employed_during(e, o.period_start, o.period_end) for e in staff):
+            continue
         days_left = (o.due_date - today).days
         event = done.get((o.deadline.deadline_id, o.period_start))
         is_done = event is not None

@@ -47,7 +47,7 @@ def test_claude_extractor_normalizes_amount_and_sends_expected_request():
     fake = FakeClaude({"intent": "calculate_payroll_tax", "amount": "2 500", "language": "en"})
     extraction = LLMExtractor(ClaudeBackend(fake, "claude-opus-5")).extract("hired someone for 2 500 lari")
 
-    assert extraction.entities == {"gross_salary": "2500"}
+    assert extraction.entities == {"gross_salary": "2500", "hire": True}
     assert extraction.source == "claude"
     [call] = fake.calls
     assert call["model"] == "claude-opus-5"

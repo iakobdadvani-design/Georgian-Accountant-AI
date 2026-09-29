@@ -17,4 +17,6 @@ def company_facts(company: Company, db: Session) -> Facts:
         facts["company.tax_regime"] = company.tax_profile.tax_regime.value
         facts["company.has_employees"] = company.tax_profile.has_employees or facts["company.employee_count"] > 0
         facts["company.owns_property"] = company.tax_profile.owns_property
+    elif facts["company.employee_count"]:  # no tax profile yet, but the employee list answers this one
+        facts["company.has_employees"] = True
     return facts

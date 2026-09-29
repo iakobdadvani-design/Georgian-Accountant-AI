@@ -17,7 +17,8 @@ from app.facts import company_facts
 from app.auth import get_current_user
 from app.chat.claude import ClaudeBackend, get_client
 from app.chat.context import apply_context, inherit_language, pending_state, topic_state
-from app.chat.extractor import INTENT_AMOUNT_FACT, Extraction, Extractor, KeywordExtractor
+from app.chat.extractor import ALT_AMOUNT_FACT, INTENT_AMOUNT_FACT, Extraction, Extractor, KeywordExtractor
+from app.chat.hiring import EmployeeDraft, employee_draft
 from app.chat.llm import AIUnavailable, LLMExtractor, LLMResponder
 from app.chat.ollama import OllamaBackend
 from app.chat.records import TransactionDraft, draft_from, missing_for_record, record_reply
@@ -32,7 +33,7 @@ from app.reviews import apply_to_results
 from app.rules.engine import evaluate, referenced_facts
 from app.rules.lateness import lateness
 from app.rules.loader import get_rules
-from app.rules.schema import RuleResult
+from app.rules.schema import RuleResult, TaxRule
 
 log = logging.getLogger(__name__)
 
@@ -86,6 +87,14 @@ def with_lateness(extraction: Extraction, as_of: date) -> Extraction:
     return extraction.model_copy(update={"entities": {**entities, "months_late": str(late.months)}})
 
 
+def rules_for(extraction: Extraction) -> list[TaxRule]:
+    """The rules that read the intent's amount fact ("2 500 on hand": the take-home rule, not the gross one)."""
+    amount_fact = INTENT_AMOUNT_FACT[extraction.intent]
+    if (alt := ALT_AMOUNT_FACT.get(extraction.intent)) and alt in extraction.entities:
+        amount_fact = alt
+    return [r for r in get_rules() if f"input.{amount_fact}" in referenced_facts(r)]
+
+
 def with_defaults(extraction: Extraction) -> Extraction:
     defaults = {k: v for k, v in DEFAULT_FACTS.get(extraction.intent, {}).items() if k not in extraction.entities}
     if not defaults:
@@ -116,6 +125,8 @@ class ChatResponse(BaseModel):
     suggestions: list[str] = Field(default=[], description="Example questions to offer when the turn wasn't a tax question")
     deadlines: list[DeadlineItem] = []
     draft: TransactionDraft | None = Field(default=None, description="A record to confirm; saved only when the user presses Save")
+    employee_draft: EmployeeDraft | None = Field(
+        default=None, description="A new employee to confirm; saved only when the user adds the details and presses Save")
     warnings: list[str] = []
 
 
@@ -208,6 +219,7 @@ def chat(
     results: list[RuleResult] = []
     deadlines: list[DeadlineItem] = []
     draft: TransactionDraft | None = None
+    employee: EmployeeDraft | None = None
     record_missing: list[str] = []
     if extraction.intent == "list_deadlines":
         deadlines = deadline_items(company, db, payload.as_of)
@@ -216,10 +228,10 @@ def chat(
         draft = draft_from(extraction.entities, payload.message, vat_payer, payload.as_of)
         record_missing = missing_for_record(extraction.entities)
     elif extraction.intent != "unknown":
-        topic_fact = f"input.{INTENT_AMOUNT_FACT[extraction.intent]}"
-        rules = [r for r in get_rules() if topic_fact in referenced_facts(r)]
+        rules = rules_for(extraction)
         facts = company_facts(company, db) | {f"input.{k}": v for k, v in extraction.entities.items()}
         results = attach_citations(apply_to_results(evaluate(rules, facts, payload.as_of), rules, db), legal_index)
+        employee = employee_draft(extraction.entities, results, payload.message, payload.as_of)
 
     warnings = [t("warning.extraction", extraction.language, detail=failure)] if failure else []
     reply_source = pipeline.responder_source
@@ -239,7 +251,7 @@ def chat(
     response = ChatResponse(conversation_id=conversation.id, reply=reply, reply_source=reply_source,
                             extraction=extraction, used_context=used_context, results=results,
                             questions=questions, suggestions=suggestions_for(extraction, payload.message),
-                            deadlines=deadlines, draft=draft, warnings=warnings)
+                            deadlines=deadlines, draft=draft, employee_draft=employee, warnings=warnings)
 
     record = response.model_dump(mode="json", exclude={"conversation_id"})
     record["as_of"] = payload.as_of.isoformat()

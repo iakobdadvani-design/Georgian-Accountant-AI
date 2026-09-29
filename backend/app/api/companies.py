@@ -16,8 +16,6 @@ from app.schemas.domain import (
     CompanyCreate,
     CompanyRead,
     CompanyRename,
-    EmployeeCreate,
-    EmployeeRead,
     TaxEventCreate,
     TaxEventRead,
     TaxProfileRead,
@@ -84,21 +82,6 @@ def upsert_tax_profile(
     for field, value in payload.model_dump().items():
         setattr(profile, field, value)
     return save(db, profile)
-
-
-@router.post("/{company_id}/employees", response_model=EmployeeRead, status_code=status.HTTP_201_CREATED)
-def create_employee(payload: EmployeeCreate, company: Company = Depends(get_company), db: Session = Depends(get_db)):
-    duplicate = db.scalar(
-        select(Employee).where(Employee.company_id == company.id, Employee.personal_id == payload.personal_id)
-    )
-    if duplicate:
-        raise HTTPException(status.HTTP_409_CONFLICT, "An employee with this personal_id already exists")
-    return save(db, Employee(company_id=company.id, **payload.model_dump()))
-
-
-@router.get("/{company_id}/employees", response_model=list[EmployeeRead])
-def list_employees(company: Company = Depends(get_company), db: Session = Depends(get_db)):
-    return db.scalars(select(Employee).where(Employee.company_id == company.id).order_by(Employee.full_name)).all()
 
 
 @router.post("/{company_id}/transactions", response_model=TransactionRead, status_code=status.HTTP_201_CREATED)
