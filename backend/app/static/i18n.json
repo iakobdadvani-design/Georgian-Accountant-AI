@@ -682,7 +682,8 @@
   "lp.final.title": "Your next tax deadline is already in the calendar.",
   "lp.final.sub": "Create a free account in a minute and see it.",
   "lp.footer.rights": "Rules are written from the Tax Code of Georgia and are general information, not tax advice.",
-  "lp.footer.privacy": "Privacy"
+  "lp.footer.privacy": "Privacy",
+  "lp.nav.open": "Open the app"
  },
  "ka": {
   "meta.locale": "ka-GE",
@@ -1357,7 +1358,8 @@
   "lp.final.title": "თქვენი შემდეგი ვადა უკვე კალენდარშია.",
   "lp.final.sub": "შექმენით უფასო ანგარიში ერთ წუთში და ნახეთ.",
   "lp.footer.rights": "წესები საქართველოს საგადასახადო კოდექსიდანაა დაწერილი და ზოგადი ინფორმაციაა, არა საგადასახადო კონსულტაცია.",
-  "lp.footer.privacy": "კონფიდენციალურობა"
+  "lp.footer.privacy": "კონფიდენციალურობა",
+  "lp.nav.open": "აპლიკაციის გახსნა"
  },
  "ru": {
   "meta.locale": "ru-RU",
@@ -2062,7 +2064,8 @@
   "lp.final.title": "Ваш следующий срок уже в календаре.",
   "lp.final.sub": "Создайте бесплатный аккаунт за минуту и посмотрите.",
   "lp.footer.rights": "Правила написаны по Налоговому кодексу Грузии и носят информационный характер, это не налоговая консультация.",
-  "lp.footer.privacy": "Конфиденциальность"
+  "lp.footer.privacy": "Конфиденциальность",
+  "lp.nav.open": "Открыть приложение"
  },
  "de": {
   "meta.locale": "de-DE",
@@ -2747,7 +2750,8 @@
   "lp.final.title": "Ihre nächste Steuerfrist steht schon im Kalender.",
   "lp.final.sub": "Kostenloses Konto in einer Minute anlegen und ansehen.",
   "lp.footer.rights": "Die Regeln stammen aus dem georgischen Steuergesetzbuch und sind allgemeine Informationen, keine Steuerberatung.",
-  "lp.footer.privacy": "Datenschutz"
+  "lp.footer.privacy": "Datenschutz",
+  "lp.nav.open": "App öffnen"
  },
  "fr": {
   "meta.locale": "fr-FR",
@@ -3432,6 +3436,7 @@
   "lp.final.title": "Votre prochaine échéance est déjà dans le calendrier.",
   "lp.final.sub": "Créez un compte gratuit en une minute et découvrez-la.",
   "lp.footer.rights": "Les règles sont écrites d’après le Code des impôts de Géorgie et constituent une information générale, pas un conseil fiscal.",
-  "lp.footer.privacy": "Confidentialité"
+  "lp.footer.privacy": "Confidentialité",
+  "lp.nav.open": "Ouvrir l’application"
  }
 }

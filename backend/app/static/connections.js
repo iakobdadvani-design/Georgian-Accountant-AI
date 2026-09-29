@@ -271,7 +271,9 @@
         ];
     return el("section", { class: "panel entity" },
       el("div", { class: "entity-head" },
-        b.logo ? el("img", { class: "bank-mark", src: b.logo, alt: "", width: "48", height: "48" }) : null,
+        b.logo && b.url ? el("a", { class: "bank-mark-link", href: b.url, target: "_blank", rel: "noopener noreferrer", title: `${t("bk.openBank")} ↗`,
+          "aria-label": `${t("bk.openBank")}: ${t(`bank.${b.id}`)}` }, el("img", { class: "bank-mark", src: b.logo, alt: "", width: "48", height: "48" }))
+          : b.logo ? el("img", { class: "bank-mark", src: b.logo, alt: "", width: "48", height: "48" }) : null,
         el("div", { class: "entity-name" }, el("b", { text: t(`bank.${b.id}`) }),
           el("span", { text: [account.iban ? formatIban(account.iban) : null, account.currency].filter(Boolean).join(" · ") })),
         account.is_primary ? el("span", { class: "state bad", text: t("bk.primary") }) : null),
@@ -298,6 +300,7 @@
     if (!bkOpen) return;
     const head = el("div", { class: "page-head" }, el("div", {}, el("h1", { text: t("nav.banks") }), el("p", { text: t("bk.desc") })));
     if (!banks || !catalog) { $("banksInner").replaceChildren(head); return; }
+    if (adding && !catalog.banks.some((b) => b.id === adding.bank_id)) adding = null;
     const primary = banks.find((b) => b.is_primary);
     const upload = el("button", { class: "dropzone", type: "button", onclick: () => window.Books?.openImport(primary ? primary.id : null, primary ? primary.currency : "GEL") },
       uploadIcon(), el("b", { text: t("bk.drop") }), el("span", { text: t("bk.dropHint") }));
@@ -324,7 +327,12 @@
   }
 
   window.Banks = {
-    show() { bkOpen = true; $("banks").hidden = false; renderBanks(); loadBanks(); },
+    show() {
+      // A bank logo on the website links here as /app?bank=<id>#banks: start adding that bank.
+      const wanted = new URLSearchParams(location.search).get("bank");
+      if (wanted) { adding = { bank_id: wanted }; history.replaceState(null, "", "/app#banks"); }
+      bkOpen = true; $("banks").hidden = false; renderBanks(); loadBanks();
+    },
     hide() { bkOpen = false; adding = null; editing = null; },
     reload() { if (bkOpen) loadBanks(); },
     onCompanyChange() { banks = null; adding = null; editing = null; if (bkOpen) loadBanks(); },
