@@ -60,3 +60,21 @@ ChatGPT kept one misstatement in rule 13 — see the correction row.
 | salary.benefit_employee_payment | A benefit's value is reduced by what the employee paid for it | 101(2) | text read |
 | salary.low_interest_loan | Employer loan below the Finance Minister's rate: the benefit is the interest at that rate (rate not in the corpus) | 101(2)(ბ) | text read |
 | salary.goods_services_benefit | Employer-provided goods/services: market price | 101(2)(გ) | summary consistent |
+
+## Batch 3 (rules 21–30): 11/11 quotes verbatim
+
+| Rule | Fact | Article |
+|---|---|---|
+| salary.housing_benefit | Employer housing: annual market rent, pro rata for the period | 101(2)(დ) |
+| salary.education_assistance | Education paid for the employee or dependants is a benefit (job-related training excluded) | 101(2)(ე) |
+| salary.expense_reimbursement | Reimbursed expenses are a benefit (business trips within the Finance Ministry limits and representation costs excluded, 101(3)(ა)–(ბ)) | 101(2)(ვ) |
+| salary.debt_forgiveness | Forgiven debt is a benefit, unless enforcing it would cost more than the debt | 101(2)(ზ) |
+| salary.life_health_insurance | Employer-paid life/health insurance premiums are a benefit (compulsory insurance excluded, 101(3)(ე)) | 101(2)(თ) |
+| salary.voluntary_private_pension | Employer contributions to a voluntary private pension scheme are a benefit (that law is not in the corpus) | 101(2)(თ¹) |
+| salary.other_benefit_market_value | Any other benefit: market price under Art. 18 | 101(2)(ი) |
+| salary.employer_car_private_use | Private use of the employer's car: fixed **income tax in lari** per month — > 3 500 cm³: **300**; 2 500–3 500 cm³: **200**; < 2 500 cm³: **100**; any hybrid: **60** (English table read) | 101(2¹) |
+| salary.employer_car_tax_deadline | Monthly period; the employer pays by the **15th** of the next month | 101(2²) |
+| salary.employer_electric_vehicle_exemption | Private use of the employer's electric car: no income tax | 101(2³) |
+
+App candidate: the employer-car tax is a fixed table with a monthly deadline — an easy, fully sourced rule
+(engine size or hybrid/electric → amount; deadline on the 15th).
