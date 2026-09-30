@@ -7,6 +7,31 @@ by an accountant in the app's Rule review screen.
 Source files: `C:\Users\iakob\Desktop\Tax documents for ChatGPT` (00 Contents + Parts 01–11, built from the rad_law
 Matsne corpus: Tax Code downloaded 19 Sep 2026, Customs Code 29 Sep 2026). Upload them once to a ChatGPT Project.
 
+## Automated routine (from 30 Sep 2026)
+
+ChatGPT writes each batch into a Markdown file instead of the chat; the files go into
+`C:\Users\iakob\Desktop\Tax knowledge base`, and a script checks them against the law text:
+
+```powershell
+cd backend; .\.venv\Scripts\python -m tools.kb_check "C:\Users\iakob\Desktop\Tax knowledge base"
+```
+
+It prints only the rules with problems (a Georgian quote not found word for word in the current Tax Code, Customs
+Code or Funded Pension law; a quote cut with "…"; a number in CONDITIONS / CALCULATION / DEADLINE that its quote
+doesn't contain) and a summary line. Only those problems need a look; a clean run means the batch is verified.
+
+Add this to the ChatGPT Project instructions:
+
+````
+OUTPUT AS FILES
+Write every batch into a downloadable Markdown file instead of the chat, using your file/code tool:
+- File name: topic-NN-part-MM.md (NN = topic number, MM = batch number, both two digits), e.g. topic-04-part-01.md.
+- Contents: only the rule blocks, each starting with a line "RULE: <id>", in the exact OUTPUT FORMAT, with the complete Georgian quote under "QUOTE (ka):" on its own lines (never "…").
+- In the chat, reply with just: the download link, the rule ids in the file, and "next: <first rule id of the next batch>".
+- The discovery step (article list + rule table) goes into topic-NN-part-00.md the same way.
+- The final lists (NEEDS ACCOUNTANT, missing laws/orders, SEE TOPIC n) go into topic-NN-part-99.md.
+````
+
 ## How each topic goes
 
 1. New chat in the ChatGPT Project; first message: `TOPIC: n — name` (+ the check items for that topic, below).
