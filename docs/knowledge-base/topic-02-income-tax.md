@@ -129,3 +129,21 @@ employer-car reporting.
 
 App candidates: "I'm selling my apartment / my car — do I pay tax?" is a very common question. With the holding
 periods above plus the rate on taxable gains (81(3)–(4), next batches) it's a small, fully sourced rule.
+
+## Batch 7 (rules 61–70): 10/10 quotes verbatim
+
+| Rule | Fact | Article |
+|---|---|---|
+| pit.exemption.gifts_inheritance_first_second_degree | Gifts and inheritance received by **1st- and 2nd-line heirs**: exempt, no limit (who counts: 82(4)(გ), still to come) | 82(1)(ზ) |
+| pit.exemption.small_gifts | Gifts up to **GEL 1 000** in a tax year: exempt — **not** gifts from one's employer | 82(1)(თ) |
+| pit.exemption.gifts_inheritance_third_fourth_degree | Gifts/inheritance to **3rd- and 4th-line heirs** worth up to **GEL 150 000** in a tax year: exempt | 82(1)(ი) |
+| pit.exemption.blood_donation_payment | Payments to blood donors: exempt until **1 April 2030** | 82(1)(კ¹) |
+| pit.exemption.agricultural_primary_supply | First sale of Georgian-grown farm produce by the farmer: exempt until **1 January 2028** if that income is ≤ **GEL 200 000** a year | 82(1)(ლ) |
+| pit.exemption.privatization_disaster_housing | Property from privatisation (incl. free), replacement flats after earthquakes/disasters, flats for eco-migrants: exempt | 82(1)(მ) |
+| pit.exemption.land_title_recognition | Benefit from recognition of land ownership under the land-recognition law: exempt | 82(1)(მ¹) |
+| pit.exemption.refugee_idp_compensation_property | Compensation to refugees/IDPs instead of temporary housing, state-given property to IDPs and its first sale: exempt | 82(1)(ნ) |
+| pit.exemption.nonresident_risk_insurance | Non-resident's Georgian-source income from risk insurance/reinsurance: exempt | 82(1)(რ) |
+| pit.exemption.nonresident_leasing_income | Non-resident's leasing income not tied to a Georgian PE: exempt | 82(1)(ს) |
+
+Open question for the accountant: how 82(1)(თ) (GEL 1 000, any giver) combines with 82(1)(ი) (GEL 150 000, 3rd/4th-line
+heirs) when someone receives gifts from both kinds of giver in one year.
