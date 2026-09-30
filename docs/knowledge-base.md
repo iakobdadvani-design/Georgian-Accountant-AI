@@ -21,7 +21,7 @@ Matsne corpus: Tax Code downloaded 19 Sep 2026, Customs Code 29 Sep 2026). Uploa
 | # | Topic | ChatGPT done | Checked by Claude | In the app |
 |---|---|---|---|---|
 | 1 | General rules: taxpayers, residency, definitions, related parties, how deadlines count | ☑ | ☑ [notes](knowledge-base/topic-01-general.md) | ☐ |
-| 2 | Income tax on individuals: salary, rent, interest, dividends, property/car sales, gifts, foreign income, exemptions | ☐ | ☐ | ☐ |
+| 2 | Income tax on individuals: salary, rent, interest, dividends, property/car sales, gifts, foreign income, exemptions | in progress (index of ~130 rules received; salary rule confirmed, 2% now sourced) | ☐ | ☐ |
 | 3 | Withholding and tax agents | ☐ | ☐ | ☐ |
 | 4 | VAT | ☐ | ☐ | ☐ |
 | 5 | Profit tax (Estonian model) | ☐ | ☐ | ☐ |
@@ -33,7 +33,7 @@ Matsne corpus: Tax Code downloaded 19 Sep 2026, Customs Code 29 Sep 2026). Uploa
 | 11 | Administration: registration, returns, audits, disputes, limitation periods | ☐ | ☐ | ☐ |
 | 12 | Penalties and sanctions | ☐ | ☐ | ☐ |
 
-Missing laws/orders ChatGPT reports (to download into rad_law): _none yet_
+Missing laws/orders ChatGPT reports (to download into rad_law): Law on Funded Pension — **downloaded 29 Sep 2026, extra "Part 12" file; upload it to the Project**. Still missing (from topic 1): Labour Code holidays, tax treaties, Law on Entrepreneurs, Securities Market Law, Ministry of Finance / Justice orders on delivery and registration, National Bank third-party payment rules.
 
 ## Base prompt (ChatGPT Project instructions)
 

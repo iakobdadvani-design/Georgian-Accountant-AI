@@ -47,7 +47,7 @@ Schema changes go through Alembic (see "Database" below).
 
 | Rule / deadline | Law |
 |---|---|
-| `ge.payroll.income_tax` — 2% pension, 20% income tax, take-home, employer cost | Tax Code 81(1), 82(1)(b3); Funded Pension law 3(6) (from Matsne, not in the corpus) |
+| `ge.payroll.income_tax` — 2% pension, 20% income tax, take-home, employer cost | Tax Code 81(1), 82(1)(b3), 101(3)(d); Funded Pension law 3(6)(a)-(b) |
 | `ge.payroll.gross_from_net` — the same rates solved for gross from take-home pay: net / 0.784 in the pension scheme, net / 0.8 outside it, gross rounded to the tetri and everything recomputed from it | same as above |
 | `ge.vat.registration_threshold` — register once 12-month taxable supplies > GEL 100 000 | 165(1) |
 | `ge.vat.output_vat` — VAT on a net price, or 18/118 of a VAT-inclusive one | 166 |
