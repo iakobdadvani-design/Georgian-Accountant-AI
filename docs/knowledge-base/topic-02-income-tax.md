@@ -78,3 +78,21 @@ ChatGPT kept one misstatement in rule 13 — see the correction row.
 
 App candidate: the employer-car tax is a fixed table with a monthly deadline — an easy, fully sourced rule
 (engine size or hybrid/electric → amount; deadline on the 15th).
+
+## Batch 4 (rules 31–40): 18/18 quotes verbatim
+
+| Rule | Fact | Article |
+|---|---|---|
+| salary.business_trip_reimbursement | Business-trip reimbursement within the Finance Ministry norm is not salary (the norm isn't in the corpus) | 101(3)(ა) |
+| salary.representation_reimbursement | Reimbursed representation expenses are not salary | 101(3)(ბ) |
+| salary.organized_transport | Employer-organised home↔work transport is not salary when public transport is impossible or unreasonably costly/slow | 101(3)(გ) |
+| salary.accumulative_pension_exclusion | Employer's and state's funded-pension contributions are not salary (confirmed with the pension law, see top) | 101(3)(დ) |
+| salary.mandatory_insurance_exclusion | Employer-paid **compulsory** insurance is not salary | 101(3)(ე) |
+| salary.work_required_housing_food | Housing/food needed because of the employer's activity (or avoiding unreasonable cost/time), and not part of contractual pay, is not salary | 101(3)(ვ) |
+| salary.benefit_tax_inclusive | Benefit values include excise, VAT and other taxes the employee would pay | 101(4) |
+| salary.loan_rate_minister | The low-interest-loan benchmark rate is set by the Finance Minister (not in the corpus) | 101(5) |
+| salary.employer_car_recordkeeping | Recording and reporting employer cars used privately: Finance Minister order (not in the corpus) | 101(2⁴) |
+| income.economic_activity_scope | Economic-activity income: supplies, asset gains, interest (except an individual's bank-deposit interest), dividends, royalties, leasing/rent, other | 102(1) |
+
+Still missing from the corpus (Finance Ministry orders): business-trip norms, the employer-loan benchmark rate,
+employer-car reporting.
