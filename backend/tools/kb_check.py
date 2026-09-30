@@ -1,7 +1,7 @@
 """Check ChatGPT's knowledge-base files against the law text, so only problems need a human (or Claude) to look.
 
-    python -m tools.kb_check "C:\\Users\\iakob\\Desktop\\Tax knowledge base"      # a folder of .md/.txt files
-    python -m tools.kb_check topic-04-part-01.md                                   # or single files
+    python -m tools.kb_check                          # moves topic-*-part-*.md from Downloads to Desktop\\Tax knowledge base, checks all
+    python -m tools.kb_check topic-04-part-01.md      # or given files / folders only
 
 For every rule (a "RULE:" block, or an "Article …" heading in a compact table) it checks:
 - each Georgian quote line appears word for word in the current Tax Code, Customs Code or Law on Funded Pension
@@ -19,6 +19,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 CORPUS = Path(r"C:\Users\iakob\Desktop\rag law\RAD law\data")
+KB_FOLDER = Path.home() / "Desktop" / "Tax knowledge base"
+DOWNLOADS = Path.home() / "Downloads"
 LAWS = {"1043717": "Tax Code", "4598501": "Customs Code", "4280127": "Law on Funded Pension"}
 GEORGIAN = re.compile(r"[ა-ჰ]")
 SUPERSCRIPTS = str.maketrans("⁰¹²³⁴⁵⁶⁷⁸⁹", "0123456789")
@@ -123,10 +125,27 @@ def check(rule: Rule, law: str) -> list[str]:
     return problems
 
 
+def collect_downloads() -> None:
+    """Move ChatGPT's topic-NN-part-MM files from Downloads into the knowledge-base folder (newer copies win)."""
+    KB_FOLDER.mkdir(parents=True, exist_ok=True)
+    for f in sorted(DOWNLOADS.glob("topic-*-part-*.*"), key=lambda p: p.stat().st_mtime):
+        if f.suffix.lower() not in (".md", ".txt"):
+            continue
+        name = re.sub(r"\s*\(\d+\)(?=\.\w+$)", "", f.name)  # "topic-02-part-10 (1).md" -> a re-download of the same file
+        target = KB_FOLDER / name
+        target.unlink(missing_ok=True)
+        f.replace(target)
+        print(f"moved {f.name} -> {target}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Check ChatGPT knowledge-base files against the law text.")
-    parser.add_argument("paths", nargs="+", type=Path, help=".md/.txt files or folders of them")
+    parser.add_argument("paths", nargs="*", type=Path,
+                        help=".md/.txt files or folders (default: collect from Downloads into the knowledge-base folder)")
     args = parser.parse_args()
+    if not args.paths:
+        collect_downloads()
+        args.paths = [KB_FOLDER]
     files = sorted(f for p in args.paths for f in ([p] if p.is_file() else [*p.glob("*.md"), *p.glob("*.txt")]))
     if not files:
         sys.exit("No .md or .txt files found.")
