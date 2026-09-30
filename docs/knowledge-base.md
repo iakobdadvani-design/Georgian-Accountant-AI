@@ -13,7 +13,7 @@ ChatGPT writes each batch into a Markdown file instead of the chat; the files go
 `C:\Users\iakob\Desktop\Tax knowledge base`, and a script checks them against the law text:
 
 ```powershell
-cd backend; .\.venv\Scripts\python -m tools.kb_check "C:\Users\iakob\Desktop\Tax knowledge base"
+cd backend; .\.venv\Scripts\python -m tools.kb_check   # moves topic-*-part-*.md from Downloads into the folder, then checks
 ```
 
 It prints only the rules with problems (a Georgian quote not found word for word in the current Tax Code, Customs
