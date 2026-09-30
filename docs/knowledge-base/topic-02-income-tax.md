@@ -162,3 +162,39 @@ heirs) when someone receives gifts from both kinds of giver in one year.
 | pit.exemption.lottery_winnings_under_1000 | Lottery winnings up to **GEL 1 000**: exempt | 82(1)(ღ) |
 | pit.exemption.partnership_property_distribution | Property a partnership gives its member: exempt if all members are individuals, membership unchanged since founding (an heir taking a share or an enforcement sale doesn't count as a change — sentence read in the Code) and the partnership isn't a VAT payer at distribution | 82(1)(ყ) |
 | pit.exemption.nonresident_short_employment | Non-resident's salary for work in Georgia of **≤ 30 calendar days** in a tax year, paid by a non-resident employer and not a cost of its Georgian PE: exempt | 82(1)(შ) |
+
+## Batch 9 — compact table of the remaining rules: 35 quotes, 33 verbatim + 2 one-word slips
+
+The two slips are in the gambling rates 81(3¹) and 81(3³): ChatGPT wrote "თამაშებში/თამაშების" where the Code says
+"თამაშობებში/თამაშობების"; the rates are right. Every number below was checked against the quoted Georgian text.
+
+| Rule | Fact | Article |
+|---|---|---|
+| pit.rate.residential_rent | Renting out a home for living, without claiming deductions: **5%** (registry procedure: Finance Minister, 81(5)) | 81(2) |
+| pit.rate.dwelling_vehicle_gain | Taxable gain on selling a home with its land, or a car: **5%** (gain per 82(4)(ბ), 81(4)) | 81(3) |
+| pit.rate.gambling_operator | Individual running slot-machine halls / online gambling: **20%**; income from foreign players' online gambling/betting: **5%**; amounts under 80(8): **5%** | 81(3¹)–(3³) |
+| pit.asset.ownership_period_start | The 2-year holding period runs from the date of the ownership document submitted for registration (a split asset keeps the original date), or from acquiring ownership if not registered | 82(4)(ა) |
+| pit.asset.inherited_period_aggregation | For the 2 years, the holding period of the person you inherited from / got it as a gift from counts too — **only if you're their 1st-line heir** | 82(4)(ა¹) |
+| pit.exemption.partner_real_property_liquidation | Real estate received for a company share on liquidation/capital reduction: exempt if the share was owned **> 2 years** | 82(1)(ჩ) |
+| pit.exemption.agricultural_salary | Farm-work salaries: exempt until **1 Jan 2028** if the employer's income from that activity ≤ **GEL 200 000** | 82(1)(ც) |
+| pit.exemption.tourist_hotel_free_stay | Free hotel stay for a hotel-room owner: exempt up to **60 days** a year | 82(1)(ჯ) |
+| pit.exemption.highland_enterprise_income | Highland-enterprise entrepreneur's income: exempt for **10 calendar years** (incl. the year of status) | 82(1)(ჰ³) |
+| pit.exemption.low_income_categories | **GEL 3 000** of annual taxable income exempt for: war veterans, "Mother of Georgia", single parents, adopters (1 year), foster parents; highland budget-sector workers with 3+ children under 18 (1–2 children: tax on GEL 3 000 cut by **50%**) | 82(2)(ა) |
+| pit.exemption.disability_income | People disabled since childhood or with severe/significant disability: **GEL 6 000** a year exempt | 82(2)(ბ) |
+| pit.exemption.peacekeeping_injury_income | Seriously injured in peacekeeping: **GEL 6 000** a year exempt | 82(2)(ბ¹) |
+| pit.exemption.highland_resident_income | Permanent highland residents: **GEL 6 000** a year of local income exempt (not budget-sector/state-clinic salaries) | 82(2)(გ) |
+| pit.exemption.highest_single_relief | Only the single highest 82(2) relief applies | 82(3) |
+| pit.dividend.withholding_rate | Dividends from a resident company to an individual, non-profit or non-resident company: **5%** at source | 130(1) |
+| pit.dividend.agricultural_cooperative / financial_sector / gambling | Not withheld, not income: cooperative dividends to members until **1 Jan 2028**; bank/credit-union/MFO/lender dividends from **2023+** profits; gambling-operator dividends from **2025+** profits taxed under 98(6) | 130(4¹), (8), (9) |
+| pit.interest.withholding_rate | Interest paid to an individual or a non-resident without a Georgian PE: **5%** at source (final for individuals, 131(3)) | 131(1) |
+| pit.royalty.withholding_rate | Royalty to a resident individual (not VAT-registered): **20%** at source | 132(1) |
+| pit.tourist_enterprise.hotel_owner_payment | Tourist enterprise paying an individual under the hotel contract: **5%** at source, final | 133²(1) |
+| pit.goods_supplier.source_withholding | Finance Minister may list goods whose purchase from an individual is withheld at **3%** | 133³(1) |
+| pit.withholding.gift_agent | Someone giving property to an individual who isn't a registered entrepreneur withholds tax — except gifts up to **GEL 1 000** a year from that giver | 154(1)(მ) |
+| pit.withholding.remittance_timing | Withheld tax goes to the budget **when the payment is made**; for non-cash payments, on the last day of the month | 154(3)(ა) |
+| pit.withholding.tax_information_report / monthly_return | Recipient information and the withholding return: by the **15th** of the next month | 154(3)(გ.ა), 154(4) |
+
+Rows without numbers (no quote given, not individually checked): other 82(1) exemptions (gambling operators,
+foreign players' winnings, charity for vulnerable people, administrative-body property/fuel, free guarantees,
+highland notaries, bankruptcy regime, expropriation, micro power stations, special enterprises), dividend/interest/
+royalty finality and state/free-zone exceptions, and the list of withholding agents in 154(1).
