@@ -96,3 +96,18 @@ App candidate: the employer-car tax is a fixed table with a monthly deadline —
 
 Still missing from the corpus (Finance Ministry orders): business-trip norms, the employer-loan benchmark rate,
 employer-car reporting.
+
+## Batch 5 (rules 41–50): 10/10 quotes verbatim
+
+| Rule | Fact | Article |
+|---|---|---|
+| income.free_supply_market_value | Free supplies count at market price in gross income (not advertising goods with no consumer value of their own) | 102(2) |
+| income.nonemployment_nonbusiness_scope | Other income = any income or benefit not from employment or business, except the listed exclusions | 103(1) |
+| income.partner_contribution_exclusion | Partners' contributions that increase the company's net assets are not income | 103(1)(ა) |
+| income.health_insurance_payment_exclusion | Health-insurance payouts to the insured person are not income | 103(1)(ბ.ა) |
+| income.damage_compensation_exclusion | Insurance payouts up to the actual damage are not income | 103(1)(ბ.ბ) |
+| income.uninsured_foreign_vehicle_damage_exclusion | Compulsory Insurance Centre payouts for damage by uninsured foreign-registered cars, up to the damage, are not income | 103(1)(ბ¹) |
+| income.control_purchase_secret_assistance_exclusion | Control-purchase costs and covert help to criminal investigators are not income | 103(1)(გ) |
+| income.self_employed_state_pension_contribution_exclusion | The state's funded-pension contribution for a self-employed person is not income | 103(1)(დ) |
+| income.mandatory_insurance_benefit_exclusion | Employer-paid compulsory insurance is not income | 103(1)(ე) |
+| income.other_person_property_benefit_valuation | Property or benefits received from someone are valued by the Art. 101(2) rules | 103(2) |
