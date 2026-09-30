@@ -147,3 +147,18 @@ periods above plus the rate on taxable gains (81(3)–(4), next batches) it's a 
 
 Open question for the accountant: how 82(1)(თ) (GEL 1 000, any giver) combines with 82(1)(ი) (GEL 150 000, 3rd/4th-line
 heirs) when someone receives gifts from both kinds of giver in one year.
+
+## Batch 8 (rules 71–80): 9/9 quotes verbatim
+
+| Rule | Fact | Article |
+|---|---|---|
+| pit.exemption.state_nbg_debt_interest | Interest on debt securities of the state, the National Bank, the Deposit Insurance Agency or an international financial institution (Government list, not in the corpus): exempt | 82(1)(ტ) |
+| pit.exemption.state_nbg_securities_gain | Gains on selling those securities, and interest on funds at the National Bank: exempt | 82(1)(უ) |
+| pit.exemption.resident_public_debt_security_supply | Selling publicly offered debt securities of a resident company listed on an NBG-recognised market: exempt | 82(1)(უ¹) |
+| pit.exemption.resident_public_debt_interest | Interest on those securities: exempt until **1 January 2028** | 82(1)(უ²) |
+| pit.exemption.resident_public_equity_security_supply | Selling publicly offered, listed shares of a resident company: exempt | 82(1)(უ³) |
+| pit.exemption.resident_foreign_source_income | Same rule as batch 1 (pit.foreign_source_exemption) — duplicate | 82(1)(ფ) |
+| pit.exemption.injured_security_military_assistance | Employer aid to police, State Security or military staff injured/disabled on duty, or to their family if they died: exempt | 82(1)(ქ) |
+| pit.exemption.lottery_winnings_under_1000 | Lottery winnings up to **GEL 1 000**: exempt | 82(1)(ღ) |
+| pit.exemption.partnership_property_distribution | Property a partnership gives its member: exempt if all members are individuals, membership unchanged since founding (an heir taking a share or an enforcement sale doesn't count as a change — sentence read in the Code) and the partnership isn't a VAT payer at distribution | 82(1)(ყ) |
+| pit.exemption.nonresident_short_employment | Non-resident's salary for work in Georgia of **≤ 30 calendar days** in a tax year, paid by a non-resident employer and not a cost of its Georgian PE: exempt | 82(1)(შ) |
