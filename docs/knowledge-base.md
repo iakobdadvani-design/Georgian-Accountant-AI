@@ -20,7 +20,7 @@ Matsne corpus: Tax Code downloaded 19 Sep 2026, Customs Code 29 Sep 2026). Uploa
 
 | # | Topic | ChatGPT done | Checked by Claude | In the app |
 |---|---|---|---|---|
-| 1 | General rules: taxpayers, residency, definitions, related parties, how deadlines count | ☐ | ☐ | ☐ |
+| 1 | General rules: taxpayers, residency, definitions, related parties, how deadlines count | ☑ | ☑ [notes](knowledge-base/topic-01-general.md) | ☐ |
 | 2 | Income tax on individuals: salary, rent, interest, dividends, property/car sales, gifts, foreign income, exemptions | ☐ | ☐ | ☐ |
 | 3 | Withholding and tax agents | ☐ | ☐ | ☐ |
 | 4 | VAT | ☐ | ☐ | ☐ |
