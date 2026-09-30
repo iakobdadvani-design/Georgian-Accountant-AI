@@ -43,8 +43,9 @@ That is why such freelancers typically use small business status (topic 6).
 
 ## Batch 2 (rules 11–20): facts checked against the English text
 
-Quality note: this batch quoted only short fragments with "…" and gave vague amendment dates, so the Georgian quotes
-couldn't be checked word for word. The facts below were checked against the English translation.
+The first version quoted only fragments; ChatGPT redid it with full quotes and law numbers: **28/28 quotes verbatim**
+(the royalty line differs only in how Matsne splits the superscript "ბ¹"). Facts also checked against the English text.
+ChatGPT kept one misstatement in rule 13 — see the correction row.
 
 | Rule | Fact | Article | Checked |
 |---|---|---|---|
