@@ -40,3 +40,22 @@ here?") needs residency (topic 1, Art. 34) *and* the service-source rules, not t
 Under 104(1)(გ.ზ) a Georgian **resident** providing services to a customer in another state earns **Georgian-source**
 income (unless supplied through a foreign permanent establishment that confirms it), so 82(1)(ფ) does not exempt it.
 That is why such freelancers typically use small business status (topic 6).
+
+## Batch 2 (rules 11–20): facts checked against the English text
+
+Quality note: this batch quoted only short fragments with "…" and gave vague amendment dates, so the Georgian quotes
+couldn't be checked word for word. The facts below were checked against the English translation.
+
+| Rule | Fact | Article | Checked |
+|---|---|---|---|
+| pit.source_investment_income | Dividends from a resident company, sale of shares in a resident company, interest and royalties paid by a resident (or tied to a Georgian PE) are Georgian-source | 104(1)(ვ)–(ი) | summary consistent |
+| pit.source_property_other | Leasing movable property used in Georgia, Georgian real estate used in business, and **shares in a company whose assets are > 50% Georgian real estate** are Georgian-source | 104(1)(კ)–(მ) | text read |
+| pit.nonresident_withholding | Non-resident without a registered Georgian PE, taxed at source without deductions: dividends/interest per 130/131; **royalties 5%**; international telecom/transport **10%**; oil & gas subcontractors **4%**; rent to an individual and salary at the Art. 81 rate; other Georgian-source **10%**; registered in a preferential-tax country: **15%** on interest, royalties, other | 134(1), (1¹) | text read |
+| — correction | 134(2): the **taxes paid** by or for a non-resident's Georgian PE count as paid by a resident enterprise (ChatGPT wrote "payments … treated as payments by a resident enterprise") | 134(2) | text read |
+| pit.nonresident_recalculation | For 134(1)(გ)–(ე) income, a return by **1 April** of the next year recalculates on gross income − deductions; tax can't exceed what was withheld | 134(3)–(4) | text read |
+| pit.treaty_relief | Treaty relief and refunds follow a Minister of Finance order (not in the corpus) | 125 | not re-read |
+| pit.income_recognition | Calendar-year reporting by default; cash or accrual method as in the accounts; monthly periods for listed cases | 135–142 | not re-read |
+| salary.income_scope | Salary = any pay or benefit from employment, including pensions from a former employer and pay for future work | 101(1) | text read |
+| salary.benefit_employee_payment | A benefit's value is reduced by what the employee paid for it | 101(2) | text read |
+| salary.low_interest_loan | Employer loan below the Finance Minister's rate: the benefit is the interest at that rate (rate not in the corpus) | 101(2)(ბ) | text read |
+| salary.goods_services_benefit | Employer-provided goods/services: market price | 101(2)(გ) | summary consistent |
