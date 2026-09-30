@@ -111,3 +111,21 @@ employer-car reporting.
 | income.self_employed_state_pension_contribution_exclusion | The state's funded-pension contribution for a self-employed person is not income | 103(1)(დ) |
 | income.mandatory_insurance_benefit_exclusion | Employer-paid compulsory insurance is not income | 103(1)(ე) |
 | income.other_person_property_benefit_valuation | Property or benefits received from someone are valued by the Art. 101(2) rules | 103(2) |
+
+## Batch 6 (rules 51–60): 19/19 quotes verbatim
+
+| Rule | Fact | Article |
+|---|---|---|
+| pit.exemption.foreign_diplomatic_employment | Non-residents working at foreign embassies (and equivalents) in Georgia: exempt | 82(1)(ა) |
+| pit.exemption.grants_state_payments | Grants, state pensions, state compensation, state (academic) scholarships, budget assistance and one-off payments: exempt | 82(1)(ბ) |
+| pit.exemption.state_charity_benefit | Charity from a state-founded non-profit: exempt | 82(1)(ბ¹) |
+| pit.exemption.charity_medical_benefit | Charity paying for treatment/medical services: exempt | 82(1)(ბ²) |
+| pit.exemption.accumulative_pension | Funded-pension contributions, their returns and pensions paid under the pension law: exempt — **except** refunds of mistaken/excess contributions, refunds on leaving the scheme (pension law Art. 22) and assets returned on leaving Georgia for good (Art. 34¹): those are taxed at **20%** (81(1)) | 82(1)(ბ³) + note |
+| pit.exemption.voluntary_private_pension | Voluntary private pension: contributions up to **GEL 6 000 a year** exempt; returns exempt unless withdrawn early; programmed withdrawal/annuity at pension age, early retirement or disability exempt; a lump-sum payout taxes the previously exempt contributions at 20% | 82(1)(ბ⁴) |
+| pit.exemption.sports_awards | Awards for Olympic, chess olympiad, world/European championship (etc.) wins or places, and government-set sports prizes: exempt | 82(1)(გ) |
+| pit.exemption.alimony | Alimony: exempt | 82(1)(დ) |
+| pit.exemption.divorce_property | Property received in a divorce: exempt | 82(1)(ე) |
+| pit.exemption.property_sale_gain | Gain on selling: a home with its land owned **> 2 years**; a car owned **> 6 months** after its ownership was registered; another asset owned **> 2 years** and not used in business (business use ignored if it ended 2+ years before the sale; just holding shares for dividends isn't business use): exempt. Gain = sale price − purchase price, or − market value when received free | 82(1)(ვ) + note, 82(4)(ბ) |
+
+App candidates: "I'm selling my apartment / my car — do I pay tax?" is a very common question. With the holding
+periods above plus the rate on taxable gains (81(3)–(4), next batches) it's a small, fully sourced rule.
