@@ -198,3 +198,27 @@ Rows without numbers (no quote given, not individually checked): other 82(1) exe
 foreign players' winnings, charity for vulnerable people, administrative-body property/fuel, free guarantees,
 highland notaries, bankruptcy regime, expropriation, micro power stations, special enterprises), dividend/interest/
 royalty finality and state/free-zone exceptions, and the list of withholding agents in 154(1).
+
+## Parts 10–13 + 99 (the rules the compact table skipped): 36 rules, 170 quotes — all passed `tools.kb_check`
+
+Files in `Desktop\Tax knowledge base\topic-02-part-1*.md`. Highlights:
+
+| Rule | Fact | Article |
+|---|---|---|
+| rent.short_term_fixed_regime | Until **1 Jan 2028**, short-term letting of one's own home (NACE 55.2), on application, not voluntarily VAT-registered or ≤ **GEL 100 000** in any 12 months: fixed tax **GEL 10 per m² per month** (Government may adjust by location/season); paid quarterly by **15 Apr, 15 Jul, 5 Oct, 15 Jan**; not recalculated | 309(24)–(28) |
+| rent.short_term_employees_subletting | Under that regime staff are exempt (no withholding), no other reliefs apply, no cash register; a lessee subletting for the same activity is also exempt | 309(29)–(31) |
+| gift.heir_categories | 1st line: spouse, children (incl. adopted), grandchildren and their descendants, parents (incl. adoptive); 2nd: siblings, nieces/nephews and their children; 3rd: grandparents and great-grandparents; 4th: uncles and aunts | 82(4)(გ) |
+| filing.annual_individual_return | Residents whose income isn't taxed at source file by **1 April** of the next year | 153(1)(ა) |
+| filing.voluntary_refund | Anyone not obliged to file may file to get a refund | 153(4) |
+| filing.property_registry_notice | The registry tells individuals about their tax duties before registering a sale or a taxable gift | 153(6) |
+| filing.personal_asset_gain | A non-business asset gain needs a return by the **15th** of the next month | 153(12) |
+| gift.extended_payment | 3rd/4th-line heirs receiving ≥ **GEL 150 000**: tax paid over **2 calendar years** (dates by Finance Minister order) | 153(7) |
+| salary.international_company | Salaries at an international company: **5%** | 23(7) |
+| dividend.international_company_exemption | International-company dividends: not withheld, not income | 23(8) |
+| pit.advance_payment_boundary | Companies and entrepreneurs with a calendar-year period pay **4 × 25%** of last year's tax by **15 May, 15 Jul, 15 Sep, 15 Dec**; none if no taxable income last year; may cut them if expecting a ≥ 50% drop (interest if the drop isn't confirmed) | 155 |
+| withholding.liability_and_payment | The payer is liable for tax it didn't withhold, plus sanctions | 154(2) |
+| investment funds, partnerships, gains, non-recognition, reorganisations, bankruptcy returns, Art. 309 transitional items | see the files | 23¹, 143, 147–153, 309 |
+
+Topic 2 is complete. Missing orders/laws reported: Law on Investment Funds, Finance Ministry / NBG orders (investment
+accounts, 2-year gift payment dates, diplomatic organisations, fixed-rent procedure, 309(130)/(140)/(146)),
+Government rules for free-zone salaries and short-term-rent rate adjustments, the insolvency law, Resolution №671.

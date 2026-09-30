@@ -15,6 +15,7 @@ import argparse
 import json
 import re
 import sys
+import zipfile
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -31,9 +32,10 @@ CHECKED_FIELDS = ("CONDITIONS", "CALCULATION", "DEADLINE")
 def normalize(text: str) -> str:
     """Whitespace, quotes and Matsne's split superscripts ('ბ 1 )' for 'ბ¹)') made uniform."""
     text = text.replace("\u00a0", " ").replace("\u200b", "").replace("“", "„").replace("”", "“")
-    text = text.translate(SUPERSCRIPTS)
+    # Paragraph/subparagraph superscripts ("5¹.", "ბ¹)") are dropped on both sides: Matsne writes them as "5 1 .".
+    text = re.sub(r"[⁰¹²³⁴⁵⁶⁷⁸⁹]+", "", text)
     text = re.sub(r"\s+", " ", text)
-    return re.sub(r"(?<=[ა-ჰ.]) ?(\d{1,2}) ?(?=[).])", r"\1", text).strip()
+    return re.sub(r"(?<=[\dა-ჰ]) \d{1,2} (?=[).])", "", text).strip()
 
 
 def current_laws() -> str:
@@ -89,7 +91,13 @@ def parse(text: str, source: str) -> list[Rule]:
     return [r for r in rules if r.quotes or r.fields]
 
 
+REFERENCE = re.compile(  # "Art. 154(3)", "Articles 147–152", "Law No. 4022", "Article 309(115)(a)" are not amounts
+    r"\b(?:Art(?:icle)?s?\.?|Law(?: of Georgia)? No\.?|No\.|№|paragraphs?|items?)\s*"
+    r"[\d⁰¹²³⁴⁵⁶⁷⁸⁹]+(?:\([^)]*\))*(?:\s*(?:[–-]|and|,)\s*[\d⁰¹²³⁴⁵⁶⁷⁸⁹]+(?:\([^)]*\))*)*", re.I)
+
+
 def numbers(text: str) -> set[str]:
+    text = REFERENCE.sub(" ", text)
     found = set()
     for m in NUMBER.finditer(text):
         digits = re.sub(r"[ ,.\u00a0](?=\d{3}\b)", "", m.group(1)).replace(",", ".")
@@ -126,9 +134,20 @@ def check(rule: Rule, law: str) -> list[str]:
 
 
 def collect_downloads() -> None:
-    """Move ChatGPT's topic-NN-part-MM files from Downloads into the knowledge-base folder (newer copies win)."""
+    """Move ChatGPT's topic-NN-part-MM files from Downloads into the knowledge-base folder (newer copies win).
+    Also takes them out of topic-*.zip files and topic-* folders (ChatGPT sometimes zips a whole topic)."""
     KB_FOLDER.mkdir(parents=True, exist_ok=True)
-    for f in sorted(DOWNLOADS.glob("topic-*-part-*.*"), key=lambda p: p.stat().st_mtime):
+    for archive in DOWNLOADS.glob("topic-*.zip"):
+        with zipfile.ZipFile(archive) as z:
+            for member in z.namelist():
+                name = Path(member).name
+                if re.match(r"topic-\d+-part-\d+\.(md|txt)$", name, re.I):
+                    (KB_FOLDER / name).write_bytes(z.read(member))
+                    print(f"unzipped {name} from {archive.name}")
+        archive.unlink()
+    found = [*DOWNLOADS.glob("topic-*-part-*.*"),
+             *(f for d in DOWNLOADS.glob("topic-*") if d.is_dir() for f in d.rglob("topic-*-part-*.*"))]
+    for f in sorted(found, key=lambda p: p.stat().st_mtime):
         if f.suffix.lower() not in (".md", ".txt"):
             continue
         name = re.sub(r"\s*\(\d+\)(?=\.\w+$)", "", f.name)  # "topic-02-part-10 (1).md" -> a re-download of the same file
