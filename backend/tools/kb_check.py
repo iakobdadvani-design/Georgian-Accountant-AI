@@ -147,19 +147,20 @@ def unstated(rule: Rule, law_quotes: str) -> list[str]:
 
 
 def collect_downloads() -> None:
-    """Move ChatGPT's topic-NN-part-MM files from Downloads into the knowledge-base folder (newer copies win).
+    """Move ChatGPT's topic-NN-*.md files (topic-04-part-01.md, topic-05-combined.md) from Downloads into the
+    knowledge-base folder (newer copies win).
     Also takes them out of topic-*.zip files and topic-* folders (ChatGPT sometimes zips a whole topic)."""
     KB_FOLDER.mkdir(parents=True, exist_ok=True)
     for archive in DOWNLOADS.glob("topic-*.zip"):
         with zipfile.ZipFile(archive) as z:
             for member in z.namelist():
                 name = Path(member).name
-                if re.match(r"topic-\d+-part-\d+\.(md|txt)$", name, re.I):
+                if re.match(r"topic-\d+-[\w -]+\.(md|txt)$", name, re.I):
                     (KB_FOLDER / name).write_bytes(z.read(member))
                     print(f"unzipped {name} from {archive.name}")
         archive.unlink()
-    found = [*DOWNLOADS.glob("topic-*-part-*.*"),
-             *(f for d in DOWNLOADS.glob("topic-*") if d.is_dir() for f in d.rglob("topic-*-part-*.*"))]
+    found = [*DOWNLOADS.glob("topic-[0-9]*-*.*"),
+             *(f for d in DOWNLOADS.glob("topic-*") if d.is_dir() for f in d.rglob("topic-[0-9]*-*.*"))]
     for f in sorted(found, key=lambda p: p.stat().st_mtime):
         if f.suffix.lower() not in (".md", ".txt"):
             continue
