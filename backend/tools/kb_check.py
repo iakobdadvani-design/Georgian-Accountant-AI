@@ -184,8 +184,10 @@ def main() -> None:
     law = current_laws()
     total = failed = quotes = 0
     coarse: list[str] = []
+    rules = [rule for f in files for rule in parse(f.read_text(encoding="utf-8"), f.name)]
+    split = {r.name for r in rules if any(other.name.startswith(r.name + ".") for other in rules)}
     for f in files:
-        for rule in parse(f.read_text(encoding="utf-8"), f.name):
+        for rule in (r for r in rules if r.source == f.name):
             total += 1
             quotes += len(rule.quotes)
             problems = check(rule, law)
@@ -195,7 +197,10 @@ def main() -> None:
                 for p in problems:
                     print(f"    - {p}")
             missing = unstated(rule, normalize(" ".join(rule.quotes)))
-            if len(missing) >= 2:
+            if rule.name in split:  # "vat.x" split into "vat.x.<part>" rules: together they must state every fact
+                parts = " ".join(v for r in rules if r.name.startswith(rule.name + ".") for v in r.fields.values())
+                missing = [n for n in missing if n not in numbers(parts, everything=True)]
+            if len(missing) >= 2 or (missing and rule.name in split):
                 coarse.append(f"  {rule.name}  ({rule.source}): {', '.join(missing)}")
     if coarse:
         print("\nToo coarse: the quote states these amounts / time limits but the rule doesn't (ask for one RULE each):")
