@@ -33,7 +33,7 @@ def normalize(text: str) -> str:
     """Whitespace, quotes and Matsne's split superscripts ('ბ 1 )' for 'ბ¹)') made uniform."""
     text = text.replace("\u00a0", " ").replace("\u200b", "").replace("“", "„").replace("”", "“")
     # Paragraph/subparagraph superscripts ("5¹.", "ბ¹)") are dropped on both sides: Matsne writes them as "5 1 .".
-    text = re.sub(r"[⁰¹²³⁴⁵⁶⁷⁸⁹]+", "", text)
+    text = re.sub(r"(?<=[ა-ჰ]) *[⁰¹²³⁴⁵⁶⁷⁸⁹]+|[⁰¹²³⁴⁵⁶⁷⁸⁹]+", "", text)  # "მ ²)" -> "მ)"
     text = re.sub(r"\s+", " ", text)
     return re.sub(r"(?<=[\dა-ჰ]) \d{1,2} (?=[).])|(?<=[ა-ჰ]) \d{1,2} ?(?=[„“\"])", "", text).strip()
 
@@ -99,6 +99,7 @@ REFERENCE = re.compile(  # "Art. 154(3)", "Articles 147–152", "Law No. 4022", 
 def numbers(text: str, everything: bool = False) -> set[str]:
     """Amounts, percentages and dates in `text`; unless everything=True, small bare numbers (list positions) are skipped."""
     text = REFERENCE.sub(" ", text)
+    text = re.sub(r"\b(\d+)\s*(?:მილიონ|million)", lambda m: str(int(m.group(1)) * 1_000_000), text, flags=re.I)
     found = set()
     for m in NUMBER.finditer(text):
         digits = re.sub(r"[ ,.\u00a0](?=\d{3}\b)", "", m.group(1)).replace(",", ".")
