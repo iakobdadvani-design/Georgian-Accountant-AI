@@ -54,7 +54,7 @@ Schema changes go through Alembic (see "Database" below).
 | `ge.vat.payable` — output VAT minus deductible input VAT; `max` step keeps payable and the refundable excess at 0 or more | 174-176, 181(1) |
 | `ge.profit.distribution` — payout / 0.85 x 15% | 97(1), 97(10), 98(1) |
 | `ge.dividend.withholding` — 5% to individuals, none to companies | 130(1)-(2) |
-| `ge.small_business.tax` — individual entrepreneur with small business status: 1%, or 3% once the year's gross income passes GEL 500 000 | 88(1), 90(1)-(2) |
+| `ge.small_business.tax` — individual entrepreneur with small business status: 1% of taxable income (Georgian-source, not salary), or 3% from the start of the month in which the year's gross income passes GEL 500 000 (the books count income through the end of the month) | 88(1), 90(1)-(3) |
 | `ge.penalty.late_payment` — penalty interest 0.05% of the unpaid tax per overdue day (from the day after the due date through the day of payment), at most 3 years (1 095 days, `min` step) | 272(2), (2¹), (4) |
 | `ge.penalty.late_filing` — return filed late: 5% of its tax per started month up to 2 months, 10% beyond; none if the tax is zero | 274 |
 | Deadlines: VAT (15th), salary withholding (15th), profit tax return (15th), property tax (1 Apr, 15 Jun), small business return (15th), micro business return (31 Mar) | 168(1), 154(3)-(4), 153(10), 205(2)-(4), 93(1¹), 93(1) |
