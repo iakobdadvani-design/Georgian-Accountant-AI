@@ -20,9 +20,23 @@ supply (162–162¹), tax point (163–163¹), taxable amount and customs base (
 (165²), exemptions with and without credit (168¹–173), input credit, proportional credit, restrictions, corrections
 (177–179), tax invoices (180), refunds incl. EU persons (181–181¹).
 
-Unlike topics 2–3, most blocks are one per article, so thresholds inside Art. 177–181 (proportional-credit shares,
-invoice time limits, refund periods) are in the quotes but not stated as separate rules. Re-ask for those when they
-become app rules.
+Thresholds and time limits (part 05, re-asked 2026-10-01 because the first pass summarised whole articles; one quote
+had a one-letter copying slip, ფარგლებს → ფარგლების, corrected by hand):
+
+| Fact | Article |
+|---|---|
+| Small-value gift: ≤ **GEL 50** per individual per calendar year, excl. VAT (not advertising/representation) | 157(ი) |
+| Short-term hire: ships ≤ **90 days**, other vehicles ≤ **30 days** | 157(ყ) |
+| Investment gold: bars ≥ 995/1000; coins ≥ 900/1000, issued after **1800**, legal tender | 157(წ) |
+| Export in a non-resident traveller's luggage: out within **90 days**, price incl. VAT > **GEL 600** | 172(4)(ე) |
+| Hotel assets taken back within **2 years**; free hotel stay for the owner ≤ **60 days** a year | 172(4)(ქ), (ღ) |
+| Asset withdrawal by an enterprise > **50%** state/municipal; lottery organiser > **50%** state-owned | 172(4)(ბ), (ს) |
+| Mixed-use fixed asset: non-creditable share < **20%** last year → full credit, annual cancellation | 177(5)(ა) |
+| Non-creditable share < **5%** of turnover → full credit, no apportionment | 177(7) |
+| Adjustment spread: buildings **10 years** (1/10 a year), other fixed assets **5 years** (1/5) | 177(6) |
+| Input credit not allowed on an invoice **3 years** after the end of its year; a third-year claim extends the limitation period by **1 year** | 178(დ) |
+| Grant recipient: document within **3 months** after the month of the purchase | 181(3) |
+| Tourist refund: goods out within **3 months**, one receipt > **GEL 200** excl. VAT | 181(6)(ბ) |
 
 NEEDS ACCOUNTANT (part 99): 14 rules that depend on Finance Minister orders (investment gold, asset transfers, vouchers,
 reverse-charge procedure, forced sales, margin scheme, place of supply, registration and cancellation procedure,
