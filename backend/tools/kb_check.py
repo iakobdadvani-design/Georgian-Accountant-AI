@@ -134,6 +134,18 @@ def check(rule: Rule, law: str) -> list[str]:
     return problems
 
 
+QUOTED_FACT = re.compile(  # "100 000 ლარი", "5 პროცენტი", "3 თვე" (years like "2007 წლის" and commodity codes aren't facts)
+    r"(?<!\d)(?<!\d )(?!(?:19|20)\d\d\b)(?:\d{1,3}(?: \d{3})+|\d+(?:[.,]\d+)?)(?= ?(?:პროცენტ|ლარ|სამუშაო დღ|კალენდარული დღ|დღ|თვ|წლ|წელ))")
+
+
+def unstated(rule: Rule, law_quotes: str) -> list[str]:
+    """Amounts, percentages and time limits its quote states but the rule's fields never mention: a rule summarising
+    a whole article instead of stating each fact."""
+    stated = numbers(" ".join(rule.fields.values()), everything=True)
+    found = {re.sub(r" (?=\d{3})", "", m.group()).replace(",", ".") for m in QUOTED_FACT.finditer(law_quotes)}
+    return sorted(found - stated, key=lambda n: float(n))
+
+
 def collect_downloads() -> None:
     """Move ChatGPT's topic-NN-part-MM files from Downloads into the knowledge-base folder (newer copies win).
     Also takes them out of topic-*.zip files and topic-* folders (ChatGPT sometimes zips a whole topic)."""
@@ -171,6 +183,7 @@ def main() -> None:
         sys.exit("No .md or .txt files found.")
     law = current_laws()
     total = failed = quotes = 0
+    coarse: list[str] = []
     for f in files:
         for rule in parse(f.read_text(encoding="utf-8"), f.name):
             total += 1
@@ -181,8 +194,14 @@ def main() -> None:
                 print(f"\n✗ {rule.name}  ({rule.source})")
                 for p in problems:
                     print(f"    - {p}")
+            missing = unstated(rule, normalize(" ".join(rule.quotes)))
+            if len(missing) >= 2:
+                coarse.append(f"  {rule.name}  ({rule.source}): {', '.join(missing)}")
+    if coarse:
+        print("\nToo coarse: the quote states these amounts / time limits but the rule doesn't (ask for one RULE each):")
+        print("\n".join(coarse))
     print(f"\n{len(files)} file(s), {total} rules, {quotes} Georgian quotes: "
-          f"{total - failed} passed, {failed} with problems.")
+          f"{total - failed} passed, {failed} with problems, {len(coarse)} too coarse.")
     sys.exit(1 if failed else 0)
 
 

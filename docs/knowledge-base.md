@@ -18,7 +18,8 @@ cd backend; .\.venv\Scripts\python -m tools.kb_check   # moves topic-*-part-*.md
 
 It prints only the rules with problems (a Georgian quote not found word for word in the current Tax Code, Customs
 Code or Funded Pension law; a quote cut with "…"; a number in CONDITIONS / CALCULATION / DEADLINE that its quote
-doesn't contain) and a summary line. Only those problems need a look; a clean run means the batch is verified.
+doesn't contain), then the rules that are too coarse (the quote states an amount, percentage or time limit the rule
+never mentions: one block summarising a whole article), and a summary line. Only those problems need a look; a clean run means the batch is verified.
 
 Add this to the ChatGPT Project instructions:
 
