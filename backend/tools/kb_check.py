@@ -35,7 +35,7 @@ def normalize(text: str) -> str:
     # Paragraph/subparagraph superscripts ("5¹.", "ბ¹)") are dropped on both sides: Matsne writes them as "5 1 .".
     text = re.sub(r"[⁰¹²³⁴⁵⁶⁷⁸⁹]+", "", text)
     text = re.sub(r"\s+", " ", text)
-    return re.sub(r"(?<=[\dა-ჰ]) \d{1,2} (?=[).])", "", text).strip()
+    return re.sub(r"(?<=[\dა-ჰ]) \d{1,2} (?=[).])|(?<=[ა-ჰ]) \d{1,2} ?(?=[„“\"])", "", text).strip()
 
 
 def current_laws() -> str:
@@ -93,15 +93,16 @@ def parse(text: str, source: str) -> list[Rule]:
 
 REFERENCE = re.compile(  # "Art. 154(3)", "Articles 147–152", "Law No. 4022", "Article 309(115)(a)" are not amounts
     r"\b(?:Art(?:icle)?s?\.?|Law(?: of Georgia)? No\.?|No\.|№|paragraphs?|items?)\s*"
-    r"[\d⁰¹²³⁴⁵⁶⁷⁸⁹]+(?:\([^)]*\))*(?:\s*(?:[–-]|and|,)\s*[\d⁰¹²³⁴⁵⁶⁷⁸⁹]+(?:\([^)]*\))*)*", re.I)
+    r"[\d⁰¹²³⁴⁵⁶⁷⁸⁹]+(?:\([^)]*\))*(?:\s*(?:[–-]|and|or|,)\s*[\d⁰¹²³⁴⁵⁶⁷⁸⁹]+(?:\([^)]*\))*)*", re.I)
 
 
-def numbers(text: str) -> set[str]:
+def numbers(text: str, everything: bool = False) -> set[str]:
+    """Amounts, percentages and dates in `text`; unless everything=True, small bare numbers (list positions) are skipped."""
     text = REFERENCE.sub(" ", text)
     found = set()
     for m in NUMBER.finditer(text):
         digits = re.sub(r"[ ,.\u00a0](?=\d{3}\b)", "", m.group(1)).replace(",", ".")
-        if digits not in {"0", "1", "2", "3", "4"} or m.group(2):  # small bare numbers are list positions
+        if everything or digits not in {"0", "1", "2", "3", "4"} or m.group(2):
             found.add(digits.rstrip("0").rstrip(".") if "." in digits else digits)
     return found
 
@@ -123,7 +124,7 @@ def check(rule: Rule, law: str) -> list[str]:
             lo, hi = (mid, hi) if q[:mid] in law else (lo, mid - 1)
         at = law.find(q[:lo]) + lo if lo else -1
         problems.append(f"quote not in the law after {lo}/{len(q)} chars: quote «{q[lo:lo + 50]}» | law «{law[at:at + 50] if lo else '—'}»")
-    in_quotes = numbers(quoted_text)
+    in_quotes = numbers(quoted_text, everything=True)
     for name in CHECKED_FIELDS:
         missing = sorted(n for n in numbers(rule.fields.get(name, "")) if n not in in_quotes)
         if missing and rule.quotes:

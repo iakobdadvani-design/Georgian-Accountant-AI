@@ -47,7 +47,7 @@ Write every batch into a downloadable Markdown file instead of the chat, using y
 |---|---|---|---|---|
 | 1 | General rules: taxpayers, residency, definitions, related parties, how deadlines count | ☑ | ☑ [notes](knowledge-base/topic-01-general.md) | ☐ |
 | 2 | Income tax on individuals: salary, rent, interest, dividends, property/car sales, gifts, foreign income, exemptions | ☑ | ☑ [notes](knowledge-base/topic-02-income-tax.md) | ☐ |
-| 3 | Withholding and tax agents | ☐ | ☐ | ☐ |
+| 3 | Withholding and tax agents | ☑ | ☑ [notes](knowledge-base/topic-03-withholding.md) | ☐ |
 | 4 | VAT | ☐ | ☐ | ☐ |
 | 5 | Profit tax (Estonian model) | ☐ | ☐ | ☐ |
 | 6 | Special regimes: small/micro business, fixed tax, international companies, free zones, special trading companies | ☐ | ☐ | ☐ |
