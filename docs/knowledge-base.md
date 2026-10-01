@@ -48,7 +48,7 @@ Write every batch into a downloadable Markdown file instead of the chat, using y
 | 1 | General rules: taxpayers, residency, definitions, related parties, how deadlines count | ☑ | ☑ [notes](knowledge-base/topic-01-general.md) | ☐ |
 | 2 | Income tax on individuals: salary, rent, interest, dividends, property/car sales, gifts, foreign income, exemptions | ☑ | ☑ [notes](knowledge-base/topic-02-income-tax.md) | ☐ |
 | 3 | Withholding and tax agents | ☑ | ☑ [notes](knowledge-base/topic-03-withholding.md) | ☐ |
-| 4 | VAT | ☐ | ☐ | ☐ |
+| 4 | VAT | ☑ | ☑ [notes](knowledge-base/topic-04-vat.md) | ☐ |
 | 5 | Profit tax (Estonian model) | ☐ | ☐ | ☐ |
 | 6 | Special regimes: small/micro business, fixed tax, international companies, free zones, special trading companies | ☐ | ☐ | ☐ |
 | 7 | Property tax | ☐ | ☐ | ☐ |
@@ -140,6 +140,8 @@ TOPIC: 5 — Profit tax: the "Estonian model", distributions, deemed distributio
 
 Also check this rule we already have. Confirm it, or correct it with the article that proves it:
 - Profit tax on distributed profit: payout ÷ 0.85 × 15%. (Art. 97(1), 97(10), 98(1))
+
+One RULE block per rate, threshold, time limit or deadline (not one per article), each with the sentence that states it.
 ```
 
 ```
