@@ -52,7 +52,7 @@ Write every batch into a downloadable Markdown file instead of the chat, using y
 | 4 | VAT | ☑ | ☑ [notes](knowledge-base/topic-04-vat.md) | ☐ |
 | 5 | Profit tax (Estonian model) | ☑ | ☑ [notes](knowledge-base/topic-05-profit-tax.md) | ☐ |
 | 6 | Special regimes: small/micro business, fixed tax, international companies, free zones, special trading companies | ☑ | ☑ [notes](knowledge-base/topic-06-special-regimes.md) | ☐ |
-| 7 | Property tax | ☐ | ☐ | ☐ |
+| 7 | Property tax | ☑ | ☑ [notes](knowledge-base/topic-07-property-tax.md) | ☐ |
 | 8 | Excise | ☐ | ☐ | ☐ |
 | 9 | Import: customs value, import duty, import VAT (Tax Code + Customs Code) | ☐ | ☐ | ☐ |
 | 10 | Non-residents and international | ☐ | ☐ | ☐ |

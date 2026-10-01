@@ -86,6 +86,9 @@ def parse(text: str, source: str) -> list[Rule]:
         georgian_share = len(GEORGIAN.findall(stripped)) / max(1, len(re.findall(r"\w", stripped)))
         if georgian_share > 0.6 and len(stripped) >= 12 and "\t" not in line and "|" not in stripped:
             current.quotes.append(stripped.strip("\"„“”"))
+        elif field_name == "QUOTE (ka)" and (re.fullmatch(r"\d[\d .,]*", stripped) or GEORGIAN.search(stripped)
+                                             and len(stripped) > 3):  # rate tables: "1.", "100", "ახმეტა 16 5"
+            current.quotes.append(stripped)
         elif field_name in CHECKED_FIELDS:
             current.fields[field_name] = current.fields.get(field_name, "") + " " + stripped
     return [r for r in rules if r.quotes or r.fields]
@@ -93,7 +96,8 @@ def parse(text: str, source: str) -> list[Rule]:
 
 REFERENCE = re.compile(  # "Art. 154(3)", "Articles 147–152", "Law No. 4022", "Article 309(115)(a)" are not amounts
     r"\b(?:Art(?:icle)?s?\.?|Law(?: of Georgia)? No\.?|No\.|№|paragraphs?|items?)\s*"
-    r"[\d⁰¹²³⁴⁵⁶⁷⁸⁹]+(?:\([^)]*\))*(?:\s*(?:[–-]|and|or|,)\s*[\d⁰¹²³⁴⁵⁶⁷⁸⁹]+(?:\([^)]*\))*)*", re.I)
+    r"[\d⁰¹²³⁴⁵⁶⁷⁸⁹]+(?:\([^)]*\))*"
+    r"(?:\s*(?:[–-]|and|or|,)\s*(?:[\d⁰¹²³⁴⁵⁶⁷⁸⁹]+(?:\([^)]*\))*|(?:\([^)]*\))+))*", re.I)  # "202(5)–(7)", "205(12) and (14)"
 
 
 def numbers(text: str, everything: bool = False) -> set[str]:
@@ -108,7 +112,9 @@ def numbers(text: str, everything: bool = False) -> set[str]:
     return found
 
 
-def check(rule: Rule, law: str) -> list[str]:
+def check(rule: Rule, law: str, compact_law: str, topic_numbers: set[str]) -> list[str]:
+    """`compact_law` is the law without whitespace (Matsne sometimes stores a paragraph one word per line);
+    `topic_numbers` are the numbers in the topic's quotes, for a fact a rule takes from another article it cites."""
     problems = []
     quoted_text = ""
     for quote in rule.quotes:
@@ -116,7 +122,7 @@ def check(rule: Rule, law: str) -> list[str]:
         if "…" in quote or "..." in quote:
             problems.append(f"quote cut with '…': «{quote[:70]}»")
             continue
-        if q in law:
+        if q in law or re.sub(r"\s", "", q) in compact_law:
             quoted_text += " " + q
             continue
         lo, hi = 0, len(q)
@@ -127,11 +133,18 @@ def check(rule: Rule, law: str) -> list[str]:
         problems.append(f"quote not in the law after {lo}/{len(q)} chars: quote «{q[lo:lo + 50]}» | law «{law[at:at + 50] if lo else '—'}»")
     in_quotes = numbers(quoted_text, everything=True)
     for name in CHECKED_FIELDS:
-        missing = sorted(n for n in numbers(rule.fields.get(name, "")) if n not in in_quotes)
+        missing = set()
+        # clauses ("… up to 150% … under Art. 204(1)(d)"); "Art. " and "No. " don't end one
+        for clause in re.split(r";\s|(?<!Art)(?<!Arts)(?<!No)\.(?:\s|$)", rule.fields.get(name, "")):
+            cited = REFERENCE.search(clause) is not None
+            missing |= {n for n in numbers(clause) if n not in in_quotes and not (cited and n in topic_numbers)}
+        missing = sorted(missing)
         if missing and rule.quotes:
             problems.append(f"{name} numbers not found in its quote: {', '.join(missing)}")
     if not rule.quotes and any(numbers(rule.fields.get(n, "")) for n in CHECKED_FIELDS):
         problems.append("has amounts/dates but no Georgian quote")
+    elif not rule.quotes and "QUOTE (en)" in rule.fields:
+        problems.append("no Georgian quote (empty, or only a subparagraph letter)")
     return problems
 
 
@@ -184,15 +197,19 @@ def main() -> None:
     if not files:
         sys.exit("No .md or .txt files found.")
     law = current_laws()
+    compact_law = re.sub(r"\s", "", law)
     total = failed = quotes = 0
     coarse: list[str] = []
     rules = [rule for f in files for rule in parse(f.read_text(encoding="utf-8"), f.name)]
+    topic_numbers: dict[str, set[str]] = {}  # per "topic-NN"
+    for r in rules:
+        topic_numbers.setdefault(r.source[:8], set()).update(numbers(normalize(" ".join(r.quotes)), everything=True))
     split = {r.name for r in rules if any(other.name.startswith(r.name + ".") for other in rules)}
     for f in files:
         for rule in (r for r in rules if r.source == f.name):
             total += 1
             quotes += len(rule.quotes)
-            problems = check(rule, law)
+            problems = check(rule, law, compact_law, topic_numbers.get(rule.source[:8], set()))
             if problems:
                 failed += 1
                 print(f"\n✗ {rule.name}  ({rule.source})")
