@@ -1,7 +1,7 @@
 # Topic 4 — VAT (verified 2026-10-01)
 
-ChatGPT files `Desktop\Tax knowledge base\topic-04-part-00…04, 99.md`: 37 rules (Art. 156–181¹), all Georgian quotes
-found word for word in the current Tax Code by `python -m tools.kb_check`. Two numbers have no quote of their own and are
+ChatGPT files `Desktop\Tax knowledge base\topic-04-part-00…05, 99.md`: 37 rules (Art. 156–181¹) plus 19 in part 05
+that split five article-level summaries into one rule per number; all Georgian quotes found word for word in the current Tax Code by `python -m tools.kb_check`. Two numbers have no quote of their own and are
 fine: 18/118 (ChatGPT's derivation from the 18% rate, not law text) and the 15th in `vat.tax_period` (quoted in
 `vat.declaration_payment`, Art. 168(1)).
 
@@ -17,7 +17,7 @@ The app's rules, confirmed:
 Also covered (article level): taxable person and operations (158–160), vouchers (160³), reverse charge (161), forced
 sales (161¹), margin scheme for second-hand goods — margin ÷ 1.18, no input credit, at least 24 months (161²), place of
 supply (162–162¹), tax point (163–163¹), taxable amount and customs base (164–164¹), cancellation (165¹), liable persons
-(165²), exemptions with and without credit (168¹–173), input credit, proportional credit, restrictions, corrections
+(165²), exemptions with and without credit (169–173), input credit, proportional credit, restrictions, corrections
 (177–179), tax invoices (180), refunds incl. EU persons (181–181¹).
 
 Thresholds and time limits (part 05, re-asked 2026-10-01 because the first pass summarised whole articles; one quote
