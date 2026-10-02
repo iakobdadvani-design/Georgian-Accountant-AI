@@ -128,6 +128,27 @@ def table_row_in_law(row: str, compact_law: str) -> bool:
     return False
 
 
+def outside_paragraph(rule: Rule, law: str) -> list[str]:
+    """Subparagraphs quoted under their paragraph's lead-in ("9. … მხოლოდ:" then "ა) …") must come from that paragraph:
+    ChatGPT sometimes takes the same letter from a neighbouring paragraph (29(2)(ა) for 29(9)(ა))."""
+    problems = []
+    lead = None
+    for quote in rule.quotes:
+        q = normalize(quote)
+        if re.match(r"(?:\d+\.|მუხლი)(?: |$)", q):  # a new paragraph ("2." alone or split by a superscript: no known lead-in)
+            lead = q if re.match(r"\d+\. .*:$", q) else None
+        elif lead and re.match(r"[ა-ჰ](?:\.[ა-ჰ])?[¹²³]?\) ", q) and lead in law and q in law:
+            # the next paragraph starts after a sentence end; "100 2. ბოლნისი" is a table row, not paragraph 2
+            following = re.compile(rf"(?<=[.;:“”)]) {int(lead.split('.')[0]) + 1}\. ")
+            ok = False
+            for m in re.finditer(re.escape(lead), law):  # the same lead-in can open several paragraphs
+                at, end = law.find(q, m.start()), following.search(law, m.start())
+                ok = ok or at >= 0 and (end is None or at < end.start())
+            if not ok:
+                problems.append(f"«{q[:40]}» is not in the paragraph «{lead[:40]}»")
+    return problems
+
+
 def check(rule: Rule, law: str, compact_law: str, topic_numbers: set[str]) -> list[str]:
     """`compact_law` is the law without whitespace (Matsne sometimes stores a paragraph one word per line);
     `topic_numbers` are the numbers in the topic's quotes, for a fact a rule takes from another article it cites."""
@@ -166,7 +187,7 @@ def check(rule: Rule, law: str, compact_law: str, topic_numbers: set[str]) -> li
         problems.append("has amounts/dates but no Georgian quote")
     elif not rule.quotes and "QUOTE (en)" in rule.fields:
         problems.append("no Georgian quote (empty, or only a subparagraph letter)")
-    return problems
+    return problems + outside_paragraph(rule, law)
 
 
 QUOTED_FACT = re.compile(  # "100 000 ლარი", "5 პროცენტი", "3 თვე" (years like "2007 წლის" and commodity codes aren't facts)

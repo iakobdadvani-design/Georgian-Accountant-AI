@@ -18,7 +18,7 @@ cd backend; .\.venv\Scripts\python -m tools.kb_check   # moves topic-*-part-*.md
 
 It prints only the rules with problems (a Georgian quote not found word for word in the current Tax Code, Customs
 Code or Funded Pension law; a quote cut with "…"; a number in CONDITIONS / CALCULATION / DEADLINE that its quote
-doesn't contain), then the rules that are too coarse (the quote states an amount, percentage or time limit the rule
+doesn't contain; a subparagraph quoted under a paragraph's lead-in that isn't in that paragraph), then the rules that are too coarse (the quote states an amount, percentage or time limit the rule
 never mentions: one block summarising a whole article), and a summary line. Only those problems need a look; a clean run means the batch is verified.
 
 Add this to the ChatGPT Project instructions:
@@ -55,7 +55,7 @@ Write every batch into a downloadable Markdown file instead of the chat, using y
 | 7 | Property tax | ☑ | ☑ [notes](knowledge-base/topic-07-property-tax.md) | ☐ |
 | 8 | Excise | ☑ | ☑ [notes](knowledge-base/topic-08-excise.md) | ☐ |
 | 9 | Import: customs value, import duty, import VAT (Tax Code + Customs Code) | ☑ | ☑ [notes](knowledge-base/topic-09-import.md) | ☐ |
-| 10 | Non-residents and international | ☐ | ☐ | ☐ |
+| 10 | Non-residents and international | ☑ | ☑ [notes](knowledge-base/topic-10-non-residents.md) | ☐ |
 | 11 | Administration: registration, returns, audits, disputes, limitation periods | ☐ | ☐ | ☐ |
 | 12 | Penalties and sanctions | ☐ | ☐ | ☐ |
 
