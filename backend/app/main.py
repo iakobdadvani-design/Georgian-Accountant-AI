@@ -1,9 +1,10 @@
 import asyncio
+import json
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 from app import migrate, models  # noqa: F401 - models registers all tables with Base
@@ -91,9 +92,30 @@ app.include_router(employees_router)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
+LANDING_KEYS = ("app.name", "meta.native", "nav.aria", "number.", "lp.", "bank.", "books.outputVat", "books.inputVat")
+_landing_cache: dict[tuple[float, float], str] = {}
+
+
+def landing_html() -> str:
+    """landing.html with its texts inlined in all five languages, so the hero paints without waiting for i18n.json."""
+    page, catalog_file = STATIC_DIR / "landing.html", STATIC_DIR / "i18n.json"
+    key = (page.stat().st_mtime, catalog_file.stat().st_mtime)
+    if key not in _landing_cache:
+        catalog = json.loads(catalog_file.read_text(encoding="utf-8"))
+        texts = {lang: {k: v for k, v in messages.items() if k.startswith(LANDING_KEYS)} for lang, messages in catalog.items()}
+        inline = json.dumps(texts, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
+        html = page.read_text(encoding="utf-8").replace(
+            '<script id="catalog" type="application/json">{}</script>',
+            f'<script id="catalog" type="application/json">{inline}</script>', 1).replace(
+            'content="/static/og.png"', f'content="{settings.public_url.rstrip("/")}/static/og.png"', 1)  # link previews need an absolute URL
+        _landing_cache.clear()
+        _landing_cache[key] = html
+    return _landing_cache[key]
+
+
 @app.get("/", include_in_schema=False)
 def landing_page():
-    return FileResponse(STATIC_DIR / "landing.html")
+    return HTMLResponse(landing_html())
 
 
 @app.get("/app", include_in_schema=False)

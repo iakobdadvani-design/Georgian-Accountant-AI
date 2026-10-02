@@ -99,3 +99,21 @@ def test_no_hard_coded_english_on_the_landing_page():
 def test_landing_and_app_routes(client):
     assert 'id="serviceGrid"' in client.get("/").text
     assert 'id="authForm"' in client.get("/app").text
+
+
+def test_landing_texts_are_inlined_for_a_first_paint_without_the_catalog(client):
+    page = client.get("/").text
+    inline = json.loads(page.split('<script id="catalog" type="application/json">', 1)[1].split("</script>", 1)[0])
+    assert set(inline) == set(LANGUAGES)
+    for lang in LANGUAGES:
+        assert inline[lang]["lp.hero.title"] == CATALOG[lang]["lp.hero.title"]
+        assert "{amount}" in inline[lang]["lp.demo.q"] and "{amount}" in inline[lang]["lp.demo.a"]
+    used = set(re.findall(r'data-i18n(?:-aria)?="([^"]+)"', LANDING)) | set(re.findall(r'\bt\("([a-zA-Z_.]+)"', LANDING))
+    assert used <= set(inline["en"]), used - set(inline["en"])
+
+
+def test_landing_amounts_go_through_money():
+    for lang in LANGUAGES:
+        for key, value in CATALOG[lang].items():
+            if key.startswith("lp.") and isinstance(value, str):
+                assert not re.search(r"\d[\d  .,]*\s*(?:GEL|₾|ლარ|лари)|(?:GEL|₾) ?\d", value), (lang, key, value)
