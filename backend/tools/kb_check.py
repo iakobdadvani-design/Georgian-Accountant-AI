@@ -138,7 +138,12 @@ def check(rule: Rule, law: str, compact_law: str, topic_numbers: set[str]) -> li
         if "…" in quote or "..." in quote:
             problems.append(f"quote cut with '…': «{quote[:70]}»")
             continue
-        if q in law or re.sub(r"\s", "", q) in compact_law or "|" in q and table_row_in_law(q, compact_law):
+        # Art. 197's tables have no rate column (the rate is in the lead-in "12-პროცენტიანი განაკვეთით"), so a row
+        # ending "| 12%" is checked without that cell when another quote of the rule is that lead-in
+        rate = re.fullmatch(r"(.*)\|\s*(\d+)%", q)
+        lead_in = rate and any(f"{rate.group(2)}-პროცენტიანი" in other for other in rule.quotes)
+        if (q in law or re.sub(r"\s", "", q) in compact_law or "|" in q and table_row_in_law(q, compact_law)
+                or lead_in and table_row_in_law(rate.group(1), compact_law)):
             quoted_text += " " + q.replace("|", " ")
             continue
         lo, hi = 0, len(q)

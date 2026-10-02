@@ -54,7 +54,7 @@ Write every batch into a downloadable Markdown file instead of the chat, using y
 | 6 | Special regimes: small/micro business, fixed tax, international companies, free zones, special trading companies | ☑ | ☑ [notes](knowledge-base/topic-06-special-regimes.md) | ☐ |
 | 7 | Property tax | ☑ | ☑ [notes](knowledge-base/topic-07-property-tax.md) | ☐ |
 | 8 | Excise | ☑ | ☑ [notes](knowledge-base/topic-08-excise.md) | ☐ |
-| 9 | Import: customs value, import duty, import VAT (Tax Code + Customs Code) | ☐ | ☐ | ☐ |
+| 9 | Import: customs value, import duty, import VAT (Tax Code + Customs Code) | ☑ | ☑ [notes](knowledge-base/topic-09-import.md) | ☐ |
 | 10 | Non-residents and international | ☐ | ☐ | ☐ |
 | 11 | Administration: registration, returns, audits, disputes, limitation periods | ☐ | ☐ | ☐ |
 | 12 | Penalties and sanctions | ☐ | ☐ | ☐ |
