@@ -22,7 +22,9 @@ from pathlib import Path
 CORPUS = Path(r"C:\Users\iakob\Desktop\rag law\RAD law\data")
 KB_FOLDER = Path.home() / "Desktop" / "Tax knowledge base"
 DOWNLOADS = Path.home() / "Downloads"
-LAWS = {"1043717": "Tax Code", "4598501": "Customs Code", "4280127": "Law on Funded Pension"}
+LAWS = {"1043717": "Tax Code", "4598501": "Customs Code", "4280127": "Law on Funded Pension",
+        # Amending laws only where a rule rests on their own transitional articles (not on text they put in the Code):
+        "6826443": "Law No. 1477 of 1 April 2026 (car excise, Art. 2 transition)"}
 GEORGIAN = re.compile(r"[ა-ჰ]")
 SUPERSCRIPTS = str.maketrans("⁰¹²³⁴⁵⁶⁷⁸⁹", "0123456789")
 NUMBER = re.compile(r"(?<![\w.])(\d{1,3}(?:[ ,.\u00a0]\d{3})+|\d+(?:[.,]\d+)?)\s*(%|percent|ლარ|GEL)?", re.I)
@@ -32,9 +34,12 @@ CHECKED_FIELDS = ("CONDITIONS", "CALCULATION", "DEADLINE")
 def normalize(text: str) -> str:
     """Whitespace, quotes and Matsne's split superscripts ('ბ 1 )' for 'ბ¹)') made uniform."""
     text = text.replace("\u00a0", " ").replace("\u200b", "").replace("“", "„").replace("”", "“")
-    # Paragraph/subparagraph superscripts ("5¹.", "ბ¹)") are dropped on both sides: Matsne writes them as "5 1 .".
+    # An article/paragraph number with a superscript before a word ("190¹ მუხლით", "1¹ ნაწილებით") is stored as
+    # "190 1 მუხლით"; other superscripts ("5¹.", "ბ¹)") are dropped on both sides (Matsne writes "5 1 .").
+    text = re.sub(r"(?<=\d)[⁰¹²³⁴⁵⁶⁷⁸⁹]+(?=\s)", lambda m: " " + m.group().translate(SUPERSCRIPTS), text)
     text = re.sub(r"(?<=[ა-ჰ]) *[⁰¹²³⁴⁵⁶⁷⁸⁹]+|[⁰¹²³⁴⁵⁶⁷⁸⁹]+", "", text)  # "მ ²)" -> "მ)"
     text = re.sub(r"\s+", " ", text)
+    text = re.sub(r"(?<=\d )(სმ|მ) 3\b", r"\1", text)  # "1 სმ³" is stored as "1 სმ\n3"
     return re.sub(r"(?<=[\dა-ჰ]) \d{1,2} (?=[).])|(?<=[ა-ჰ]) \d{1,2} ?(?=[„“\"])", "", text).strip()
 
 
@@ -97,7 +102,7 @@ def parse(text: str, source: str) -> list[Rule]:
 REFERENCE = re.compile(  # "Art. 154(3)", "Articles 147–152", "Law No. 4022", "Article 309(115)(a)" are not amounts
     r"\b(?:Art(?:icle)?s?\.?|Law(?: of Georgia)? No\.?|No\.|№|paragraphs?|items?)\s*"
     r"[\d⁰¹²³⁴⁵⁶⁷⁸⁹]+(?:\([^)]*\))*"
-    r"(?:\s*(?:[–-]|and|or|,)\s*(?:[\d⁰¹²³⁴⁵⁶⁷⁸⁹]+(?:\([^)]*\))*|(?:\([^)]*\))+))*", re.I)  # "202(5)–(7)", "205(12) and (14)"
+    r"(?:\s*(?:,\s*and|,\s*or|[–-]|and|or|,)\s*(?:[\d⁰¹²³⁴⁵⁶⁷⁸⁹]+(?:\([^)]*\))*|(?:\([^)]*\))+))*", re.I)  # "202(5)–(7)", "205(12) and (14)"
 
 
 def numbers(text: str, everything: bool = False) -> set[str]:
@@ -112,6 +117,17 @@ def numbers(text: str, everything: bool = False) -> set[str]:
     return found
 
 
+def table_row_in_law(row: str, compact_law: str) -> bool:
+    """A rate-table row written "group | code | goods | unit | rate": the law stores one cell per line and the group
+    cells once above its rows, so the row's last cells (at least goods, unit, rate) must be adjacent in the law and
+    the leading group cells must each be in it."""
+    cells = [re.sub(r"\s", "", c) for c in row.split("|") if c.strip()]
+    for k in range(len(cells) - 2):
+        if "".join(cells[k:]) in compact_law:
+            return all(c in compact_law for c in cells[:k])
+    return False
+
+
 def check(rule: Rule, law: str, compact_law: str, topic_numbers: set[str]) -> list[str]:
     """`compact_law` is the law without whitespace (Matsne sometimes stores a paragraph one word per line);
     `topic_numbers` are the numbers in the topic's quotes, for a fact a rule takes from another article it cites."""
@@ -122,8 +138,8 @@ def check(rule: Rule, law: str, compact_law: str, topic_numbers: set[str]) -> li
         if "…" in quote or "..." in quote:
             problems.append(f"quote cut with '…': «{quote[:70]}»")
             continue
-        if q in law or re.sub(r"\s", "", q) in compact_law:
-            quoted_text += " " + q
+        if q in law or re.sub(r"\s", "", q) in compact_law or "|" in q and table_row_in_law(q, compact_law):
+            quoted_text += " " + q.replace("|", " ")
             continue
         lo, hi = 0, len(q)
         while lo < hi:
